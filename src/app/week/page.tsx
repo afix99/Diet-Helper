@@ -6,6 +6,7 @@ import { Card, PageHeader, StatusPill } from '@/components/ui'
 import { useLogging } from '@/lib/logging'
 import { statusBand } from '@/lib/nutrition'
 import { dayTotals, entriesForSlot, entryMacros, entryName, weekOf } from '@/lib/selectors'
+import { addDays, formatDay } from '@/lib/dates'
 import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
 import { MEAL_SLOTS, SLOT_LABELS, type MealSlot } from '@/lib/types'
@@ -31,11 +32,7 @@ export default function WeekPage() {
 
   const dates = useMemo(() => weekOf(anchor), [anchor])
 
-  const shift = (weeks: number) => {
-    const d = new Date(`${anchor}T00:00:00`)
-    d.setDate(d.getDate() + weeks * 7)
-    setAnchor(d.toISOString().slice(0, 10))
-  }
+  const shift = (weeks: number) => setAnchor(addDays(anchor, weeks * 7))
 
   if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
 
@@ -53,12 +50,12 @@ export default function WeekPage() {
           </button>
           <div className="text-center">
             <p className="text-sm font-bold">
-              {new Date(`${dates[0]}T00:00:00`).toLocaleDateString('en-GB', {
+              {formatDay(dates[0], {
                 day: 'numeric',
                 month: 'short',
               })}{' '}
               –{' '}
-              {new Date(`${dates[6]}T00:00:00`).toLocaleDateString('en-GB', {
+              {formatDay(dates[6], {
                 day: 'numeric',
                 month: 'short',
               })}
@@ -154,14 +151,14 @@ export default function WeekPage() {
                         </div>
                         {entries.map((e) => (
                           <div key={e.id} className="flex items-center gap-2 py-1 pl-1">
-                            <span className="min-w-0 flex-1 truncate text-sm">{entryName(e)}</span>
+                            <span className="min-w-0 flex-1 truncate text-sm">{entryName(e, data.customFoods)}</span>
                             <span className="shrink-0 text-xs tabular-nums text-faint">
                               {Math.round(entryMacros(e).kcal)}
                             </span>
                             <button
                               type="button"
                               onClick={() => removeEntry(e.id)}
-                              aria-label={`Remove ${entryName(e)}`}
+                              aria-label={`Remove ${entryName(e, data.customFoods)}`}
                               className="tap grid h-7 w-7 shrink-0 place-items-center rounded-pill text-faint"
                             >
                               ✕

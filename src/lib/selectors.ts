@@ -9,8 +9,11 @@ import {
   sumMacros,
   type DayRecord,
 } from './nutrition'
+import { daysBetween, todayIso, weekDates, weekOf } from './dates'
 import type { AppData } from './store/types'
 import type { Food, LogEntry, Macros, MealSlot } from './types'
+
+export { weekDates, weekOf }
 
 export function allFoods(data: AppData): Food[] {
   return [...FOODS, ...data.customFoods]
@@ -20,11 +23,18 @@ export function findFood(data: AppData, id: string): Food | undefined {
   return allFoods(data).find((f) => f.id === id)
 }
 
-/** Display name for a log entry, whichever kind of thing it references. */
-export function entryName(entry: LogEntry): string {
+/**
+ * Display name for a log entry, whichever kind of thing it references.
+ * `customFoods` is optional so callers without the store can still name
+ * catalogue items.
+ */
+export function entryName(entry: LogEntry, customFoods: readonly Food[] = []): string {
   if (entry.customName) return entry.customName
   if (entry.recipeId) return RECIPES.find((r) => r.id === entry.recipeId)?.name ?? 'Recipe'
-  return FOODS.find((f) => f.id === entry.foodId)?.name ?? 'Food'
+  const known = FOODS.find((f) => f.id === entry.foodId)
+  if (known) return known.name
+  // Custom foods live in the store, not the bundled catalogue.
+  return customFoods.find((f) => f.id === entry.foodId)?.name ?? 'Food'
 }
 
 export function entriesFor(data: AppData, date: string): LogEntry[] {
@@ -44,40 +54,23 @@ export function dayTotals(data: AppData, date: string): Macros {
   return items.length ? sumMacros(items) : { ...EMPTY_MACROS }
 }
 
-/** ISO dates for the seven days ending at `end`, oldest first. */
-export function weekDates(end: string, length = 7): string[] {
-  const base = new Date(`${end}T00:00:00`)
-  return Array.from({ length }, (_, i) => {
-    const d = new Date(base)
-    d.setDate(base.getDate() - (length - 1 - i))
-    return d.toISOString().slice(0, 10)
-  })
-}
-
-/** Monday-first week containing `date`. Matches the sheet's Isnin→Ahad order. */
-export function weekOf(date: string): string[] {
-  const d = new Date(`${date}T00:00:00`)
-  const dow = (d.getDay() + 6) % 7 // Monday = 0
-  const monday = new Date(d)
-  monday.setDate(d.getDate() - dow)
-  return Array.from({ length: 7 }, (_, i) => {
-    const x = new Date(monday)
-    x.setDate(monday.getDate() + i)
-    return x.toISOString().slice(0, 10)
-  })
-}
-
 export function dayRecords(data: AppData, dates: readonly string[]): DayRecord[] {
+  // Bucket once: filtering the full log per day is O(days x entries) and this
+  // runs on every render of Today.
+  const byDate = new Map<string, LogEntry[]>()
+  for (const entry of data.entries) {
+    const list = byDate.get(entry.date)
+    if (list) list.push(entry)
+    else byDate.set(entry.date, [entry])
+  }
   return dates.map((date) => {
-    const entries = entriesFor(data, date)
-    const totals = entries.length
-      ? sumMacros(entries.map(entryMacros))
-      : { ...EMPTY_MACROS }
+    const entries = byDate.get(date) ?? []
+    const totals = entries.length ? sumMacros(entries.map(entryMacros)) : { ...EMPTY_MACROS }
     return {
       date,
       kcal: totals.kcal,
       protein: totals.protein,
-      salmonMeals: entries.filter((e) => isSalmon(entryName(e))).length,
+      salmonMeals: entries.filter((e) => isSalmon(entryName(e, data.customFoods))).length,
     }
   })
 }
@@ -91,22 +84,22 @@ export function latestWeight(data: AppData): number | null {
 /**
  * Streaks run over the user's whole history, not just the visible week — the
  * sheet could only see seven days because that was all it stored.
+ *
+ * Only days up to and including today count. The Week screen writes real
+ * entries for days you plan ahead, and a planned dinner is not a logged one.
  */
-export function streakFor(data: AppData, today: string) {
-  const dates = data.entries.map((e) => e.date)
-  if (dates.length === 0) return streak([])
-  const first = dates.reduce((min, d) => (d < min ? d : min), dates[0])
-  const span =
-    Math.round(
-      (new Date(`${today}T00:00:00`).getTime() - new Date(`${first}T00:00:00`).getTime()) /
-        86_400_000
-    ) + 1
+export function streakFor(data: AppData, today: string = todayIso()) {
+  const past = data.entries.filter((e) => e.date <= today).map((e) => e.date)
+  if (past.length === 0) return streak([])
+  const first = past.reduce((min, d) => (d < min ? d : min), past[0])
+  const span = daysBetween(first, today) + 1
   return streak(dayRecords(data, weekDates(today, Math.max(1, span))))
 }
 
-export function badgesFor(data: AppData, today: string) {
+export function badgesFor(data: AppData, today: string = todayIso()) {
   return badges({
-    days: dayRecords(data, weekOf(today)),
+    // Same reasoning as streakFor: future days in this week are plans, not meals.
+    days: dayRecords(data, weekOf(today).filter((d) => d <= today)),
     targets: data.targets,
     startWeightKg: data.profile.startWeightKg,
     goalWeightKg: data.profile.goalWeightKg,

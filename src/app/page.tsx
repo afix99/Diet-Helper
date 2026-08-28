@@ -15,6 +15,7 @@ import {
   entryName,
   streakFor,
 } from '@/lib/selectors'
+import { formatDay } from '@/lib/dates'
 import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
 import { MEAL_SLOTS, SLOT_LABELS, type MealSlot } from '@/lib/types'
@@ -38,7 +39,7 @@ export default function TodayPage() {
     <>
       <PageHeader
         title="Today"
-        subtitle={new Date(`${date}T00:00:00`).toLocaleDateString('en-GB', {
+        subtitle={formatDay(date, {
           weekday: 'long',
           day: 'numeric',
           month: 'long',
@@ -131,7 +132,7 @@ export default function TodayPage() {
                     return (
                       <li key={e.id} className="flex items-center gap-2 py-2">
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm">{entryName(e)}</span>
+                          <span className="block truncate text-sm">{entryName(e, data.customFoods)}</span>
                           <span className="block text-xs text-faint tabular-nums">
                             {Math.round(m.kcal)} kcal · {Math.round(m.protein)}g P
                           </span>
@@ -158,7 +159,7 @@ export default function TodayPage() {
                           </button>
                           <button
                             type="button"
-                            aria-label={`Remove ${entryName(e)}`}
+                            aria-label={`Remove ${entryName(e, data.customFoods)}`}
                             onClick={() => removeEntry(e.id)}
                             className="tap grid h-8 w-8 place-items-center rounded-pill text-faint"
                           >

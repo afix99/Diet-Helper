@@ -13,7 +13,13 @@ export function InstallHint() {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
-    if (localStorage.getItem(DISMISSED)) return
+    // Reading storage throws outright in some privacy modes, so never let it
+    // take the component down with it.
+    try {
+      if (localStorage.getItem(DISMISSED)) return
+    } catch {
+      return
+    }
     const ua = window.navigator.userAgent
     const isIos = /iPad|iPhone|iPod/.test(ua)
     // iPadOS 13+ reports as a Mac; the touch points give it away.
@@ -28,7 +34,11 @@ export function InstallHint() {
   if (!show) return null
 
   const dismiss = () => {
-    localStorage.setItem(DISMISSED, '1')
+    try {
+      localStorage.setItem(DISMISSED, '1')
+    } catch {
+      // Storage unavailable: the hint just reappears next visit.
+    }
     setShow(false)
   }
 

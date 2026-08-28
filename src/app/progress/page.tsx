@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Card, EmptyState, PageHeader, StatusPill } from '@/components/ui'
 import { rollingAverage, round1, statusBand } from '@/lib/nutrition'
 import { dayRecords, latestWeight, weekOf } from '@/lib/selectors'
+import { formatDay } from '@/lib/dates'
 import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
 import type { WeightLog } from '@/lib/types'
@@ -121,7 +122,7 @@ export default function ProgressPage() {
           {dayRecords(data, weekOf(today)).map((d) => (
             <li key={d.date} className="flex items-center justify-between gap-2 py-2">
               <span className="text-sm">
-                {new Date(`${d.date}T00:00:00`).toLocaleDateString('en-GB', {
+                {formatDay(d.date, {
                   weekday: 'short',
                   day: 'numeric',
                 })}

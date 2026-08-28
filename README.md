@@ -55,6 +55,7 @@ settings.
 
 ```
 seed/                  Generated from the workbook — do not hand-edit
+src/lib/dates.ts       ISO day-key arithmetic, all in UTC (see below)
 scripts/extract_xlsx.py  Regenerates seed/ from .source-workbook.xlsx
 src/lib/nutrition.ts   Every formula ported from the sheet, cell refs in comments
 src/lib/store/         DataStore interface + local and Supabase implementations
@@ -69,6 +70,17 @@ and works with no network.
 User data goes through a `DataStore` interface with two implementations. The
 screens only ever see the interface, so moving between local storage and
 Postgres is configuration, not a rewrite.
+
+### Dates
+
+Day keys are `YYYY-MM-DD` strings and all arithmetic on them happens in UTC,
+in `src/lib/dates.ts`. Building a `Date` at local midnight and then calling
+`toISOString()` shifts the day for anyone east of Greenwich — in UTC+8 it
+returned yesterday, which misaligned the week grid and dropped today out of
+the streak window. Never mix the two; use the helpers.
+
+The test suite runs under `TZ=Asia/Kuala_Lumpur` (`vitest.config.ts`) for the
+same reason: the bug was invisible in UTC.
 
 To re-import after editing the workbook:
 
@@ -102,8 +114,14 @@ alarm colours, no shaming copy.
 
 ## Not yet built
 
-Progress photos, body measurements beyond weight and waist/hip, and barcode
-or photo logging. The schema leaves room.
+- **Adding your own foods.** `addCustomFood` in `src/lib/logging.ts` and the
+  "MY FOODS" section of the picker are wired, but nothing calls them yet, so
+  the section never appears. Anything outside the 69-item catalogue can't be
+  logged.
+- Progress photos, body measurements beyond weight and waist/hip, and barcode
+  or photo logging.
+
+The schema leaves room for all of these.
 
 ## Health note
 

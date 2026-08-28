@@ -1,12 +1,10 @@
 import { DEFAULT_TARGETS, DEFAULTS, SHOPPING_SEED } from '../catalogue'
+import { todayIso } from '../dates'
+
+export { todayIso }
 import type { Profile } from '../types'
 import type { AppData, ShoppingItem } from './types'
 
-export function todayIso(): string {
-  const d = new Date()
-  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60_000)
-  return local.toISOString().slice(0, 10)
-}
 
 /**
  * A new account starts on the workbook's own numbers (62 kg → 55 kg, 1500 kcal)
