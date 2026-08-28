@@ -39,6 +39,9 @@ const config: Config = {
            Tailwind defaults. */
         card: '22px',
         sheet: '28px',
+        /* Concentric: a control inside a 22px card padded by 12px wants 10-12px,
+           not another 22. iOS derives child radii by subtracting the padding. */
+        inner: '12px',
         pill: '999px',
       },
       boxShadow: {

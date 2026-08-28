@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { FoodPicker } from '@/components/FoodPicker'
-import { Card, PageHeader, StatusPill } from '@/components/ui'
+import { Card, ListGroup, PageHeader, StatusPill } from '@/components/ui'
 import { useLogging } from '@/lib/logging'
 import { statusBand } from '@/lib/nutrition'
 import { dayTotals, entriesForSlot, entryMacros, entryName, weekOf } from '@/lib/selectors'
@@ -102,19 +102,24 @@ export default function WeekPage() {
         </Card>
       )}
 
-      <div className="grid gap-3">
+      <ListGroup>
         {dates.map((date, i) => {
           const totals = dayTotals(data, date)
           const band = statusBand(totals.kcal, data.targets.kcal)
           const isOpen = open === date
           const isToday = date === today
           return (
-            <Card key={date} className={isToday ? 'border-primary' : undefined}>
+            <div
+              key={date}
+              className={`px-4 py-2.5 [&+div]:border-t [&+div]:border-line ${
+                isToday ? 'bg-primary/5' : ''
+              }`}
+            >
               <button
                 type="button"
                 onClick={() => setOpen(isOpen ? '' : date)}
                 aria-expanded={isOpen}
-                className="tap flex w-full items-center justify-between gap-2 text-left"
+                className="tap-row -mx-4 flex w-[calc(100%+2rem)] items-center justify-between gap-2 px-4 text-left"
               >
                 <span className="min-w-0">
                   <span className="block text-secondary font-bold">
@@ -179,10 +184,10 @@ export default function WeekPage() {
                   )}
                 </div>
               )}
-            </Card>
+            </div>
           )
         })}
-      </div>
+      </ListGroup>
 
       {picking && (
         <FoodPicker date={picking.date} slot={picking.slot} onClose={() => setPicking(null)} />

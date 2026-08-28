@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useLogging } from '@/lib/logging'
+import { Sheet } from './ui'
 import type { Food } from '@/lib/types'
 
 const CATEGORY = 'MY FOODS'
@@ -78,19 +79,15 @@ export function CustomFoodDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col justify-end">
-      <button
-        type="button"
-        aria-label="Close"
-        onClick={onClose}
-        className="absolute inset-0 bg-ink/40 backdrop-blur-[2px]"
-      />
+    <Sheet onClose={onClose} labelledBy="new-food-title" className="z-[60]">
       <form
         onSubmit={save}
-        className="relative max-h-[90dvh] overflow-y-auto rounded-t-[1.75rem] border-t border-line bg-bg p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lift animate-slide-up"
+        className="overflow-y-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-body font-bold">New food</h2>
+          <h2 id="new-food-title" className="text-body font-bold">
+            New food
+          </h2>
           <button type="button" onClick={onClose} className="tap px-2 text-secondary text-faint">
             Cancel
           </button>
@@ -132,7 +129,7 @@ export function CustomFoodDialog({
           <Field label="Fibre (g)" value={draft.fibre} onChange={set('fibre')} />
         </div>
 
-        <p className="mt-2 text-[11px] leading-snug text-faint">
+        <p className="mt-2 text-caption leading-snug text-faint">
           Only name and calories are needed. Leave a macro blank and it counts as zero — a
           rough entry is better than a skipped meal.
         </p>
@@ -145,7 +142,7 @@ export function CustomFoodDialog({
           Save food
         </button>
       </form>
-    </div>
+    </Sheet>
   )
 }
 

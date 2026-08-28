@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { CustomFoodDialog } from './CustomFoodDialog'
+import { Sheet } from './ui'
 import { FOOD_CATEGORIES, RECIPES } from '@/lib/catalogue'
 import { useLogging } from '@/lib/logging'
 import { allFoods, favouriteFoods, recentFoods } from '@/lib/selectors'
@@ -60,17 +61,12 @@ export function FoodPicker({
   const label = SLOT_LABELS[slot]
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      <button
-        type="button"
-        aria-label="Close"
-        onClick={onClose}
-        className="absolute inset-0 bg-ink/40 backdrop-blur-[2px]"
-      />
-      <div className="relative flex max-h-[88dvh] flex-col rounded-t-[1.75rem] border-t border-line bg-bg shadow-lift animate-slide-up">
-        <div className="flex items-center justify-between px-4 pb-2 pt-3">
+    <Sheet onClose={onClose} labelledBy="food-picker-title">
+        <div className="flex items-center justify-between px-4 pb-2 pt-2">
           <div>
-            <p className="text-secondary font-bold">{label.label}</p>
+            <p id="food-picker-title" className="text-secondary font-bold">
+              {label.label}
+            </p>
             <p className="text-tertiary text-faint">Add an item</p>
           </div>
           <button type="button" onClick={onClose} className="tap px-2 text-secondary font-semibold text-primary">
@@ -151,7 +147,6 @@ export function FoodPicker({
             </>
           )}
         </div>
-      </div>
 
       {creating && (
         <CustomFoodDialog
@@ -164,13 +159,13 @@ export function FoodPicker({
           }}
         />
       )}
-    </div>
+    </Sheet>
   )
 }
 
 function SectionTitle({ title }: { title: string }) {
   return (
-    <h3 className="sticky top-0 z-10 bg-bg py-2 text-[11px] font-bold uppercase tracking-wide text-faint">
+    <h3 className="sticky top-0 z-10 bg-bg py-2 text-caption font-bold uppercase tracking-wide text-faint">
       {title}
     </h3>
   )
@@ -200,7 +195,7 @@ function Rail({
             <span className="block text-tertiary font-semibold leading-tight line-clamp-2">{f.name}</span>
             <span className="mt-1 block text-secondary font-bold tabular-nums text-primary">
               {f.kcal}
-              <span className="text-[10px] font-medium text-faint"> kcal</span>
+              <span className="text-caption font-medium text-faint"> kcal</span>
             </span>
           </button>
         ))}
@@ -224,7 +219,7 @@ function RecipeRail({ onPick }: { onPick: (id: string) => void }) {
             <span className="block text-tertiary font-semibold leading-tight line-clamp-2">{r.name}</span>
             <span className="mt-1 block text-secondary font-bold tabular-nums text-primary">
               {r.kcal}
-              <span className="text-[10px] font-medium text-faint"> kcal · {r.minutes}m</span>
+              <span className="text-caption font-medium text-faint"> kcal · {r.minutes}m</span>
             </span>
           </button>
         ))}

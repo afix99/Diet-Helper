@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo } from 'react'
-import { BackLink } from '@/components/BackLink'
 import { Card, PageHeader } from '@/components/ui'
 import { badgesFor, streakFor } from '@/lib/selectors'
 import { useData } from '@/lib/store/provider'
@@ -19,8 +18,11 @@ export default function BadgesPage() {
 
   return (
     <>
-      <BackLink />
-      <PageHeader title="Badges" subtitle={`${unlocked.length} of ${list.length} unlocked`} />
+      <PageHeader
+        title="Badges"
+        subtitle={`${unlocked.length} of ${list.length} unlocked`}
+        back={{ href: '/more', label: 'More' }}
+      />
 
       <Card className="mb-4 text-center">
         <p className="text-5xl font-extrabold tabular-nums text-primary">
@@ -55,13 +57,13 @@ export default function BadgesPage() {
               {b.emoji}
             </span>
             <p className="mt-1 text-tertiary font-bold leading-tight">{b.name}</p>
-            <p className="text-[10px] leading-tight text-faint">{b.requirement}</p>
+            <p className="text-caption leading-tight text-faint">{b.requirement}</p>
             {!b.unlocked && b.progress > 0 && (
               <div className="mt-2 h-1 overflow-hidden rounded-pill bg-raised">
                 <div className="h-full bg-primary/50" style={{ width: `${b.progress * 100}%` }} />
               </div>
             )}
-            {b.unlocked && <p className="mt-1 text-[10px] font-bold text-primary">UNLOCKED</p>}
+            {b.unlocked && <p className="mt-1 text-caption font-bold text-primary">UNLOCKED</p>}
           </Card>
         ))}
       </div>

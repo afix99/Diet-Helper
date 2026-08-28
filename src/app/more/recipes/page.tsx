@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { BackLink } from '@/components/BackLink'
-import { Card, PageHeader } from '@/components/ui'
+import { Card, ListGroup, PageHeader } from '@/components/ui'
 import { RECIPES } from '@/lib/catalogue'
 import { useLogging } from '@/lib/logging'
 import { todayIso } from '@/lib/store/defaults'
@@ -23,19 +22,22 @@ export default function RecipesPage() {
 
   return (
     <>
-      <BackLink />
-      <PageHeader title="Recipes" subtitle="All under 20 min active time" />
+      <PageHeader
+        title="Recipes"
+        subtitle="All under 20 min active time"
+        back={{ href: '/more', label: 'More' }}
+      />
 
-      <div className="grid gap-3">
+      <ListGroup>
         {RECIPES.map((r) => {
           const isOpen = open === r.id
           return (
-            <Card key={r.id}>
+            <div key={r.id} className="px-4 py-2.5 [&+div]:border-t [&+div]:border-line">
               <button
                 type="button"
                 onClick={() => setOpen(isOpen ? null : r.id)}
                 aria-expanded={isOpen}
-                className="tap w-full text-left"
+                className="tap-row -mx-4 w-[calc(100%+2rem)] px-4 text-left"
               >
                 <span className="block text-secondary font-bold">{r.name}</span>
                 <span className="mt-1 flex flex-wrap gap-x-3 text-tertiary tabular-nums text-muted">
@@ -69,7 +71,7 @@ export default function RecipesPage() {
                   <ol className="mb-3 grid gap-1.5">
                     {r.steps.map((step, i) => (
                       <li key={step} className="flex gap-2 text-tertiary leading-relaxed">
-                        <span className="grid h-5 w-5 shrink-0 place-items-center rounded-pill bg-primary/15 text-[10px] font-bold text-primary">
+                        <span className="grid h-5 w-5 shrink-0 place-items-center rounded-pill bg-primary/15 text-caption font-bold text-primary">
                           {i + 1}
                         </span>
                         <span>{step}</span>
@@ -115,10 +117,10 @@ export default function RecipesPage() {
                   )}
                 </div>
               )}
-            </Card>
+            </div>
           )
         })}
-      </div>
+      </ListGroup>
 
       {toast && (
         <div

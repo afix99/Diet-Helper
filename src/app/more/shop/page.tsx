@@ -1,8 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { BackLink } from '@/components/BackLink'
-import { Card, PageHeader } from '@/components/ui'
+import { Card, ListGroup, PageHeader, SegmentedControl } from '@/components/ui'
 import { PREP, RECIPES, VENDORS } from '@/lib/catalogue'
 import { entriesFor, weekOf } from '@/lib/selectors'
 import { useData } from '@/lib/store/provider'
@@ -106,30 +105,22 @@ export default function ShopPage() {
 
   return (
     <>
-      <BackLink />
-      <PageHeader title="Shop & Prep" subtitle="Shopping, batch prep & vendors" />
+      <PageHeader
+        title="Shop & Prep"
+        subtitle="Shopping, batch prep & vendors"
+        back={{ href: '/more', label: 'More' }}
+      />
 
-      <div className="mb-4 flex gap-1.5">
-        {(
-          [
-            ['list', 'List'],
-            ['prep', 'Sunday Prep'],
-            ['vendors', 'Vendors'],
-          ] as const
-        ).map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setTab(key)}
-            aria-pressed={tab === key}
-            className={`tap flex-1 rounded-pill px-3 py-2 text-tertiary font-semibold ${
-              tab === key ? 'bg-primary text-white' : 'bg-raised text-muted'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        label="Shop sections"
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: 'list', label: 'List' },
+          { value: 'prep', label: 'Sunday Prep' },
+          { value: 'vendors', label: 'Vendors' },
+        ]}
+      />
 
       {tab === 'list' && (
         <>
@@ -178,22 +169,19 @@ export default function ShopPage() {
 
           <div className="grid gap-3">
             {grouped.map(([category, items]) => (
-              <Card key={category}>
-                <h2 className="mb-1 text-[11px] font-bold uppercase tracking-wide text-faint">
-                  {category}
-                </h2>
-                <ul className="divide-y divide-line">
+              <ListGroup key={category} header={category}>
+                <ul>
                   {items.map((s) => (
-                    <li key={s.id}>
+                    <li key={s.id} className="[&+li]:border-t [&+li]:border-line">
                       <button
                         type="button"
                         onClick={() => toggle(s.id)}
                         aria-pressed={s.checked}
-                        className="tap flex w-full items-center gap-3 py-2 text-left"
+                        className="tap-row flex w-full items-center gap-3 px-4 py-2.5 text-left"
                       >
                         <span
                           aria-hidden
-                          className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border text-[11px] font-bold ${
+                          className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border text-caption font-bold ${
                             s.checked
                               ? 'border-avocado bg-avocado text-white'
                               : 'border-line text-transparent'
@@ -222,61 +210,60 @@ export default function ShopPage() {
                     </li>
                   ))}
                 </ul>
-              </Card>
+              </ListGroup>
             ))}
           </div>
         </>
       )}
 
       {tab === 'prep' && (
-        <div className="grid gap-3">
-          <Card>
-            <h2 className="text-secondary font-bold">Sunday protocol</h2>
-            <p className="text-tertiary text-faint">
-              Batch prep on Sunday morning. Fewer daily decisions, better consistency.
-            </p>
-          </Card>
-          {PREP.tasks.map((t) => (
-            <Card key={t.timeBlock}>
-              <div className="flex items-baseline justify-between gap-2">
-                <p className="text-secondary font-bold tabular-nums text-primary">{t.timeBlock}</p>
-                <p className="text-tertiary text-faint">{t.duration}</p>
-              </div>
-              <p className="mt-1 text-secondary">{t.task}</p>
-              {t.storage && t.storage !== '—' && (
-                <p className="mt-1 text-tertiary text-muted">📦 {t.storage}</p>
-              )}
-            </Card>
-          ))}
-          <Card>
-            <h2 className="mb-2 text-secondary font-bold">Storage</h2>
-            <ul className="divide-y divide-line">
-              {PREP.storage.map((s) => (
-                <li key={s.food} className="py-2">
-                  <p className="text-secondary font-medium">{s.food}</p>
-                  <p className="text-tertiary text-faint">
-                    Fridge {s.fridge} · Freezer {s.freezer}
+        <div>
+          <ListGroup
+            header="Sunday protocol"
+            footer="Batch prep on Sunday morning. Fewer daily decisions, better consistency."
+          >
+            {PREP.tasks.map((t) => (
+              <div key={t.timeBlock} className="px-4 py-2.5 [&+div]:border-t [&+div]:border-line">
+                <div className="flex items-baseline justify-between gap-2">
+                  <p className="text-secondary font-bold tabular-nums text-primary">
+                    {t.timeBlock}
                   </p>
-                  <p className="mt-0.5 text-tertiary text-muted">{s.reheat}</p>
-                </li>
-              ))}
-            </ul>
-          </Card>
+                  <p className="text-tertiary text-faint">{t.duration}</p>
+                </div>
+                <p className="mt-0.5 text-body">{t.task}</p>
+                {t.storage && t.storage !== '—' && (
+                  <p className="mt-0.5 text-tertiary text-muted">{t.storage}</p>
+                )}
+              </div>
+            ))}
+          </ListGroup>
+
+          <ListGroup header="Storage">
+            {PREP.storage.map((s) => (
+              <div key={s.food} className="px-4 py-2.5 [&+div]:border-t [&+div]:border-line">
+                <p className="text-body">{s.food}</p>
+                <p className="text-tertiary text-faint">
+                  Fridge {s.fridge} · Freezer {s.freezer}
+                </p>
+                <p className="mt-0.5 text-tertiary text-muted">{s.reheat}</p>
+              </div>
+            ))}
+          </ListGroup>
         </div>
       )}
 
       {tab === 'vendors' && (
-        <div className="grid gap-3">
+        <ListGroup header="Setiawangsa area">
           {VENDORS.map((v) => (
-            <Card key={v.name}>
-              <p className="text-secondary font-bold">{v.name}</p>
+            <div key={v.name} className="px-4 py-2.5 [&+div]:border-t [&+div]:border-line">
+              <p className="text-body">{v.name}</p>
               <p className="text-tertiary text-faint">
                 {v.hours} · {v.location}
               </p>
-              <p className="mt-1 text-tertiary text-muted">{v.strengths}</p>
-            </Card>
+              <p className="mt-0.5 text-tertiary text-muted">{v.strengths}</p>
+            </div>
           ))}
-        </div>
+        </ListGroup>
       )}
 
       {note && (

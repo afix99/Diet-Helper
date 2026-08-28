@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Card, EmptyState, PageHeader, StatusPill } from '@/components/ui'
+import { Card, EmptyState, ListGroup, PageHeader, StatusPill } from '@/components/ui'
 import { rollingAverage, round1, statusBand } from '@/lib/nutrition'
 import { dayRecords, latestWeight, weekOf } from '@/lib/selectors'
 import { formatDay } from '@/lib/dates'
@@ -94,7 +94,7 @@ export default function ProgressPage() {
             Save
           </button>
         </div>
-        <p className="mt-2 text-[11px] leading-snug text-faint">
+        <p className="mt-2 text-caption leading-snug text-faint">
           Weigh in once a week — morning, after the toilet, before breakfast. Weight swings
           1–3% day to day, so follow the average line, not a single reading.
         </p>
@@ -116,11 +116,13 @@ export default function ProgressPage() {
         )}
       </Card>
 
-      <Card>
-        <h2 className="mb-2 text-secondary font-bold">This week</h2>
-        <ul className="divide-y divide-line">
+      <ListGroup header="This week">
+        <ul>
           {dayRecords(data, weekOf(today)).map((d) => (
-            <li key={d.date} className="flex items-center justify-between gap-2 py-2">
+            <li
+              key={d.date}
+              className="flex items-center justify-between gap-2 px-4 py-2.5 [&+li]:border-t [&+li]:border-line"
+            >
               <span className="text-secondary">
                 {formatDay(d.date, {
                   weekday: 'short',
@@ -136,7 +138,7 @@ export default function ProgressPage() {
             </li>
           ))}
         </ul>
-      </Card>
+      </ListGroup>
     </>
   )
 }
@@ -230,7 +232,7 @@ function WeightChart({
           {round1(min)}
         </text>
       </svg>
-      <p className="mt-1 text-[10px] text-faint">
+      <p className="mt-1 text-caption text-faint">
         <span className="text-primary">━</span> 7-day average · <span>━</span> daily reading
       </p>
     </div>

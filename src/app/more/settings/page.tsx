@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { BackLink } from '@/components/BackLink'
 import { Card, ListGroup, PageHeader } from '@/components/ui'
 import { METHODOLOGY, TARGET_NOTES } from '@/lib/catalogue'
 import { bmr, leanBodyMass, tdee } from '@/lib/nutrition'
@@ -51,8 +50,11 @@ export default function SettingsPage() {
 
   return (
     <>
-      <BackLink />
-      <PageHeader title="Settings" subtitle="Profile, targets & data" />
+      <PageHeader
+        title="Settings"
+        subtitle="Profile, targets & data"
+        back={{ href: '/more', label: 'More' }}
+      />
 
       <ListGroup header="Profile">
         <div className="grid grid-cols-2 gap-3 p-4">
@@ -111,12 +113,12 @@ export default function SettingsPage() {
                 type="button"
                 onClick={() => setProfile({ activityLevel: a.value })}
                 aria-pressed={p.activityLevel === a.value}
-                className={`tap flex-1 rounded-pill px-2 py-2 text-[11px] font-semibold ${
+                className={`tap flex-1 rounded-pill px-2 py-2 text-caption font-semibold ${
                   p.activityLevel === a.value ? 'bg-primary text-white' : 'bg-raised text-muted'
                 }`}
               >
                 {a.label}
-                <span className="block text-[9px] font-normal opacity-70">{a.factor}</span>
+                <span className="block text-caption font-normal opacity-70">{a.factor}</span>
               </button>
             ))}
           </div>
@@ -134,7 +136,7 @@ export default function SettingsPage() {
             <Calc label="LBM" value={lbm === null ? '—' : `${lbm}`} unit="kg" />
           </dl>
         )}
-        <p className="mt-2 text-[11px] leading-snug text-faint">
+        <p className="mt-2 text-caption leading-snug text-faint">
           Mifflin–St Jeor. TDEE = BMR × activity factor. A 300–500 kcal daily deficit gives
           roughly 0.4–0.6 kg of loss per week.
         </p>
@@ -150,7 +152,7 @@ export default function SettingsPage() {
                 onChange={(v) => setTarget(f.key, v ?? 0)}
               />
               {TARGET_NOTES[f.key] && (
-                <p className="mt-1 text-[11px] leading-snug text-faint">{TARGET_NOTES[f.key]}</p>
+                <p className="mt-1 text-caption leading-snug text-faint">{TARGET_NOTES[f.key]}</p>
               )}
             </div>
           ))}
@@ -240,9 +242,9 @@ function Calc({ label, value, unit }: { label: string; value: string; unit: stri
     <div>
       <dd className="text-xl font-extrabold tabular-nums text-primary">
         {value}
-        <span className="ml-0.5 text-[10px] font-semibold text-faint">{unit}</span>
+        <span className="ml-0.5 text-caption font-semibold text-faint">{unit}</span>
       </dd>
-      <dt className="text-[11px] font-semibold">{label}</dt>
+      <dt className="text-caption font-semibold">{label}</dt>
     </div>
   )
 }

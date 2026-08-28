@@ -1,8 +1,22 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { STATUS_LABELS, type StatusBand } from '@/lib/nutrition'
 import { Icon } from './icons'
+
+/** iOS keeps back navigation in the nav bar, not floating in the content. */
+export function BackButton({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-0.5 text-body text-primary active:opacity-60"
+    >
+      <Icon name="chevron" size={18} strokeWidth={2.5} className="-ml-1.5 rotate-180" />
+      {label}
+    </Link>
+  )
+}
 
 /**
  * The iOS large-title pattern: a 34pt title in the scroll flow that hands off
@@ -15,10 +29,12 @@ export function PageHeader({
   title,
   subtitle,
   action,
+  back,
 }: {
   title: string
   subtitle?: string
   action?: ReactNode
+  back?: { href: string; label: string }
 }) {
   const sentinel = useRef<HTMLDivElement>(null)
   const [collapsed, setCollapsed] = useState(false)
@@ -37,15 +53,23 @@ export function PageHeader({
   return (
     <>
       <div
-        aria-hidden
-        className={`glass pointer-events-none fixed inset-x-0 top-0 z-30 flex h-[calc(env(safe-area-inset-top)+48px)] items-end justify-center rounded-none border-x-0 border-t-0 pb-2.5 transition-opacity duration-200 ${
-          collapsed ? 'opacity-100' : 'opacity-0'
+        className={`glass fixed inset-x-0 top-0 z-30 flex h-[calc(env(safe-area-inset-top)+48px)] items-end rounded-none border-x-0 border-t-0 px-4 pb-2.5 transition-opacity duration-200 ${
+          collapsed ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >
+        {/* Back stays reachable once the large title has scrolled away. */}
+        <span className="flex-1 truncate">{back && <BackButton {...back} />}</span>
         <span className="text-title">{title}</span>
+        <span className="flex-1" aria-hidden />
       </div>
 
-      <header className="mb-4 flex items-start justify-between gap-3 pt-2">
+      {back && (
+        <div className="mb-1 pt-1">
+          <BackButton {...back} />
+        </div>
+      )}
+
+      <header className="mb-4 flex items-start justify-between gap-3 pt-1">
         <div className="min-w-0">
           <h1 className="text-large-title">{title}</h1>
           {subtitle && <p className="mt-0.5 text-secondary text-faint">{subtitle}</p>}
@@ -257,7 +281,7 @@ export function BudgetRing({
         <span className="mt-1 text-tertiary font-semibold text-muted">
           {remaining >= 0 ? 'kcal left' : 'kcal over'}
         </span>
-        <span className="mt-0.5 text-[11px] text-faint tabular-nums">
+        <span className="mt-0.5 text-caption text-faint tabular-nums">
           {Math.round(consumed)} / {target}
         </span>
       </div>
@@ -323,6 +347,113 @@ export function EmptyState({
       </div>
       <p className="mt-2 font-semibold">{title}</p>
       {hint && <p className="text-secondary text-faint">{hint}</p>}
+    </div>
+  )
+}
+
+/**
+ * iOS 26 segmented control. The shape is a capsule — Apple made that the system
+ * style and stopped allowing the old rounded rectangle — with a thumb that
+ * slides between segments rather than each option toggling independently.
+ *
+ * Generic over the option key so each screen's own tab union stays type-safe.
+ */
+export function SegmentedControl<T extends string>({
+  options,
+  value,
+  onChange,
+  label,
+}: {
+  options: readonly { value: T; label: string }[]
+  value: T
+  onChange: (value: T) => void
+  label: string
+}) {
+  const index = Math.max(0, options.findIndex((o) => o.value === value))
+
+  return (
+    <div
+      role="tablist"
+      aria-label={label}
+      className="relative mb-5 flex rounded-pill bg-raised p-1"
+    >
+      {/* One sliding thumb, positioned by index, rather than per-option styling. */}
+      <span
+        aria-hidden
+        className="absolute inset-y-1 left-1 rounded-pill bg-surface shadow-card transition-transform duration-200 ease-out"
+        style={{
+          width: `calc((100% - 0.5rem) / ${options.length})`,
+          transform: `translateX(${index * 100}%)`,
+        }}
+      />
+      {options.map((o) => {
+        const selected = o.value === value
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="tab"
+            aria-selected={selected}
+            onClick={() => onChange(o.value)}
+            className={`relative z-10 min-h-[36px] flex-1 rounded-pill px-2 text-tertiary font-semibold transition-colors ${
+              selected ? 'text-ink' : 'text-muted'
+            }`}
+          >
+            {o.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/**
+ * Bottom sheet shell. iOS 26 floats a sheet at its lowest detent with a gap and
+ * fully rounded corners, and marks it with a grabber so it reads as draggable.
+ * We don't implement drag detents, but the grabber and the floating geometry are
+ * what make it recognisable.
+ */
+export function Sheet({
+  children,
+  onClose,
+  className = '',
+  labelledBy,
+}: {
+  children: ReactNode
+  onClose: () => void
+  className?: string
+  labelledBy?: string
+}) {
+  // Escape should dismiss, as it does for a system sheet on a hardware keyboard.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col justify-end">
+      <button
+        type="button"
+        aria-label="Close"
+        onClick={onClose}
+        className="absolute inset-0 bg-ink/40 backdrop-blur-[2px]"
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={labelledBy}
+        className={`relative flex max-h-[88dvh] flex-col rounded-t-sheet border-t border-line bg-bg shadow-lift animate-slide-up ${className}`}
+      >
+        <span
+          aria-hidden
+          data-grabber
+          className="mx-auto mt-2 h-[5px] w-9 shrink-0 rounded-pill bg-faint/40"
+        />
+        {children}
+      </div>
     </div>
   )
 }

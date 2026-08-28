@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { BackLink } from '@/components/BackLink'
-import { Card, PageHeader } from '@/components/ui'
+import { Card, ListGroup, PageHeader, SegmentedControl } from '@/components/ui'
 import { SUPPLEMENTS } from '@/lib/catalogue'
 import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
@@ -49,8 +48,11 @@ export default function SupplementsPage() {
 
   return (
     <>
-      <BackLink />
-      <PageHeader title="Supplements & Water" subtitle="Hydration & micronutrients" />
+      <PageHeader
+        title="Supplements & Water"
+        subtitle="Hydration & micronutrients"
+        back={{ href: '/more', label: 'More' }}
+      />
 
       <Card className="mb-4 border-amber/40 bg-amber/5">
         <p className="text-tertiary leading-relaxed text-muted">
@@ -59,47 +61,35 @@ export default function SupplementsPage() {
         </p>
       </Card>
 
-      <div className="mb-4 grid grid-cols-4 gap-1.5">
-        {(
-          [
-            ['supplements', 'Supplements'],
-            ['hydration', 'Water plan'],
-            ['micro', 'Micro'],
-            ['caffeine', 'Caffeine'],
-          ] as const
-        ).map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setTab(key)}
-            aria-pressed={tab === key}
-            className={`tap rounded-pill px-2 py-2 text-[11px] font-semibold ${
-              tab === key ? 'bg-primary text-white' : 'bg-raised text-muted'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        label="Supplement sections"
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: 'supplements', label: 'Supps' },
+          { value: 'hydration', label: 'Water' },
+          { value: 'micro', label: 'Micro' },
+          { value: 'caffeine', label: 'Caffeine' },
+        ]}
+      />
 
       {tab === 'supplements' && (
-        <div className="grid gap-3">
-          <p className="text-tertiary text-faint">
-            {takenToday.length} of {SUPPLEMENTS.supplements.length} taken today
-          </p>
+        <ListGroup
+          header={`${takenToday.length} of ${SUPPLEMENTS.supplements.length} taken today`}
+        >
           {SUPPLEMENTS.supplements.map((s) => {
             const taken = takenToday.includes(s.name)
             return (
-              <Card key={s.name} className={taken ? 'border-avocado/40 bg-avocado/5' : undefined}>
+              <div key={s.name} className="[&+div]:border-t [&+div]:border-line">
                 <button
                   type="button"
                   onClick={() => toggleSupplement(s.name)}
                   aria-pressed={taken}
-                  className="tap flex w-full items-start gap-3 text-left"
+                  className="tap-row flex w-full items-start gap-3 px-4 py-2.5 text-left"
                 >
                   <span
                     aria-hidden
-                    className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border text-[11px] font-bold ${
+                    className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border text-caption font-bold ${
                       taken ? 'border-avocado bg-avocado text-white' : 'border-line text-transparent'
                     }`}
                   >
@@ -117,44 +107,37 @@ export default function SupplementsPage() {
                     )}
                   </span>
                 </button>
-              </Card>
+              </div>
             )
           })}
-        </div>
+        </ListGroup>
       )}
 
       {tab === 'hydration' && (
-        <div className="grid gap-2">
-          <Card>
-            <p className="text-tertiary leading-relaxed text-muted">
-              A suggested schedule through the day. Log what you actually drink on the{' '}
-              <span className="font-semibold">Today</span> screen.
-            </p>
-          </Card>
+        <ListGroup
+          header="Suggested schedule"
+          footer="Log what you actually drink on the Today screen."
+        >
           {SUPPLEMENTS.hydration.map((h) => (
-            <Card key={h.time}>
+            <div key={h.time} className="px-4 py-2.5 [&+div]:border-t [&+div]:border-line">
               <div className="flex items-baseline justify-between gap-2">
                 <p className="text-secondary font-bold tabular-nums text-ocean">{h.time}</p>
-                <p className="text-tertiary font-semibold tabular-nums text-muted">{h.volumeMl} ml</p>
+                <p className="text-tertiary font-semibold tabular-nums text-muted">
+                  {h.volumeMl} ml
+                </p>
               </div>
-              <p className="mt-0.5 text-secondary">{h.beverage}</p>
-              {h.notes && <p className="mt-1 text-tertiary text-faint">{h.notes}</p>}
-            </Card>
+              <p className="mt-0.5 text-body">{h.beverage}</p>
+              {h.notes && <p className="mt-0.5 text-tertiary text-faint">{h.notes}</p>}
+            </div>
           ))}
-        </div>
+        </ListGroup>
       )}
 
       {tab === 'micro' && (
-        <Card>
-          <div className="mb-2 flex items-baseline justify-between">
-            <h2 className="text-secondary font-bold">
-              Daily checklist
-            </h2>
-            <span className="text-tertiary tabular-nums text-faint">
-              {tickedToday.length}/{SUPPLEMENTS.micronutrients.length}
-            </span>
-          </div>
-          <ul className="divide-y divide-line">
+        <ListGroup
+          header={`Daily checklist · ${tickedToday.length}/${SUPPLEMENTS.micronutrients.length}`}
+        >
+          <ul>
             {SUPPLEMENTS.micronutrients.map((m) => {
               const ticked = tickedToday.includes(m.nutrient)
               return (
@@ -163,11 +146,11 @@ export default function SupplementsPage() {
                     type="button"
                     onClick={() => toggleNutrient(m.nutrient)}
                     aria-pressed={ticked}
-                    className="tap flex w-full items-start gap-3 py-2.5 text-left"
+                    className="tap-row flex w-full items-start gap-3 px-4 py-2.5 text-left"
                   >
                     <span
                       aria-hidden
-                      className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border text-[11px] font-bold ${
+                      className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border text-caption font-bold ${
                         ticked
                           ? 'border-avocado bg-avocado text-white'
                           : 'border-line text-transparent'
@@ -193,15 +176,18 @@ export default function SupplementsPage() {
               )
             })}
           </ul>
-        </Card>
+        </ListGroup>
       )}
 
       {tab === 'caffeine' && (
-        <div className="grid gap-3">
-          <Card>
-            <ul className="divide-y divide-line">
+        <div>
+          <ListGroup header="Caffeine content">
+            <ul>
               {SUPPLEMENTS.caffeine.map((c) => (
-                <li key={c.beverage} className="flex items-center gap-2 py-2.5">
+                <li
+                  key={c.beverage}
+                  className="flex items-center gap-2 px-4 py-2.5 [&+li]:border-t [&+li]:border-line"
+                >
                   <span className="min-w-0 flex-1">
                     <span className="block text-secondary font-semibold">{c.beverage}</span>
                     <span className="block text-tertiary text-faint">{c.serving}</span>
@@ -209,14 +195,14 @@ export default function SupplementsPage() {
                   <span className="shrink-0 text-right">
                     <span className="block text-secondary font-bold tabular-nums text-primary">
                       {c.caffeineMg}
-                      <span className="text-[10px] font-medium text-faint"> mg</span>
+                      <span className="text-caption font-medium text-faint"> mg</span>
                     </span>
-                    <span className="block text-[10px] text-faint">{c.max}</span>
+                    <span className="block text-caption text-faint">{c.max}</span>
                   </span>
                 </li>
               ))}
             </ul>
-          </Card>
+          </ListGroup>
           {SUPPLEMENTS.caffeineCutoff && (
             <Card className="border-amber/40 bg-amber/5">
               <p className="text-tertiary leading-relaxed text-muted">
