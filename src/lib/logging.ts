@@ -28,7 +28,9 @@ export function useLogging() {
             slot,
             foodId: food.id,
             recipeId: null,
-            customName: null,
+            // Snapshot a custom food's name too: it lives in the store, so
+            // deleting it later would otherwise orphan every entry using it.
+            customName: food.ownerId ? food.name : null,
             servings,
             notes: null,
             // Snapshot the macros so editing a food later can't rewrite history.
@@ -134,6 +136,21 @@ export function useLogging() {
     [update]
   )
 
+  /**
+   * Removes a food from the catalogue. Past entries keep their snapshotted
+   * name and macros, so history stays readable.
+   */
+  const deleteCustomFood = useCallback(
+    (id: string) => {
+      update((d) => ({
+        ...d,
+        customFoods: d.customFoods.filter((f) => f.id !== id),
+        favourites: d.favourites.filter((f) => f !== id),
+      }))
+    },
+    [update]
+  )
+
   const resolveFood = useCallback((id: string) => findFood(data, id), [data])
 
   return {
@@ -144,6 +161,7 @@ export function useLogging() {
     toggleFavourite,
     copyDay,
     addCustomFood,
+    deleteCustomFood,
     resolveFood,
   }
 }

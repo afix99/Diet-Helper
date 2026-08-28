@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { CustomFoodDialog } from './CustomFoodDialog'
 import { FOOD_CATEGORIES, RECIPES } from '@/lib/catalogue'
 import { useLogging } from '@/lib/logging'
 import { allFoods, favouriteFoods, recentFoods } from '@/lib/selectors'
@@ -26,6 +27,7 @@ export function FoodPicker({
   const { data } = useData()
   const { logFood, logRecipe } = useLogging()
   const [query, setQuery] = useState('')
+  const [creating, setCreating] = useState(false)
 
   const foods = useMemo(() => allFoods(data), [data])
   const recents = useMemo(() => recentFoods(data, slot), [data, slot])
@@ -131,9 +133,18 @@ export function FoodPicker({
                 </>
               )}
               {results.length === 0 && matchingRecipes.length === 0 ? (
-                <p className="py-8 text-center text-sm text-faint">
-                  No matches. Try another word.
-                </p>
+                <div className="py-8 text-center">
+                  <p className="text-sm text-faint">No matches.</p>
+                  {/* The moment you discover something is missing is the moment
+                      you are willing to add it — so offer it right here. */}
+                  <button
+                    type="button"
+                    onClick={() => setCreating(true)}
+                    className="tap mt-3 rounded-pill bg-primary px-5 py-2.5 text-sm font-bold text-white"
+                  >
+                    Add &ldquo;{query.trim()}&rdquo;
+                  </button>
+                </div>
               ) : (
                 results.map((f) => <FoodRow key={f.id} food={f} onPick={pick} />)
               )}
@@ -141,6 +152,18 @@ export function FoodPicker({
           )}
         </div>
       </div>
+
+      {creating && (
+        <CustomFoodDialog
+          initialName={query.trim()}
+          onClose={() => setCreating(false)}
+          // Created straight from a search, so log it immediately.
+          onCreated={(food) => {
+            logFood(date, slot, food)
+            onClose()
+          }}
+        />
+      )}
     </div>
   )
 }

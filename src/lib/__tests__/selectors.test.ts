@@ -88,6 +88,59 @@ describe('entryName', () => {
   })
 })
 
+describe('custom foods survive being deleted', () => {
+  const customFood = {
+    id: 'custom-1',
+    slug: 'custom-1',
+    category: 'MY FOODS',
+    name: 'Mak’s rendang',
+    servingSize: '1 plate',
+    kcal: 420,
+    protein: 24,
+    carbs: 12,
+    fat: 30,
+    fibre: 2,
+    glycemicLoad: null,
+    ownerId: 'local',
+    notes: null,
+  }
+
+  /** What logFood writes for a custom food: name snapshotted onto the entry. */
+  const loggedCustom: LogEntry = {
+    id: 'e-custom',
+    date: '2026-08-29',
+    slot: 'dinner',
+    foodId: customFood.id,
+    recipeId: null,
+    customName: customFood.name,
+    servings: 1,
+    macros: { kcal: 420, protein: 24, carbs: 12, fat: 30, fibre: 2 },
+    notes: null,
+  }
+
+  it('keeps the name on the entry once the food is gone', () => {
+    // customFoods deliberately empty: the food has been deleted.
+    expect(entryName(loggedCustom, [])).toBe('Mak’s rendang')
+  })
+
+  it('still names it while the food exists', () => {
+    expect(entryName(loggedCustom, [customFood])).toBe('Mak’s rendang')
+  })
+
+  it('falls back to the store for an entry logged before the snapshot existed', () => {
+    const legacy: LogEntry = { ...loggedCustom, customName: null }
+    expect(entryName(legacy, [customFood])).toBe('Mak’s rendang')
+    expect(entryName(legacy, [])).toBe('Food')
+  })
+
+  it('counts a deleted custom food toward the day total', () => {
+    const data = { ...defaultData(), entries: [loggedCustom] }
+    const [record] = dayRecords(data, ['2026-08-29'])
+    expect(record.kcal).toBe(420)
+    expect(record.protein).toBe(24)
+  })
+})
+
 describe('dayRecords', () => {
   it('counts salmon meals for the Omega Squad badge', () => {
     const today = todayIso()

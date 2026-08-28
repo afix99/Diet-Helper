@@ -112,16 +112,27 @@ It asserts 69 foods and 7 recipes survived the round trip.
 Tone follows the workbook's own: `✓ Ikut target`, `~ Dekat`, `▲ Lebih`. No
 alarm colours, no shaming copy.
 
+## Adding your own foods
+
+The 69-item catalogue won't have everything. Two ways in:
+
+- **From a search that finds nothing.** Type a name in the meal picker, and
+  where the "no matches" message used to dead-end there's now an
+  `Add "…"` button. Fill in the form and it's logged immediately — the moment
+  you notice something is missing is the moment you'll add it.
+- **From the Foods tab**, via `+ New`.
+
+Only name and calories are required. A blank macro counts as zero, because a
+rough entry beats a skipped meal.
+
+Custom foods can be deleted; meals already logged keep working. `logFood`
+snapshots a custom food's name onto the entry alongside its macros, so
+deleting the food never orphans your history.
+
 ## Not yet built
 
-- **Adding your own foods.** `addCustomFood` in `src/lib/logging.ts` and the
-  "MY FOODS" section of the picker are wired, but nothing calls them yet, so
-  the section never appears. Anything outside the 69-item catalogue can't be
-  logged.
-- Progress photos, body measurements beyond weight and waist/hip, and barcode
-  or photo logging.
-
-The schema leaves room for all of these.
+Progress photos, body measurements beyond weight and waist/hip, and barcode
+or photo logging. The schema leaves room.
 
 ## Health note
 
