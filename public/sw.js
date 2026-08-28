@@ -5,7 +5,9 @@
  * worker needs to cache is the shell itself — enough that opening the app in
  * a dead spot still shows the UI rather than a browser error page.
  */
-const CACHE = 'memey-shell-v1'
+// Stamped per build by scripts/stamp-sw.mjs: a new deploy gets a new cache,
+// and the activate handler below deletes every older one.
+const CACHE = 'memey-shell-__BUILD__'
 const SHELL = ['/', '/week', '/foods', '/progress', '/more', '/manifest.webmanifest', '/icon-192.png']
 
 self.addEventListener('install', (event) => {

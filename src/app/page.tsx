@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { FoodPicker } from '@/components/FoodPicker'
+import { QuickAdd } from '@/components/QuickAdd'
 import { WaterCard } from '@/components/WaterCard'
 import { BudgetRing, Card, MacroBar, PageHeader, StatusPill } from '@/components/ui'
 import { useLogging } from '@/lib/logging'
@@ -24,9 +25,21 @@ export default function TodayPage() {
   const { data, ready } = useData()
   const { removeEntry, setServings } = useLogging()
   const [picking, setPicking] = useState<MealSlot | null>(null)
+  const [quickAdding, setQuickAdding] = useState<MealSlot | null>(null)
   const date = todayIso()
 
   const totals = useMemo(() => dayTotals(data, date), [data, date])
+
+  /** Best guess at which meal you mean, from the time of day. */
+  const nextOpenSlot = useMemo<MealSlot>(() => {
+    const h = new Date().getHours()
+    if (h < 10) return 'breakfast'
+    if (h < 12) return 'morning_snack'
+    if (h < 15) return 'lunch'
+    if (h < 18) return 'afternoon_snack'
+    if (h < 21) return 'dinner'
+    return 'evening'
+  }, [])
   const band = statusBand(totals.kcal, data.targets.kcal)
   const run = useMemo(() => streakFor(data, date), [data, date])
   const unlocked = useMemo(() => badgesFor(data, date).filter((b) => b.unlocked), [data, date])
@@ -111,6 +124,17 @@ export default function TodayPage() {
 
       <WaterCard date={date} />
 
+      {/* Buried inside the picker, nobody found this. It is the fastest way to
+          log, so it belongs on the front screen. */}
+      <button
+        type="button"
+        onClick={() => setQuickAdding(nextOpenSlot)}
+        className="tap mb-3 flex w-full items-center justify-center gap-2 rounded-card bg-primary py-3 text-secondary font-bold text-white shadow-card"
+      >
+        <span aria-hidden>✎</span>
+        Describe a whole meal
+      </button>
+
       <div className="grid gap-3">
         {MEAL_SLOTS.map((slot) => {
           const entries = entriesForSlot(data, date, slot)
@@ -185,6 +209,9 @@ export default function TodayPage() {
       </div>
 
       {picking && <FoodPicker date={date} slot={picking} onClose={() => setPicking(null)} />}
+      {quickAdding && (
+        <QuickAdd date={date} slot={quickAdding} onClose={() => setQuickAdding(null)} />
+      )}
     </>
   )
 }

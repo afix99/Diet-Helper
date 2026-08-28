@@ -25,6 +25,13 @@ export default function ProgressPage() {
 
   // Observations run over the last four weeks of *logged* days, never planned
   // ones, so a week filled in ahead can't skew them.
+  const loggedDays = useMemo(
+    () =>
+      dayRecords(data, weekDates(today, 28).filter((d) => d <= today)).filter((d) => d.kcal > 0)
+        .length,
+    [data, today]
+  )
+
   const coaching = useMemo(
     () =>
       insights({
@@ -130,6 +137,31 @@ export default function ProgressPage() {
           />
         )}
       </Card>
+
+      {/* Silently rendering nothing left people assuming the feature was
+          missing. Show the locked state and what opens it. */}
+      {coaching.length === 0 && (
+        <section className="mb-5">
+          <h2 className="mb-1.5 px-4 text-tertiary font-semibold uppercase tracking-wide text-faint">
+            What your log shows
+          </h2>
+          <div className="rounded-card bg-surface p-4 shadow-card">
+            <p className="text-body font-semibold">Patterns need a few days</p>
+            <p className="mt-1 text-tertiary leading-relaxed text-muted">
+              Once {Math.max(0, 3 - loggedDays)} more {loggedDays === 2 ? 'day is' : 'days are'}{' '}
+              logged, this fills with observations from your own diary — how weekends compare
+              to weekdays, whether protein is holding, how fast you are actually losing.
+            </p>
+            <div className="mt-3 h-1.5 overflow-hidden rounded-pill bg-raised">
+              <div
+                className="h-full bg-primary transition-[width] duration-500"
+                style={{ width: `${Math.min(100, (loggedDays / 3) * 100)}%` }}
+              />
+            </div>
+            <p className="mt-1.5 text-caption text-faint">{loggedDays} of 3 days logged</p>
+          </div>
+        </section>
+      )}
 
       {coaching.length > 0 && (
         <section className="mb-5">
