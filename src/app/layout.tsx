@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { AuthGate } from '@/components/AuthGate'
 import { DataProvider } from '@/lib/store/provider'
 import { TabBar } from '@/components/TabBar'
 import { InstallHint } from '@/components/InstallHint'
@@ -30,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <DataProvider>
           <div className="mx-auto flex min-h-[100dvh] w-full max-w-2xl flex-col">
             <main className="flex-1 px-4 pb-32 pt-[max(1rem,env(safe-area-inset-top))]">
-              {children}
+              <AuthGate>{children}</AuthGate>
             </main>
             <InstallHint />
             <ServiceWorker />

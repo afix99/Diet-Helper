@@ -5,6 +5,7 @@ import { BackLink } from '@/components/BackLink'
 import { Card, PageHeader } from '@/components/ui'
 import { METHODOLOGY, TARGET_NOTES } from '@/lib/catalogue'
 import { bmr, leanBodyMass, tdee } from '@/lib/nutrition'
+import { supabaseClient } from '@/lib/store'
 import { useData } from '@/lib/store/provider'
 import type { ActivityLevel, Sex, Targets } from '@/lib/types'
 
@@ -172,6 +173,15 @@ export default function SettingsPage() {
             ? 'Disimpan dalam akaun anda — sync merentas peranti.'
             : 'Disimpan dalam pelayar ini sahaja. Sambungkan Supabase untuk sync merentas peranti.'}
         </p>
+        {storeKind === 'supabase' && (
+          <button
+            type="button"
+            onClick={() => supabaseClient()?.auth.signOut()}
+            className="tap mt-3 w-full rounded-pill border border-line py-2 text-xs font-semibold text-muted"
+          >
+            Log keluar
+          </button>
+        )}
       </Card>
 
       <Card>
