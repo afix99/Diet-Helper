@@ -3,60 +3,63 @@
 @tailwind utilities;
 
 /*
- * Warm, food-friendly palette. Salmon leads because the programme does.
- * Status colours deliberately avoid alarm-red: the spreadsheet's own voice is
- * non-judgemental ("~ Dekat", "▲ Lebih"), and the app keeps that.
+ * Soft rose palette. Pink leads; supporting hues are muted so the primary
+ * stays the only saturated thing on screen.
+ *
+ * Status colours deliberately avoid alarm-red: the workbook's own voice is
+ * non-judgemental ("Close", "Over"), and the app keeps that. `clay` is a dusty
+ * rose rather than a warning colour for exactly that reason.
  */
 :root {
-  --bg: 253 250 246;
+  --bg: 255 250 252;
   --surface: 255 255 255;
-  --raised: 247 242 236;
-  --line: 232 224 214;
-  --ink: 34 30 28;
-  --muted: 112 103 96;
-  --faint: 158 148 140;
+  --raised: 252 240 245;
+  --line: 240 224 232;
+  --ink: 42 28 35;
+  --muted: 122 100 110;
+  --faint: 168 148 158;
 
-  --salmon: 232 116 94;
-  --avocado: 106 153 78;
-  --amber: 214 154 58;
-  --clay: 186 122 96;
-  --ocean: 74 124 138;
+  --primary: 214 87 132;
+  --avocado: 106 156 120;
+  --amber: 214 148 74;
+  --clay: 194 112 128;
+  --ocean: 106 140 186;
 
   --font-sans: ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: 22 20 19;
-    --surface: 32 29 27;
-    --raised: 42 38 35;
-    --line: 58 52 48;
-    --ink: 244 239 234;
-    --muted: 168 158 150;
-    --faint: 122 113 106;
+    --bg: 26 20 24;
+    --surface: 38 29 34;
+    --raised: 51 39 46;
+    --line: 70 54 63;
+    --ink: 247 238 243;
+    --muted: 180 160 172;
+    --faint: 134 116 128;
 
-    --salmon: 240 138 116;
-    --avocado: 132 178 102;
-    --amber: 228 174 84;
-    --clay: 204 146 120;
-    --ocean: 106 158 172;
+    --primary: 244 146 180;
+    --avocado: 142 190 158;
+    --amber: 234 180 110;
+    --clay: 220 152 166;
+    --ocean: 146 176 220;
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: 22 20 19;
-  --surface: 32 29 27;
-  --raised: 42 38 35;
-  --line: 58 52 48;
-  --ink: 244 239 234;
-  --muted: 168 158 150;
-  --faint: 122 113 106;
+  --bg: 26 20 24;
+  --surface: 38 29 34;
+  --raised: 51 39 46;
+  --line: 70 54 63;
+  --ink: 247 238 243;
+  --muted: 180 160 172;
+  --faint: 134 116 128;
 
-  --salmon: 240 138 116;
-  --avocado: 132 178 102;
-  --amber: 228 174 84;
-  --clay: 204 146 120;
-  --ocean: 106 158 172;
+  --primary: 244 146 180;
+  --avocado: 142 190 158;
+  --amber: 234 180 110;
+  --clay: 220 152 166;
+  --ocean: 146 176 220;
 }
 
 html {

@@ -6,29 +6,31 @@ import { Card, PageHeader } from '@/components/ui'
 import { METHODOLOGY, TARGET_NOTES } from '@/lib/catalogue'
 import { bmr, leanBodyMass, tdee } from '@/lib/nutrition'
 import { supabaseClient } from '@/lib/store'
+import { defaultData } from '@/lib/store/defaults'
 import { useData } from '@/lib/store/provider'
 import type { ActivityLevel, Sex, Targets } from '@/lib/types'
 
-const ACTIVITY: { value: ActivityLevel; ms: string; factor: string }[] = [
-  { value: 'sedentary', ms: 'Kurang aktif', factor: '×1.2' },
-  { value: 'moderate', ms: 'Sederhana', factor: '×1.55' },
-  { value: 'active', ms: 'Aktif', factor: '×1.725' },
+const ACTIVITY: { value: ActivityLevel; label: string; factor: string }[] = [
+  { value: 'sedentary', label: 'Light', factor: '×1.2' },
+  { value: 'moderate', label: 'Moderate', factor: '×1.55' },
+  { value: 'active', label: 'Active', factor: '×1.725' },
 ]
 
-const TARGET_FIELDS: { key: keyof Targets; ms: string; en: string; unit: string }[] = [
-  { key: 'kcal', ms: 'Tenaga', en: 'Energy', unit: 'kcal' },
-  { key: 'protein', ms: 'Protein', en: 'Protein', unit: 'g' },
-  { key: 'carbs', ms: 'Karbohidrat', en: 'Carbs', unit: 'g' },
-  { key: 'fat', ms: 'Lemak', en: 'Fat', unit: 'g' },
-  { key: 'fibre', ms: 'Serat', en: 'Fibre', unit: 'g' },
-  { key: 'waterMl', ms: 'Air', en: 'Water', unit: 'ml' },
+const TARGET_FIELDS: { key: keyof Targets; label: string; unit: string }[] = [
+  { key: 'kcal', label: 'Calories', unit: 'kcal' },
+  { key: 'protein', label: 'Protein', unit: 'g' },
+  { key: 'carbs', label: 'Carbs', unit: 'g' },
+  { key: 'fat', label: 'Fat', unit: 'g' },
+  { key: 'fibre', label: 'Fibre', unit: 'g' },
+  { key: 'waterMl', label: 'Water', unit: 'ml' },
 ]
 
 export default function SettingsPage() {
   const { data, ready, update, storeKind } = useData()
   const [showDisclaimer, setShowDisclaimer] = useState(false)
+  const [confirmingReset, setConfirmingReset] = useState(false)
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Memuatkan…</p>
+  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
 
   const p = data.profile
   const basal = p.heightCm && p.age ? bmr(p.startWeightKg, p.heightCm, p.age, p.sex) : null
@@ -41,48 +43,46 @@ export default function SettingsPage() {
   const setTarget = (key: keyof Targets, value: number) =>
     update((d) => ({ ...d, targets: { ...d.targets, [key]: value } }))
 
+  /** Wipes food logs, weights, water and ticks, back to a fresh install. */
+  const resetEverything = () => {
+    update(() => defaultData())
+    setConfirmingReset(false)
+  }
+
   return (
     <>
       <BackLink />
-      <PageHeader ms="Tetapan" en="Profile & targets" />
+      <PageHeader title="Settings" subtitle="Profile, targets & data" />
 
       <Card className="mb-4">
-        <h2 className="mb-3 text-sm font-bold">
-          Profil <span className="font-normal text-faint">Profile</span>
-        </h2>
+        <h2 className="mb-3 text-sm font-bold">Profile</h2>
         <div className="grid grid-cols-2 gap-3">
           <NumField
-            label="Berat mula"
-            en="Start (kg)"
+            label="Starting weight (kg)"
             value={p.startWeightKg}
             step={0.1}
             onChange={(v) => v !== null && setProfile({ startWeightKg: v })}
           />
           <NumField
-            label="Berat sasaran"
-            en="Goal (kg)"
+            label="Goal weight (kg)"
             value={p.goalWeightKg}
             step={0.1}
             onChange={(v) => v !== null && setProfile({ goalWeightKg: v })}
           />
           <NumField
-            label="Tinggi"
-            en="Height (cm)"
+            label="Height (cm)"
             value={p.heightCm}
             onChange={(v) => setProfile({ heightCm: v })}
           />
-          <NumField label="Umur" en="Age" value={p.age} onChange={(v) => setProfile({ age: v })} />
+          <NumField label="Age" value={p.age} onChange={(v) => setProfile({ age: v })} />
           <NumField
-            label="Lemak badan"
-            en="Body fat (%)"
+            label="Body fat (%)"
             value={p.bodyFatPct}
             step={0.1}
             onChange={(v) => setProfile({ bodyFatPct: v })}
           />
           <div>
-            <span className="mb-1 block text-xs font-semibold">
-              Jantina <span className="font-normal text-faint">Sex</span>
-            </span>
+            <span className="mb-1 block text-xs font-semibold">Sex</span>
             <div className="flex gap-1">
               {(['female', 'male'] as Sex[]).map((s) => (
                 <button
@@ -91,10 +91,10 @@ export default function SettingsPage() {
                   onClick={() => setProfile({ sex: s })}
                   aria-pressed={p.sex === s}
                   className={`tap flex-1 rounded-pill px-2 py-2 text-xs font-semibold ${
-                    p.sex === s ? 'bg-salmon text-white' : 'bg-raised text-muted'
+                    p.sex === s ? 'bg-primary text-white' : 'bg-raised text-muted'
                   }`}
                 >
-                  {s === 'female' ? 'Perempuan' : 'Lelaki'}
+                  {s === 'female' ? 'Female' : 'Male'}
                 </button>
               ))}
             </div>
@@ -103,7 +103,7 @@ export default function SettingsPage() {
 
         <div className="mt-3">
           <span className="mb-1 block text-xs font-semibold">
-            Tahap aktiviti <span className="font-normal text-faint">Activity</span>
+            Activity level
           </span>
           <div className="flex gap-1">
             {ACTIVITY.map((a) => (
@@ -113,10 +113,10 @@ export default function SettingsPage() {
                 onClick={() => setProfile({ activityLevel: a.value })}
                 aria-pressed={p.activityLevel === a.value}
                 className={`tap flex-1 rounded-pill px-2 py-2 text-[11px] font-semibold ${
-                  p.activityLevel === a.value ? 'bg-salmon text-white' : 'bg-raised text-muted'
+                  p.activityLevel === a.value ? 'bg-primary text-white' : 'bg-raised text-muted'
                 }`}
               >
-                {a.ms}
+                {a.label}
                 <span className="block text-[9px] font-normal opacity-70">{a.factor}</span>
               </button>
             ))}
@@ -125,11 +125,9 @@ export default function SettingsPage() {
       </Card>
 
       <Card className="mb-4">
-        <h2 className="mb-2 text-sm font-bold">
-          Kiraan <span className="font-normal text-faint">Calculated</span>
-        </h2>
+        <h2 className="mb-2 text-sm font-bold">Calculated</h2>
         {basal === null ? (
-          <p className="text-xs text-faint">Isi tinggi dan umur untuk kira BMR &amp; TDEE.</p>
+          <p className="text-xs text-faint">Fill in height and age to calculate BMR &amp; TDEE.</p>
         ) : (
           <dl className="grid grid-cols-3 gap-2 text-center">
             <Calc label="BMR" value={`${basal}`} unit="kcal" />
@@ -138,21 +136,18 @@ export default function SettingsPage() {
           </dl>
         )}
         <p className="mt-2 text-[11px] leading-snug text-faint">
-          Mifflin–St Jeor. TDEE = BMR × faktor aktiviti. Defisit 300–500 kcal sehari beri
-          penurunan ~0.4–0.6 kg seminggu.
+          Mifflin–St Jeor. TDEE = BMR × activity factor. A 300–500 kcal daily deficit gives
+          roughly 0.4–0.6 kg of loss per week.
         </p>
       </Card>
 
       <Card className="mb-4">
-        <h2 className="mb-3 text-sm font-bold">
-          Sasaran harian <span className="font-normal text-faint">Daily targets</span>
-        </h2>
+        <h2 className="mb-3 text-sm font-bold">Daily targets</h2>
         <div className="grid gap-3">
           {TARGET_FIELDS.map((f) => (
             <div key={f.key}>
               <NumField
-                label={f.ms}
-                en={`${f.en} (${f.unit})`}
+                label={`${f.label} (${f.unit})`}
                 value={data.targets[f.key]}
                 onChange={(v) => setTarget(f.key, v ?? 0)}
               />
@@ -165,13 +160,11 @@ export default function SettingsPage() {
       </Card>
 
       <Card className="mb-4">
-        <h2 className="text-sm font-bold">
-          Data <span className="font-normal text-faint">Storage</span>
-        </h2>
+        <h2 className="text-sm font-bold">Data</h2>
         <p className="mt-1 text-xs text-muted">
           {storeKind === 'supabase'
-            ? 'Disimpan dalam akaun anda — sync merentas peranti.'
-            : 'Disimpan dalam pelayar ini sahaja. Sambungkan Supabase untuk sync merentas peranti.'}
+            ? 'Saved to your account and synced across devices.'
+            : 'Saved in this browser only. Connect Supabase to sync across devices.'}
         </p>
         {storeKind === 'supabase' && (
           <button
@@ -179,7 +172,41 @@ export default function SettingsPage() {
             onClick={() => supabaseClient()?.auth.signOut()}
             className="tap mt-3 w-full rounded-pill border border-line py-2 text-xs font-semibold text-muted"
           >
-            Log keluar
+            Sign out
+          </button>
+        )}
+      </Card>
+
+      <Card className="mb-4 border-clay/40">
+        <h2 className="text-sm font-bold">Reset</h2>
+        <p className="mt-1 text-xs text-muted">
+          Erases every food log, weight entry, water count and tick, and restores the original
+          targets and shopping list. This cannot be undone.
+        </p>
+        {confirmingReset ? (
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={resetEverything}
+              className="tap flex-1 rounded-pill bg-clay py-2.5 text-xs font-bold text-white"
+            >
+              Yes, erase everything
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmingReset(false)}
+              className="tap rounded-pill bg-raised px-4 py-2.5 text-xs font-semibold text-muted"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirmingReset(true)}
+            className="tap mt-3 w-full rounded-pill border border-clay py-2.5 text-xs font-bold text-clay"
+          >
+            Reset all data
           </button>
         )}
       </Card>
@@ -191,9 +218,7 @@ export default function SettingsPage() {
           aria-expanded={showDisclaimer}
           className="tap flex w-full items-center justify-between text-left"
         >
-          <span className="text-sm font-bold">
-            Penafian perubatan <span className="font-normal text-faint">Medical disclaimer</span>
-          </span>
+          <span className="text-sm font-bold">Medical disclaimer</span>
           <span aria-hidden className="text-faint">
             {showDisclaimer ? '▲' : '▼'}
           </span>
@@ -215,7 +240,7 @@ export default function SettingsPage() {
 function Calc({ label, value, unit }: { label: string; value: string; unit: string }) {
   return (
     <div>
-      <dd className="text-xl font-extrabold tabular-nums text-salmon">
+      <dd className="text-xl font-extrabold tabular-nums text-primary">
         {value}
         <span className="ml-0.5 text-[10px] font-semibold text-faint">{unit}</span>
       </dd>
@@ -226,22 +251,18 @@ function Calc({ label, value, unit }: { label: string; value: string; unit: stri
 
 function NumField({
   label,
-  en,
   value,
   step = 1,
   onChange,
 }: {
   label: string
-  en: string
   value: number | null
   step?: number
   onChange: (v: number | null) => void
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-semibold">
-        {label} <span className="font-normal text-faint">{en}</span>
-      </span>
+      <span className="mb-1 block text-xs font-semibold">{label}</span>
       <input
         type="number"
         inputMode="decimal"
@@ -251,7 +272,7 @@ function NumField({
           const v = Number.parseFloat(e.target.value)
           onChange(Number.isFinite(v) ? v : null)
         }}
-        className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-base tabular-nums outline-none focus:border-salmon"
+        className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-base tabular-nums outline-none focus:border-primary"
       />
     </label>
   )

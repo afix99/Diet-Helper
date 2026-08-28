@@ -22,14 +22,13 @@ export const MEAL_SLOTS: readonly MealSlot[] = [
   'evening',
 ] as const
 
-/** Bilingual label pairs, Malay first — matching the sheet's own convention. */
-export const SLOT_LABELS: Record<MealSlot, { ms: string; en: string; time: string }> = {
-  breakfast: { ms: 'Sarapan', en: 'Breakfast', time: '07:00' },
-  morning_snack: { ms: 'Snek Pagi', en: 'Morning Snack', time: '10:00' },
-  lunch: { ms: 'Tengahari', en: 'Lunch', time: '13:00' },
-  afternoon_snack: { ms: 'Snek Petang', en: 'Afternoon Snack', time: '16:00' },
-  dinner: { ms: 'Malam', en: 'Dinner', time: '19:00' },
-  evening: { ms: 'Malam (pilihan)', en: 'Evening (optional)', time: '21:00' },
+export const SLOT_LABELS: Record<MealSlot, { label: string; time: string }> = {
+  breakfast: { label: 'Breakfast', time: '07:00' },
+  morning_snack: { label: 'Morning Snack', time: '10:00' },
+  lunch: { label: 'Lunch', time: '13:00' },
+  afternoon_snack: { label: 'Afternoon Snack', time: '16:00' },
+  dinner: { label: 'Dinner', time: '19:00' },
+  evening: { label: 'Evening (optional)', time: '21:00' },
 }
 
 export interface Macros {

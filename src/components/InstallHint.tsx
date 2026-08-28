@@ -39,16 +39,16 @@ export function InstallHint() {
           📲
         </span>
         <div className="flex-1 text-sm">
-          <p className="font-semibold">Pasang di skrin utama</p>
+          <p className="font-semibold">Add to your home screen</p>
           <p className="mt-0.5 text-xs text-muted">
-            Tekan <span aria-hidden>􀈂</span> <strong>Share</strong> → <strong>Add to Home
-            Screen</strong>. Buka macam app biasa, tak perlu App Store.
+            Tap <strong>Share</strong> → <strong>Add to Home Screen</strong>. Opens like a
+            normal app — no App Store needed.
           </p>
         </div>
         <button
           type="button"
           onClick={dismiss}
-          aria-label="Tutup"
+          aria-label="Dismiss"
           className="tap -mr-1 -mt-1 rounded-pill px-2 text-faint"
         >
           ✕

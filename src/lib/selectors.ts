@@ -23,8 +23,8 @@ export function findFood(data: AppData, id: string): Food | undefined {
 /** Display name for a log entry, whichever kind of thing it references. */
 export function entryName(entry: LogEntry): string {
   if (entry.customName) return entry.customName
-  if (entry.recipeId) return RECIPES.find((r) => r.id === entry.recipeId)?.name ?? 'Resipi'
-  return FOODS.find((f) => f.id === entry.foodId)?.name ?? 'Makanan'
+  if (entry.recipeId) return RECIPES.find((r) => r.id === entry.recipeId)?.name ?? 'Recipe'
+  return FOODS.find((f) => f.id === entry.foodId)?.name ?? 'Food'
 }
 
 export function entriesFor(data: AppData, date: string): LogEntry[] {

@@ -8,7 +8,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Memey Diet Planner',
-  description: 'Pelan diet harian — log makanan, jejak progres, kutip lencana.',
+  description: 'Daily diet planner — log meals, track progress, earn badges.',
   manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Diet Planner' },
   icons: {
@@ -20,8 +20,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fdfaf6' },
-    { media: '(prefers-color-scheme: dark)', color: '#161413' },
+    { media: '(prefers-color-scheme: light)', color: '#fffafc' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1418' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -31,7 +31,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ms">
+    <html lang="en">
       <body>
         <DataProvider>
           <div className="mx-auto flex min-h-[100dvh] w-full max-w-2xl flex-col">

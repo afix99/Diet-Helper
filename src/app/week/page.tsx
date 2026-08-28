@@ -11,13 +11,13 @@ import { todayIso } from '@/lib/store/defaults'
 import { MEAL_SLOTS, SLOT_LABELS, type MealSlot } from '@/lib/types'
 
 const DAY_LABELS = [
-  { ms: 'Isnin', en: 'Monday' },
-  { ms: 'Selasa', en: 'Tuesday' },
-  { ms: 'Rabu', en: 'Wednesday' },
-  { ms: 'Khamis', en: 'Thursday' },
-  { ms: 'Jumaat', en: 'Friday' },
-  { ms: 'Sabtu', en: 'Saturday' },
-  { ms: 'Ahad', en: 'Sunday' },
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
 ]
 
 export default function WeekPage() {
@@ -37,18 +37,18 @@ export default function WeekPage() {
     setAnchor(d.toISOString().slice(0, 10))
   }
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Memuatkan…</p>
+  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
 
   const weekTotal = dates.reduce((sum, d) => sum + dayTotals(data, d).kcal, 0)
   const loggedDays = dates.filter((d) => dayTotals(data, d).kcal > 0).length
 
   return (
     <>
-      <PageHeader ms="Minggu" en="Week plan" />
+      <PageHeader title="Week" subtitle="Plan ahead, copy days" />
 
       <Card className="mb-4">
         <div className="flex items-center justify-between">
-          <button type="button" onClick={() => shift(-1)} className="tap px-2 text-lg" aria-label="Minggu sebelum">
+          <button type="button" onClick={() => shift(-1)} className="tap px-2 text-lg" aria-label="Previous week">
             ‹
           </button>
           <div className="text-center">
@@ -64,19 +64,19 @@ export default function WeekPage() {
               })}
             </p>
             <p className="text-xs text-faint">
-              {loggedDays}/7 hari · purata{' '}
+              {loggedDays}/7 days · avg{' '}
               {loggedDays > 0 ? Math.round(weekTotal / loggedDays) : 0} kcal
             </p>
           </div>
-          <button type="button" onClick={() => shift(1)} className="tap px-2 text-lg" aria-label="Minggu depan">
+          <button type="button" onClick={() => shift(1)} className="tap px-2 text-lg" aria-label="Next week">
             ›
           </button>
         </div>
       </Card>
 
       {copySource && (
-        <Card className="mb-3 border-salmon bg-salmon/5">
-          <p className="text-sm font-semibold">Salin ke hari mana?</p>
+        <Card className="mb-3 border-primary bg-primary/5">
+          <p className="text-sm font-semibold">Copy to which day?</p>
           <p className="mb-2 text-xs text-faint">Pick a day to copy this plan onto.</p>
           <div className="flex flex-wrap gap-1.5">
             {dates
@@ -91,7 +91,7 @@ export default function WeekPage() {
                   }}
                   className="tap rounded-pill bg-surface px-3 py-1.5 text-xs font-semibold"
                 >
-                  {DAY_LABELS[dates.indexOf(d)].ms}
+                  {DAY_LABELS[dates.indexOf(d)]}
                 </button>
               ))}
             <button
@@ -99,7 +99,7 @@ export default function WeekPage() {
               onClick={() => setCopySource(null)}
               className="tap rounded-pill px-3 py-1.5 text-xs text-faint"
             >
-              Batal
+              Cancel
             </button>
           </div>
         </Card>
@@ -112,7 +112,7 @@ export default function WeekPage() {
           const isOpen = open === date
           const isToday = date === today
           return (
-            <Card key={date} className={isToday ? 'border-salmon' : undefined}>
+            <Card key={date} className={isToday ? 'border-primary' : undefined}>
               <button
                 type="button"
                 onClick={() => setOpen(isOpen ? '' : date)}
@@ -121,14 +121,13 @@ export default function WeekPage() {
               >
                 <span className="min-w-0">
                   <span className="block text-sm font-bold">
-                    {DAY_LABELS[i].ms}
-                    <span className="ml-1 font-normal text-faint">{DAY_LABELS[i].en}</span>
-                    {isToday && <span className="ml-1.5 text-xs text-salmon">· hari ini</span>}
+                    {DAY_LABELS[i]}
+                    {isToday && <span className="ml-1.5 text-xs text-primary">· today</span>}
                   </span>
                   <span className="block text-xs tabular-nums text-faint">
                     {totals.kcal > 0
                       ? `${Math.round(totals.kcal)} kcal · ${Math.round(totals.protein)}g protein`
-                      : 'Belum ada rancangan'}
+                      : 'Nothing planned yet'}
                   </span>
                 </span>
                 <StatusPill band={band} />
@@ -142,13 +141,13 @@ export default function WeekPage() {
                       <div key={slot} className="mb-2 last:mb-0">
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-xs font-semibold text-muted">
-                            {SLOT_LABELS[slot].ms}
+                            {SLOT_LABELS[slot].label}
                           </span>
                           <button
                             type="button"
                             onClick={() => setPicking({ date, slot })}
-                            aria-label={`Tambah ke ${SLOT_LABELS[slot].ms}`}
-                            className="tap grid h-7 w-7 place-items-center rounded-pill bg-raised text-sm font-bold text-salmon"
+                            aria-label={`Add to ${SLOT_LABELS[slot].label}`}
+                            className="tap grid h-7 w-7 place-items-center rounded-pill bg-raised text-sm font-bold text-primary"
                           >
                             +
                           </button>
@@ -162,7 +161,7 @@ export default function WeekPage() {
                             <button
                               type="button"
                               onClick={() => removeEntry(e.id)}
-                              aria-label={`Buang ${entryName(e)}`}
+                              aria-label={`Remove ${entryName(e)}`}
                               className="tap grid h-7 w-7 shrink-0 place-items-center rounded-pill text-faint"
                             >
                               ✕
@@ -178,7 +177,7 @@ export default function WeekPage() {
                       onClick={() => setCopySource(date)}
                       className="tap mt-2 w-full rounded-pill border border-line py-2 text-xs font-semibold text-muted"
                     >
-                      Salin hari ini ke hari lain
+                      Copy this day to another
                     </button>
                   )}
                 </div>

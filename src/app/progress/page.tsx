@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import { Card, EmptyState, PageHeader, StatusPill } from '@/components/ui'
 import { rollingAverage, round1, statusBand } from '@/lib/nutrition'
 import { dayRecords, latestWeight, weekOf } from '@/lib/selectors'
@@ -36,30 +37,42 @@ export default function ProgressPage() {
     setInput('')
   }
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Memuatkan…</p>
+  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
 
   return (
     <>
-      <PageHeader ms="Progres" en="Weight & compliance" />
+      <PageHeader title="Progress" subtitle="Weight & compliance" />
 
       <Card className="mb-4">
         <div className="grid grid-cols-3 gap-2 text-center">
-          <Stat label="Sekarang" en="Now" value={latest === null ? '—' : `${latest}`} unit="kg" />
+          <Stat label="Now" value={latest === null ? '—' : `${latest}`} unit="kg" />
           <Stat
-            label="Dah turun"
-            en="Lost"
+            label="Lost"
             value={lost === null ? '—' : `${lost > 0 ? lost : 0}`}
             unit="kg"
             tone="avocado"
           />
           <Stat
-            label="Lagi"
-            en="To goal"
+            label="To goal"
             value={toGoal === null ? '—' : `${toGoal > 0 ? toGoal : 0}`}
             unit="kg"
-            tone="salmon"
+            tone="primary"
           />
         </div>
+
+        {/* Starting weight drives "Lost" and the weight badges, so it needs to
+            be reachable from the screen that shows those numbers. */}
+        <Link
+          href="/more/settings"
+          className="tap mt-3 flex items-center justify-between rounded-xl bg-raised px-3 py-2 text-xs"
+        >
+          <span className="text-muted">
+            Starting weight{' '}
+            <strong className="text-ink">{data.profile.startWeightKg} kg</strong> · Goal{' '}
+            <strong className="text-ink">{data.profile.goalWeightKg} kg</strong>
+          </span>
+          <span className="font-semibold text-primary">Edit ›</span>
+        </Link>
 
         <div className="mt-4 flex gap-2">
           <input
@@ -68,34 +81,28 @@ export default function ProgressPage() {
             step="0.1"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={`Berat hari ini (kg)`}
-            aria-label="Berat hari ini dalam kg"
-            className="min-w-0 flex-1 rounded-pill border border-line bg-surface px-4 py-2.5 text-base outline-none placeholder:text-faint focus:border-salmon"
+            placeholder="Today\u2019s weight (kg)"
+            aria-label="Today's weight in kg"
+            className="min-w-0 flex-1 rounded-pill border border-line bg-surface px-4 py-2.5 text-base outline-none placeholder:text-faint focus:border-primary"
           />
           <button
             type="button"
             onClick={addWeight}
-            className="tap shrink-0 rounded-pill bg-salmon px-5 text-sm font-bold text-white"
+            className="tap shrink-0 rounded-pill bg-primary px-5 text-sm font-bold text-white"
           >
-            Simpan
+            Save
           </button>
         </div>
         <p className="mt-2 text-[11px] leading-snug text-faint">
-          Timbang seminggu sekali — pagi, selepas tandas, sebelum sarapan. Berat naik-turun
-          1–3% setiap hari; ikut garis purata, bukan satu bacaan.
+          Weigh in once a week — morning, after the toilet, before breakfast. Weight swings
+          1–3% day to day, so follow the average line, not a single reading.
         </p>
       </Card>
 
       <Card className="mb-4">
-        <h2 className="mb-1 text-sm font-bold">
-          Graf berat <span className="font-normal text-faint">Weight trend</span>
-        </h2>
+        <h2 className="mb-1 text-sm font-bold">Weight trend</h2>
         {sorted.length < 2 ? (
-          <EmptyState
-            emoji="⚖️"
-            ms="Perlu sekurang-kurangnya 2 bacaan"
-            en="Log twice to see a trend"
-          />
+          <EmptyState emoji="⚖️" title="Need at least 2 readings" hint="Log twice to see a trend" />
         ) : (
           <WeightChart
             points={sorted.map((w, i) => ({
@@ -109,9 +116,7 @@ export default function ProgressPage() {
       </Card>
 
       <Card>
-        <h2 className="mb-2 text-sm font-bold">
-          Minggu ini <span className="font-normal text-faint">This week</span>
-        </h2>
+        <h2 className="mb-2 text-sm font-bold">This week</h2>
         <ul className="divide-y divide-line">
           {dayRecords(data, weekOf(today)).map((d) => (
             <li key={d.date} className="flex items-center justify-between gap-2 py-2">
@@ -137,18 +142,16 @@ export default function ProgressPage() {
 
 function Stat({
   label,
-  en,
   value,
   unit,
   tone = 'ink',
 }: {
   label: string
-  en: string
   value: string
   unit: string
-  tone?: 'ink' | 'salmon' | 'avocado'
+  tone?: 'ink' | 'primary' | 'avocado'
 }) {
-  const colour = tone === 'salmon' ? 'text-salmon' : tone === 'avocado' ? 'text-avocado' : ''
+  const colour = tone === 'primary' ? 'text-primary' : tone === 'avocado' ? 'text-avocado' : ''
   return (
     <div>
       <p className={`text-2xl font-extrabold tabular-nums ${colour}`}>
@@ -156,7 +159,6 @@ function Stat({
         <span className="ml-0.5 text-xs font-semibold text-faint">{unit}</span>
       </p>
       <p className="text-xs font-semibold">{label}</p>
-      <p className="text-[10px] text-faint">{en}</p>
     </div>
   )
 }
@@ -195,7 +197,7 @@ function WeightChart({
 
   return (
     <div className="overflow-x-auto">
-      <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img" aria-label="Graf berat mingguan">
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img" aria-label="Weekly weight chart">
         <line
           x1={pad.left}
           x2={w - pad.right}
@@ -212,13 +214,13 @@ function WeightChart({
         <path
           d={line((p) => p.avg)}
           fill="none"
-          stroke="rgb(var(--salmon))"
+          stroke="rgb(var(--primary))"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         {points.map((p, i) => (
-          <circle key={p.date} cx={x(i)} cy={y(p.weight)} r="2.5" fill="rgb(var(--salmon))" />
+          <circle key={p.date} cx={x(i)} cy={y(p.weight)} r="2.5" fill="rgb(var(--primary))" />
         ))}
         <text x={2} y={y(max - 0.5)} fontSize="8" fill="rgb(var(--faint))">
           {round1(max)}
@@ -228,7 +230,7 @@ function WeightChart({
         </text>
       </svg>
       <p className="mt-1 text-[10px] text-faint">
-        <span className="text-salmon">━</span> purata 7 hari · <span>━</span> bacaan harian
+        <span className="text-primary">━</span> 7-day average · <span>━</span> daily reading
       </p>
     </div>
   )

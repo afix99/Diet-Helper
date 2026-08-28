@@ -4,8 +4,8 @@ import Link from 'next/link'
 
 export function BackLink() {
   return (
-    <Link href="/more" className="tap mb-2 inline-flex items-center gap-1 text-sm text-salmon">
-      <span aria-hidden>‹</span> Lagi
+    <Link href="/more" className="tap mb-2 inline-flex items-center gap-1 text-sm text-primary">
+      <span aria-hidden>‹</span> More
     </Link>
   )
 }

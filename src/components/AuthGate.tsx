@@ -34,7 +34,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   }, [client])
 
   if (!client) return <>{children}</>
-  if (!checked) return <p className="py-20 text-center text-sm text-faint">Memuatkan…</p>
+  if (!checked) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
   if (session) return <>{children}</>
 
   const sendLink = async (e: React.FormEvent) => {
@@ -57,42 +57,42 @@ export function AuthGate({ children }: { children: ReactNode }) {
           🍽️
         </span>
         <h1 className="mt-3 text-2xl font-extrabold">Memey Diet Planner</h1>
-        <p className="mt-1 text-sm text-faint">Masuk untuk sync merentas peranti</p>
+        <p className="mt-1 text-sm text-faint">Sign in to sync across devices</p>
       </div>
 
       {sent ? (
         <div className="card p-5 text-center">
-          <p className="text-sm font-semibold">Pautan dihantar 📬</p>
+          <p className="text-sm font-semibold">Link sent 📬</p>
           <p className="mt-1 text-xs text-muted">
-            Semak inbox <strong>{email}</strong> dan tekan pautan untuk masuk.
+            Check <strong>{email}</strong> and tap the link to sign in.
           </p>
         </div>
       ) : (
         <form onSubmit={sendLink} className="card grid gap-3 p-5">
           <label className="block">
-            <span className="mb-1 block text-xs font-semibold">Emel</span>
+            <span className="mb-1 block text-xs font-semibold">Email</span>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="nama@contoh.com"
-              className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-base outline-none focus:border-salmon"
+              placeholder="you@example.com"
+              className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-base outline-none focus:border-primary"
             />
           </label>
           <button
             type="submit"
             disabled={busy}
-            className="tap rounded-pill bg-salmon py-3 text-sm font-bold text-white disabled:opacity-50"
+            className="tap rounded-pill bg-primary py-3 text-sm font-bold text-white disabled:opacity-50"
           >
-            {busy ? 'Menghantar…' : 'Hantar pautan masuk'}
+            {busy ? 'Sending…' : 'Send sign-in link'}
           </button>
           <button
             type="button"
             onClick={() => client.auth.signInWithOAuth({ provider: 'google' })}
             className="tap rounded-pill border border-line py-3 text-sm font-semibold"
           >
-            Teruskan dengan Google
+            Continue with Google
           </button>
           {error && <p className="text-xs text-clay">{error}</p>}
         </form>

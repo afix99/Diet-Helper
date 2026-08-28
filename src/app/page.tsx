@@ -31,23 +31,23 @@ export default function TodayPage() {
   const unlocked = useMemo(() => badgesFor(data, date).filter((b) => b.unlocked), [data, date])
 
   if (!ready) {
-    return <p className="py-20 text-center text-sm text-faint">Memuatkan…</p>
+    return <p className="py-20 text-center text-sm text-faint">Loading…</p>
   }
 
   return (
     <>
       <PageHeader
-        ms="Hari Ini"
-        en={new Date(`${date}T00:00:00`).toLocaleDateString('en-GB', {
+        title="Today"
+        subtitle={new Date(`${date}T00:00:00`).toLocaleDateString('en-GB', {
           weekday: 'long',
           day: 'numeric',
           month: 'long',
         })}
         action={
           run.current > 0 ? (
-            <span className="pill bg-salmon/15 text-salmon" title="Streak">
+            <span className="pill bg-primary/15 text-primary" title="Streak">
               <span aria-hidden>🔥</span>
-              {run.current} hari
+              {run.current}-day streak
             </span>
           ) : null
         }
@@ -55,28 +55,33 @@ export default function TodayPage() {
 
       <Card className="mb-4">
         <BudgetRing consumed={totals.kcal} target={data.targets.kcal} band={band} />
-        <div className="mt-3 flex justify-center">
+        <div className="mt-3 flex items-center justify-center gap-2">
           <StatusPill band={band} />
+          {/* No background: the 44px tap minimum would otherwise make this
+              pill visibly taller than the status pill beside it. */}
+          <Link
+            href="/more/settings"
+            className="tap inline-flex items-center px-2 text-xs font-semibold text-primary underline decoration-primary/30 underline-offset-4"
+          >
+            Edit target
+          </Link>
         </div>
         <div className="mt-5 grid gap-3">
           <MacroBar
             label="Protein"
-            en="protein"
             value={totals.protein}
             target={data.targets.protein}
-            tone="salmon"
+            tone="primary"
           />
           <MacroBar
-            label="Karbo"
-            en="carbs"
+            label="Carbs"
             value={totals.carbs}
             target={data.targets.carbs}
             tone="amber"
           />
-          <MacroBar label="Lemak" en="fat" value={totals.fat} target={data.targets.fat} tone="ocean" />
+          <MacroBar label="Fat" value={totals.fat} target={data.targets.fat} tone="ocean" />
           <MacroBar
-            label="Serat"
-            en="fibre"
+            label="Fibre"
             value={totals.fibre}
             target={data.targets.fibre}
             tone="avocado"
@@ -93,7 +98,7 @@ export default function TodayPage() {
               ))}
             </div>
             <p className="flex-1 text-sm font-semibold">
-              {unlocked.length} lencana
+              {unlocked.length} {unlocked.length === 1 ? 'badge' : 'badges'}
               <span className="ml-1 font-normal text-faint">unlocked</span>
             </p>
             <span aria-hidden className="text-faint">
@@ -113,9 +118,7 @@ export default function TodayPage() {
           return (
             <Card key={slot}>
               <div className="mb-2 flex items-baseline justify-between">
-                <h2 className="text-sm font-bold">
-                  {label.ms} <span className="font-normal text-faint">{label.en}</span>
-                </h2>
+                <h2 className="text-sm font-bold">{label.label}</h2>
                 <span className="text-xs tabular-nums text-faint">
                   {slotKcal > 0 ? `${Math.round(slotKcal)} kcal` : label.time}
                 </span>
@@ -136,7 +139,7 @@ export default function TodayPage() {
                         <span className="flex items-center gap-1">
                           <button
                             type="button"
-                            aria-label="Kurangkan"
+                            aria-label="Decrease servings"
                             onClick={() => setServings(e.id, e.servings - 0.5)}
                             className="tap grid h-8 w-8 place-items-center rounded-pill bg-raised text-sm font-bold"
                           >
@@ -147,7 +150,7 @@ export default function TodayPage() {
                           </span>
                           <button
                             type="button"
-                            aria-label="Tambah"
+                            aria-label="Increase servings"
                             onClick={() => setServings(e.id, e.servings + 0.5)}
                             className="tap grid h-8 w-8 place-items-center rounded-pill bg-raised text-sm font-bold"
                           >
@@ -155,7 +158,7 @@ export default function TodayPage() {
                           </button>
                           <button
                             type="button"
-                            aria-label={`Buang ${entryName(e)}`}
+                            aria-label={`Remove ${entryName(e)}`}
                             onClick={() => removeEntry(e.id)}
                             className="tap grid h-8 w-8 place-items-center rounded-pill text-faint"
                           >
@@ -171,9 +174,9 @@ export default function TodayPage() {
               <button
                 type="button"
                 onClick={() => setPicking(slot)}
-                className="tap w-full rounded-pill border border-dashed border-line py-2.5 text-sm font-semibold text-salmon"
+                className="tap w-full rounded-pill border border-dashed border-line py-2.5 text-sm font-semibold text-primary"
               >
-                + Tambah makanan
+                + Add food
               </button>
             </Card>
           )

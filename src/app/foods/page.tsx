@@ -30,24 +30,24 @@ export default function FoodsPage() {
     })
   }, [foods, query, category])
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Memuatkan…</p>
+  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
 
   return (
     <>
-      <PageHeader ms="Makanan" en={`${foods.length} item · tap for details`} />
+      <PageHeader title="Foods" subtitle={`${foods.length} items · tap for details`} />
 
       <input
         type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Cari makanan, kategori, nota…"
-        aria-label="Cari makanan"
-        className="mb-3 w-full rounded-pill border border-line bg-surface px-4 py-3 text-base outline-none placeholder:text-faint focus:border-salmon"
+        placeholder="Search foods, categories, notes…"
+        aria-label="Search foods"
+        className="mb-3 w-full rounded-pill border border-line bg-surface px-4 py-3 text-base outline-none placeholder:text-faint focus:border-primary"
       />
 
       <div className="-mx-4 mb-4 flex gap-1.5 overflow-x-auto px-4 pb-1">
         <Chip active={category === null} onClick={() => setCategory(null)}>
-          Semua
+          All
         </Chip>
         {FOOD_CATEGORIES.map((c) => (
           <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
@@ -57,7 +57,7 @@ export default function FoodsPage() {
       </div>
 
       {shown.length === 0 ? (
-        <EmptyState emoji="🔍" ms="Tiada padanan" en="No matches — try another word" />
+        <EmptyState emoji="🔍" title="No matches" hint="Try another word" />
       ) : (
         <div className="grid gap-2">
           {shown.map((f) => (
@@ -91,7 +91,7 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={`tap shrink-0 rounded-pill px-3 py-1.5 text-xs font-semibold ${
-        active ? 'bg-salmon text-white' : 'bg-raised text-muted'
+        active ? 'bg-primary text-white' : 'bg-raised text-muted'
       }`}
     >
       {children}
@@ -119,17 +119,17 @@ function FoodCard({
           <span className="block text-sm font-semibold">{food.name}</span>
           <span className="block text-xs text-faint">{food.servingSize}</span>
           <span className="mt-1 flex flex-wrap gap-x-3 text-xs tabular-nums text-muted">
-            <span className="font-bold text-salmon">{food.kcal} kcal</span>
+            <span className="font-bold text-primary">{food.kcal} kcal</span>
             <span>P {food.protein}g</span>
             <span>C {food.carbs}g</span>
             <span>F {food.fat}g</span>
-            {food.fibre > 0 && <span>Serat {food.fibre}g</span>}
+            {food.fibre > 0 && <span>Fibre {food.fibre}g</span>}
           </span>
         </button>
         <button
           type="button"
           onClick={onFavourite}
-          aria-label={favourite ? 'Buang dari kegemaran' : 'Simpan sebagai kegemaran'}
+          aria-label={favourite ? 'Remove from favourites' : 'Save to favourites'}
           aria-pressed={favourite}
           className="tap grid w-12 place-items-center text-lg"
         >

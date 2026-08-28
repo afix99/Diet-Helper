@@ -13,29 +13,31 @@ export default function BadgesPage() {
   const list = useMemo(() => badgesFor(data, today), [data, today])
   const run = useMemo(() => streakFor(data, today), [data, today])
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Memuatkan…</p>
+  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
 
   const unlocked = list.filter((b) => b.unlocked)
 
   return (
     <>
       <BackLink />
-      <PageHeader ms="Lencana" en={`${unlocked.length} / ${list.length} unlocked`} />
+      <PageHeader title="Badges" subtitle={`${unlocked.length} of ${list.length} unlocked`} />
 
       <Card className="mb-4 text-center">
-        <p className="text-5xl font-extrabold tabular-nums text-salmon">
+        <p className="text-5xl font-extrabold tabular-nums text-primary">
           {run.current}
-          <span className="ml-1 text-base font-semibold text-muted">hari</span>
+          <span className="ml-1 text-base font-semibold text-muted">
+            {run.current === 1 ? 'day' : 'days'}
+          </span>
         </p>
-        <p className="mt-1 text-sm font-semibold">Streak semasa</p>
-        <p className="text-xs text-faint">Best run: {run.best} hari</p>
+        <p className="mt-1 text-sm font-semibold">Current streak</p>
+        <p className="text-xs text-faint">Best run: {run.best} days</p>
         {run.usingGrace ? (
           <p className="mt-2 text-xs text-amber">
-            Terlepas sehari — streak masih hidup. Log hari ini untuk sambung.
+            Missed a day — your streak is still alive. Log today to keep it going.
           </p>
         ) : (
           <p className="mt-2 text-xs text-faint">
-            Boleh terlepas {run.graceRemaining} hari minggu ini tanpa putus streak.
+            You can miss {run.graceRemaining} day this week without breaking the streak.
           </p>
         )}
       </Card>
@@ -44,7 +46,7 @@ export default function BadgesPage() {
         {list.map((b) => (
           <Card
             key={b.id}
-            className={`text-center ${b.unlocked ? 'border-salmon/40 bg-salmon/5' : ''}`}
+            className={`text-center ${b.unlocked ? 'border-primary/40 bg-primary/5' : ''}`}
           >
             <span
               aria-hidden
@@ -52,14 +54,14 @@ export default function BadgesPage() {
             >
               {b.emoji}
             </span>
-            <p className="mt-1 text-xs font-bold leading-tight">{b.name.ms}</p>
-            <p className="text-[10px] leading-tight text-faint">{b.requirement.ms}</p>
+            <p className="mt-1 text-xs font-bold leading-tight">{b.name}</p>
+            <p className="text-[10px] leading-tight text-faint">{b.requirement}</p>
             {!b.unlocked && b.progress > 0 && (
               <div className="mt-2 h-1 overflow-hidden rounded-pill bg-raised">
-                <div className="h-full bg-salmon/50" style={{ width: `${b.progress * 100}%` }} />
+                <div className="h-full bg-primary/50" style={{ width: `${b.progress * 100}%` }} />
               </div>
             )}
-            {b.unlocked && <p className="mt-1 text-[10px] font-bold text-salmon">UNLOCKED</p>}
+            {b.unlocked && <p className="mt-1 text-[10px] font-bold text-primary">UNLOCKED</p>}
           </Card>
         ))}
       </div>

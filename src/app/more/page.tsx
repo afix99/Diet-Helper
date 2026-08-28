@@ -7,16 +7,21 @@ import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
 
 const LINKS = [
-  { href: '/more/recipes', emoji: '👩‍🍳', ms: 'Resipi', en: 'Recipes · 7 salmon dishes' },
-  { href: '/more/shop', emoji: '🛒', ms: 'Beli & Prep', en: 'Shopping list & Sunday prep' },
+  { href: '/more/recipes', emoji: '👩‍🍳', label: 'Recipes', hint: '7 salmon dishes' },
+  { href: '/more/shop', emoji: '🛒', label: 'Shop & Prep', hint: 'Shopping list & Sunday prep' },
   {
     href: '/more/supplements',
     emoji: '💊',
-    ms: 'Suplemen & Air',
-    en: 'Supplements, hydration & micronutrients',
+    label: 'Supplements & Water',
+    hint: 'Hydration & micronutrients',
   },
-  { href: '/more/badges', emoji: '🏅', ms: 'Lencana', en: 'Badges & streak' },
-  { href: '/more/settings', emoji: '⚙️', ms: 'Tetapan', en: 'Profile, targets & disclaimer' },
+  { href: '/more/badges', emoji: '🏅', label: 'Badges', hint: 'Streak & achievements' },
+  {
+    href: '/more/settings',
+    emoji: '⚙️',
+    label: 'Settings',
+    hint: 'Calorie target, weight, reset',
+  },
 ]
 
 export default function MorePage() {
@@ -25,7 +30,7 @@ export default function MorePage() {
 
   return (
     <>
-      <PageHeader ms="Lagi" en="More" />
+      <PageHeader title="More" />
       <div className="grid gap-2">
         {LINKS.map((l) => (
           <Link key={l.href} href={l.href}>
@@ -34,11 +39,11 @@ export default function MorePage() {
                 {l.emoji}
               </span>
               <span className="flex-1">
-                <span className="block text-sm font-bold">{l.ms}</span>
-                <span className="block text-xs text-faint">{l.en}</span>
+                <span className="block text-sm font-bold">{l.label}</span>
+                <span className="block text-xs text-faint">{l.hint}</span>
               </span>
               {l.href === '/more/badges' && unlocked > 0 && (
-                <span className="pill bg-salmon/15 text-salmon">{unlocked}</span>
+                <span className="pill bg-primary/15 text-primary">{unlocked}</span>
               )}
               <span aria-hidden className="text-faint">
                 ›

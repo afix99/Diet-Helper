@@ -45,27 +45,27 @@ export default function SupplementsPage() {
       }
     })
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Memuatkan…</p>
+  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
 
   return (
     <>
       <BackLink />
-      <PageHeader ms="Suplemen & Air" en="Supplements, hydration & micronutrients" />
+      <PageHeader title="Supplements & Water" subtitle="Hydration & micronutrients" />
 
       <Card className="mb-4 border-amber/40 bg-amber/5">
         <p className="text-xs leading-relaxed text-muted">
-          <span className="font-bold">Makanan dahulu.</span> Suplemen menutup jurang, bukan
-          ganti makanan sebenar. Rujuk dietitian berdaftar sebelum mula apa-apa suplemen baru.
+          <span className="font-bold">Food first.</span> Supplements close gaps; they don&apos;t
+          replace real food. Talk to a registered dietitian before starting anything new.
         </p>
       </Card>
 
       <div className="mb-4 grid grid-cols-4 gap-1.5">
         {(
           [
-            ['supplements', 'Suplemen'],
-            ['hydration', 'Jadual Air'],
-            ['micro', 'Mikro'],
-            ['caffeine', 'Kafein'],
+            ['supplements', 'Supplements'],
+            ['hydration', 'Water plan'],
+            ['micro', 'Micro'],
+            ['caffeine', 'Caffeine'],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -74,7 +74,7 @@ export default function SupplementsPage() {
             onClick={() => setTab(key)}
             aria-pressed={tab === key}
             className={`tap rounded-pill px-2 py-2 text-[11px] font-semibold ${
-              tab === key ? 'bg-salmon text-white' : 'bg-raised text-muted'
+              tab === key ? 'bg-primary text-white' : 'bg-raised text-muted'
             }`}
           >
             {label}
@@ -85,7 +85,7 @@ export default function SupplementsPage() {
       {tab === 'supplements' && (
         <div className="grid gap-3">
           <p className="text-xs text-faint">
-            {takenToday.length} / {SUPPLEMENTS.supplements.length} diambil hari ini
+            {takenToday.length} of {SUPPLEMENTS.supplements.length} taken today
           </p>
           {SUPPLEMENTS.supplements.map((s) => {
             const taken = takenToday.includes(s.name)
@@ -107,12 +107,12 @@ export default function SupplementsPage() {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-bold">{s.name}</span>
-                    <span className="block text-xs font-semibold text-salmon">{s.dose}</span>
+                    <span className="block text-xs font-semibold text-primary">{s.dose}</span>
                     <span className="mt-1 block text-xs text-muted">{s.purpose}</span>
                     <span className="mt-1 block text-xs text-faint">🕐 {s.timing}</span>
                     {s.foodAlternative && (
                       <span className="mt-1 block text-xs text-faint">
-                        🥗 Dari makanan: {s.foodAlternative}
+                        🥗 From food: {s.foodAlternative}
                       </span>
                     )}
                   </span>
@@ -127,8 +127,8 @@ export default function SupplementsPage() {
         <div className="grid gap-2">
           <Card>
             <p className="text-xs leading-relaxed text-muted">
-              Jadual cadangan sepanjang hari. Log jumlah sebenar di skrin{' '}
-              <span className="font-semibold">Hari Ini</span>.
+              A suggested schedule through the day. Log what you actually drink on the{' '}
+              <span className="font-semibold">Today</span> screen.
             </p>
           </Card>
           {SUPPLEMENTS.hydration.map((h) => (
@@ -148,7 +148,7 @@ export default function SupplementsPage() {
         <Card>
           <div className="mb-2 flex items-baseline justify-between">
             <h2 className="text-sm font-bold">
-              Senarai semak harian <span className="font-normal text-faint">Daily checklist</span>
+              Daily checklist
             </h2>
             <span className="text-xs tabular-nums text-faint">
               {tickedToday.length}/{SUPPLEMENTS.micronutrients.length}
@@ -182,7 +182,7 @@ export default function SupplementsPage() {
                         >
                           {m.nutrient}
                         </span>
-                        <span className="shrink-0 text-xs tabular-nums text-salmon">
+                        <span className="shrink-0 text-xs tabular-nums text-primary">
                           {m.target}
                         </span>
                       </span>
@@ -207,7 +207,7 @@ export default function SupplementsPage() {
                     <span className="block text-xs text-faint">{c.serving}</span>
                   </span>
                   <span className="shrink-0 text-right">
-                    <span className="block text-sm font-bold tabular-nums text-salmon">
+                    <span className="block text-sm font-bold tabular-nums text-primary">
                       {c.caffeineMg}
                       <span className="text-[10px] font-medium text-faint"> mg</span>
                     </span>

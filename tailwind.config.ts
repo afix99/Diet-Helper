@@ -16,7 +16,7 @@ const config: Config = {
         ink: 'rgb(var(--ink) / <alpha-value>)',
         muted: 'rgb(var(--muted) / <alpha-value>)',
         faint: 'rgb(var(--faint) / <alpha-value>)',
-        salmon: 'rgb(var(--salmon) / <alpha-value>)',
+        primary: 'rgb(var(--primary) / <alpha-value>)',
         avocado: 'rgb(var(--avocado) / <alpha-value>)',
         amber: 'rgb(var(--amber) / <alpha-value>)',
         clay: 'rgb(var(--clay) / <alpha-value>)',

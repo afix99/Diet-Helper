@@ -88,12 +88,12 @@ export function statusBand(kcal: number, targetKcal: number): StatusBand {
   return 'over'
 }
 
-export const STATUS_LABELS: Record<StatusBand, { ms: string; en: string; mark: string }> = {
-  empty: { ms: 'Belum log', en: 'Not logged', mark: '—' },
-  under: { ms: 'Kurang sangat', en: 'Well under', mark: '▼' },
-  on_target: { ms: 'Ikut target', en: 'On target', mark: '✓' },
-  close: { ms: 'Dekat', en: 'Close', mark: '~' },
-  over: { ms: 'Lebih', en: 'Over', mark: '▲' },
+export const STATUS_LABELS: Record<StatusBand, { label: string; mark: string }> = {
+  empty: { label: 'Not logged', mark: '—' },
+  under: { label: 'Well under', mark: '▼' },
+  on_target: { label: 'On target', mark: '✓' },
+  close: { label: 'Close', mark: '~' },
+  over: { label: 'Over', mark: '▲' },
 }
 
 /**
@@ -178,8 +178,8 @@ export interface BadgeContext {
 
 export interface Badge {
   id: string
-  name: { ms: string; en: string }
-  requirement: { ms: string; en: string }
+  name: string
+  requirement: string
   emoji: string
   unlocked: boolean
   /** 0–1, for the progress ring on locked badges. */
@@ -201,72 +201,72 @@ export function badges(ctx: BadgeContext): Badge[] {
   return [
     {
       id: 'first_step',
-      name: { ms: 'Langkah Pertama', en: 'First Step' },
-      requirement: { ms: 'Log mana-mana satu hari', en: 'Log any single day' },
+      name: 'First Step',
+      requirement: 'Log any single day',
       emoji: '👣',
       unlocked: logged >= 1,
       progress: ratio(logged, 1),
     },
     {
       id: 'three_in_a_row',
-      name: { ms: 'Tiga Hari Lurus', en: 'Three in a Row' },
-      requirement: { ms: 'Streak 3 hari berturut-turut', en: '3-day streak' },
+      name: 'Three in a Row',
+      requirement: 'Hit a 3-day streak',
       emoji: '🔥',
       unlocked: bestStreak >= 3,
       progress: ratio(bestStreak, 3),
     },
     {
       id: 'full_week',
-      name: { ms: 'Seminggu Penuh', en: 'Full Week' },
-      requirement: { ms: 'Log semua 7 hari', en: 'Log all 7 days' },
+      name: 'Full Week',
+      requirement: 'Log all 7 days',
       emoji: '📅',
       unlocked: logged >= 7,
       progress: ratio(logged, 7),
     },
     {
       id: 'omega_squad',
-      name: { ms: 'Omega Squad', en: 'Omega Squad' },
-      requirement: { ms: '3 hidangan salmon seminggu', en: '3 salmon meals in a week' },
+      name: 'Omega Squad',
+      requirement: '3 salmon meals in a week',
       emoji: '🐟',
       unlocked: salmon >= 3,
       progress: ratio(salmon, 3),
     },
     {
       id: 'protein_power',
-      name: { ms: 'Protein Power', en: 'Protein Power' },
-      requirement: { ms: '4 hari capai target protein', en: '4 days hitting protein' },
+      name: 'Protein Power',
+      requirement: '4 days hitting your protein target',
       emoji: '💪',
       unlocked: proteinDays >= 4,
       progress: ratio(proteinDays, 4),
     },
     {
       id: 'disiplin',
-      name: { ms: 'Disiplin', en: 'Discipline' },
-      requirement: { ms: '5 hari ikut target kalori', en: '5 days on calorie target' },
+      name: 'Discipline',
+      requirement: '5 days on your calorie target',
       emoji: '🎯',
       unlocked: onTarget >= 5,
       progress: ratio(onTarget, 5),
     },
     {
       id: 'down_1kg',
-      name: { ms: 'Turun 1 kg', en: 'Down 1 kg' },
-      requirement: { ms: 'Berat turun 1 kg dari mula', en: '1 kg down from start' },
+      name: 'Down 1 kg',
+      requirement: '1 kg below your starting weight',
       emoji: '⚖️',
       unlocked: lost >= 1,
       progress: ratio(lost, 1),
     },
     {
       id: 'down_3kg',
-      name: { ms: 'Turun 3 kg', en: 'Down 3 kg' },
-      requirement: { ms: 'Berat turun 3 kg dari mula', en: '3 kg down from start' },
+      name: 'Down 3 kg',
+      requirement: '3 kg below your starting weight',
       emoji: '🏅',
       unlocked: lost >= 3,
       progress: ratio(lost, 3),
     },
     {
       id: 'goal_reached',
-      name: { ms: 'Sampai Goal', en: 'Goal Reached' },
-      requirement: { ms: 'Capai berat sasaran', en: 'Hit your target weight' },
+      name: 'Goal Reached',
+      requirement: 'Reach your target weight',
       emoji: '🏆',
       unlocked: latestWeightKg !== null && latestWeightKg <= goalWeightKg,
       progress:

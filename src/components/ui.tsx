@@ -4,19 +4,19 @@ import type { ReactNode } from 'react'
 import { STATUS_LABELS, type StatusBand } from '@/lib/nutrition'
 
 export function PageHeader({
-  ms,
-  en,
+  title,
+  subtitle,
   action,
 }: {
-  ms: string
-  en: string
+  title: string
+  subtitle?: string
   action?: ReactNode
 }) {
   return (
     <header className="mb-5 flex items-start justify-between gap-3">
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">{ms}</h1>
-        <p className="text-sm text-faint">{en}</p>
+        <h1 className="text-2xl font-extrabold tracking-tight">{title}</h1>
+        {subtitle && <p className="text-sm text-faint">{subtitle}</p>}
       </div>
       {action}
     </header>
@@ -46,8 +46,7 @@ export function StatusPill({ band }: { band: StatusBand }) {
   return (
     <span className={`pill ${BAND_STYLES[band]}`}>
       <span aria-hidden>{label.mark}</span>
-      {label.ms}
-      <span className="sr-only"> — {label.en}</span>
+      {label.label}
     </span>
   )
 }
@@ -72,11 +71,11 @@ export function BudgetRing({
   const r = (size - stroke) / 2
   const circumference = 2 * Math.PI * r
   const colour =
-    band === 'over' ? 'rgb(var(--clay))' : band === 'close' ? 'rgb(var(--amber))' : 'rgb(var(--salmon))'
+    band === 'over' ? 'rgb(var(--clay))' : band === 'close' ? 'rgb(var(--amber))' : 'rgb(var(--primary))'
 
   return (
     <div className="relative mx-auto" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90" role="img" aria-label={`${remaining} kcal berbaki`}>
+      <svg width={size} height={size} className="-rotate-90" role="img" aria-label={`${remaining} kcal remaining`}>
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -103,7 +102,7 @@ export function BudgetRing({
           {Math.abs(remaining)}
         </span>
         <span className="mt-1 text-xs font-semibold text-muted">
-          {remaining >= 0 ? 'kcal lagi' : 'kcal lebih'}
+          {remaining >= 0 ? 'kcal left' : 'kcal over'}
         </span>
         <span className="mt-0.5 text-[11px] text-faint tabular-nums">
           {Math.round(consumed)} / {target}
@@ -115,22 +114,20 @@ export function BudgetRing({
 
 export function MacroBar({
   label,
-  en,
   value,
   target,
   unit = 'g',
   tone,
 }: {
   label: string
-  en: string
   value: number
   target: number
   unit?: string
-  tone: 'salmon' | 'avocado' | 'amber' | 'ocean'
+  tone: 'primary' | 'avocado' | 'amber' | 'ocean'
 }) {
   const pct = target > 0 ? Math.min(1, value / target) : 0
   const fills = {
-    salmon: 'bg-salmon',
+    primary: 'bg-primary',
     avocado: 'bg-avocado',
     amber: 'bg-amber',
     ocean: 'bg-ocean',
@@ -138,9 +135,7 @@ export function MacroBar({
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between text-xs">
-        <span className="font-semibold">
-          {label} <span className="font-normal text-faint">{en}</span>
-        </span>
+        <span className="font-semibold">{label}</span>
         <span className="tabular-nums text-muted">
           {Math.round(value)}
           <span className="text-faint">
@@ -159,14 +154,22 @@ export function MacroBar({
   )
 }
 
-export function EmptyState({ emoji, ms, en }: { emoji: string; ms: string; en: string }) {
+export function EmptyState({
+  emoji,
+  title,
+  hint,
+}: {
+  emoji: string
+  title: string
+  hint?: string
+}) {
   return (
     <div className="py-10 text-center">
       <div aria-hidden className="text-4xl">
         {emoji}
       </div>
-      <p className="mt-2 font-semibold">{ms}</p>
-      <p className="text-sm text-faint">{en}</p>
+      <p className="mt-2 font-semibold">{title}</p>
+      {hint && <p className="text-sm text-faint">{hint}</p>}
     </div>
   )
 }

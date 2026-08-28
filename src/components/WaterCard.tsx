@@ -27,9 +27,7 @@ export function WaterCard({ date }: { date: string }) {
   return (
     <Card className="mb-4">
       <div className="mb-2 flex items-baseline justify-between">
-        <h2 className="text-sm font-bold">
-          Air <span className="font-normal text-faint">Water</span>
-        </h2>
+        <h2 className="text-sm font-bold">Water</h2>
         <span className="text-xs tabular-nums text-muted">
           {drunk} <span className="text-faint">/ {target} ml</span>
         </span>
@@ -38,7 +36,7 @@ export function WaterCard({ date }: { date: string }) {
       <div
         className="mb-3 flex flex-wrap gap-1"
         role="img"
-        aria-label={`${glasses} daripada ${targetGlasses} gelas`}
+        aria-label={`${glasses} of ${targetGlasses} glasses`}
       >
         {Array.from({ length: targetGlasses }, (_, i) => (
           <span
@@ -64,7 +62,7 @@ export function WaterCard({ date }: { date: string }) {
           onClick={() => add(GLASS_ML)}
           className="tap flex-1 rounded-pill bg-ocean py-2 text-xs font-bold text-white"
         >
-          + segelas (250ml)
+          + a glass (250ml)
         </button>
         <button
           type="button"
@@ -76,7 +74,7 @@ export function WaterCard({ date }: { date: string }) {
         <button
           type="button"
           onClick={() => add(-GLASS_ML)}
-          aria-label="Tolak segelas"
+          aria-label="Remove a glass"
           disabled={drunk === 0}
           className="tap rounded-pill bg-raised px-4 py-2 text-xs font-semibold text-muted disabled:opacity-40"
         >

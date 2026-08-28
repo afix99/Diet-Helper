@@ -40,7 +40,7 @@ export default function ShopPage() {
       }
     }
     if (planned.size === 0) {
-      setNote('Belum ada resipi dalam rancangan minggu ini.')
+      setNote('No recipes planned this week yet.')
       setTimeout(() => setNote(null), 2600)
       return
     }
@@ -56,7 +56,7 @@ export default function ShopPage() {
         .filter(([key]) => !existing.has(key))
         .map(([, item], i) => ({
           id: `plan-${Date.now()}-${i}`,
-          category: 'DARI RANCANGAN',
+          category: 'FROM YOUR PLAN',
           item,
           qty: null,
           estCostRm: null,
@@ -65,11 +65,11 @@ export default function ShopPage() {
           checked: false,
         }))
       if (added.length === 0) {
-        setNote('Semua bahan dah ada dalam senarai.')
+        setNote('Every ingredient is already on the list.')
         setTimeout(() => setNote(null), 2600)
         return d
       }
-      setNote(`${added.length} bahan ditambah dari rancangan.`)
+      setNote(`Added ${added.length} ingredients from your plan.`)
       setTimeout(() => setNote(null), 2600)
       return { ...d, shopping: [...d.shopping, ...added] }
     })
@@ -102,19 +102,19 @@ export default function ShopPage() {
     return { low: Math.round(low), high: Math.round(high) }
   }, [data.shopping])
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Memuatkan…</p>
+  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
 
   return (
     <>
       <BackLink />
-      <PageHeader ms="Beli & Prep" en="Shopping, batch prep & vendors" />
+      <PageHeader title="Shop & Prep" subtitle="Shopping, batch prep & vendors" />
 
       <div className="mb-4 flex gap-1.5">
         {(
           [
-            ['list', 'Senarai'],
-            ['prep', 'Prep Ahad'],
-            ['vendors', 'Kedai'],
+            ['list', 'List'],
+            ['prep', 'Sunday Prep'],
+            ['vendors', 'Vendors'],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -123,7 +123,7 @@ export default function ShopPage() {
             onClick={() => setTab(key)}
             aria-pressed={tab === key}
             className={`tap flex-1 rounded-pill px-3 py-2 text-xs font-semibold ${
-              tab === key ? 'bg-salmon text-white' : 'bg-raised text-muted'
+              tab === key ? 'bg-primary text-white' : 'bg-raised text-muted'
             }`}
           >
             {label}
@@ -136,9 +136,9 @@ export default function ShopPage() {
           <Card className="mb-3">
             <div className="flex items-baseline justify-between">
               <p className="text-sm font-bold">
-                {done} / {data.shopping.length} dibeli
+                {done} of {data.shopping.length} bought
               </p>
-              <p className="text-sm font-bold tabular-nums text-salmon">
+              <p className="text-sm font-bold tabular-nums text-primary">
                 RM {budget.low}
                 {budget.high !== budget.low && `–${budget.high}`}
               </p>
@@ -155,23 +155,23 @@ export default function ShopPage() {
               <button
                 type="button"
                 onClick={addFromPlan}
-                className="tap rounded-pill bg-salmon px-3 py-1.5 text-xs font-bold text-white"
+                className="tap rounded-pill bg-primary px-3 py-1.5 text-xs font-bold text-white"
               >
-                + Dari rancangan minggu
+                + From this week’s plan
               </button>
               <button
                 type="button"
                 onClick={reset}
                 className="tap rounded-pill bg-raised px-3 py-1.5 text-xs font-semibold text-muted"
               >
-                Reset tanda
+                Clear ticks
               </button>
               <button
                 type="button"
                 onClick={restoreDefaults}
                 className="tap rounded-pill px-3 py-1.5 text-xs text-faint"
               >
-                Senarai asal
+                Restore original list
               </button>
             </div>
           </Card>
@@ -231,15 +231,15 @@ export default function ShopPage() {
       {tab === 'prep' && (
         <div className="grid gap-3">
           <Card>
-            <h2 className="text-sm font-bold">Protokol Ahad</h2>
+            <h2 className="text-sm font-bold">Sunday protocol</h2>
             <p className="text-xs text-faint">
-              Batch prep pagi Ahad. Kurangkan keputusan harian, naikkan konsistensi.
+              Batch prep on Sunday morning. Fewer daily decisions, better consistency.
             </p>
           </Card>
           {PREP.tasks.map((t) => (
             <Card key={t.timeBlock}>
               <div className="flex items-baseline justify-between gap-2">
-                <p className="text-sm font-bold tabular-nums text-salmon">{t.timeBlock}</p>
+                <p className="text-sm font-bold tabular-nums text-primary">{t.timeBlock}</p>
                 <p className="text-xs text-faint">{t.duration}</p>
               </div>
               <p className="mt-1 text-sm">{t.task}</p>
@@ -249,13 +249,13 @@ export default function ShopPage() {
             </Card>
           ))}
           <Card>
-            <h2 className="mb-2 text-sm font-bold">Simpanan · Storage</h2>
+            <h2 className="mb-2 text-sm font-bold">Storage</h2>
             <ul className="divide-y divide-line">
               {PREP.storage.map((s) => (
                 <li key={s.food} className="py-2">
                   <p className="text-sm font-medium">{s.food}</p>
                   <p className="text-xs text-faint">
-                    Peti sejuk {s.fridge} · Freezer {s.freezer}
+                    Fridge {s.fridge} · Freezer {s.freezer}
                   </p>
                   <p className="mt-0.5 text-xs text-muted">{s.reheat}</p>
                 </li>

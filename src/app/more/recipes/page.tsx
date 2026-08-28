@@ -17,14 +17,14 @@ export default function RecipesPage() {
   const log = (recipeId: string, slot: MealSlot) => {
     logRecipe(todayIso(), slot, recipeId)
     setLogging(null)
-    setToast(`Ditambah ke ${SLOT_LABELS[slot].ms}`)
+    setToast(`Added to ${SLOT_LABELS[slot].label}`)
     setTimeout(() => setToast(null), 2200)
   }
 
   return (
     <>
       <BackLink />
-      <PageHeader ms="Resipi" en="All under 20 min active time" />
+      <PageHeader title="Recipes" subtitle="All under 20 min active time" />
 
       <div className="grid gap-3">
         {RECIPES.map((r) => {
@@ -39,7 +39,7 @@ export default function RecipesPage() {
               >
                 <span className="block text-sm font-bold">{r.name}</span>
                 <span className="mt-1 flex flex-wrap gap-x-3 text-xs tabular-nums text-muted">
-                  <span className="font-bold text-salmon">{r.kcal} kcal</span>
+                  <span className="font-bold text-primary">{r.kcal} kcal</span>
                   <span>{r.minutes} min</span>
                   <span>P {r.protein}g</span>
                   <span>C {r.carbs}g</span>
@@ -50,12 +50,12 @@ export default function RecipesPage() {
               {isOpen && (
                 <div className="mt-3 border-t border-line pt-3 text-sm">
                   <h3 className="mb-1 text-xs font-bold uppercase tracking-wide text-faint">
-                    Bahan · Ingredients
+                    Ingredients
                   </h3>
                   <ul className="mb-3 grid gap-0.5">
                     {r.ingredients.map((ing) => (
                       <li key={ing} className="flex gap-2 text-xs">
-                        <span aria-hidden className="text-salmon">
+                        <span aria-hidden className="text-primary">
                           •
                         </span>
                         <span>{ing}</span>
@@ -64,12 +64,12 @@ export default function RecipesPage() {
                   </ul>
 
                   <h3 className="mb-1 text-xs font-bold uppercase tracking-wide text-faint">
-                    Cara · Steps
+                    Steps
                   </h3>
                   <ol className="mb-3 grid gap-1.5">
                     {r.steps.map((step, i) => (
                       <li key={step} className="flex gap-2 text-xs leading-relaxed">
-                        <span className="grid h-5 w-5 shrink-0 place-items-center rounded-pill bg-salmon/15 text-[10px] font-bold text-salmon">
+                        <span className="grid h-5 w-5 shrink-0 place-items-center rounded-pill bg-primary/15 text-[10px] font-bold text-primary">
                           {i + 1}
                         </span>
                         <span>{step}</span>
@@ -79,7 +79,7 @@ export default function RecipesPage() {
 
                   {r.chefsNote && (
                     <p className="mb-3 rounded-card bg-raised p-2.5 text-xs leading-relaxed text-muted">
-                      <span className="font-bold">Nota chef: </span>
+                      <span className="font-bold">Chef&apos;s note: </span>
                       {r.chefsNote}
                     </p>
                   )}
@@ -93,7 +93,7 @@ export default function RecipesPage() {
                           onClick={() => log(r.id, slot)}
                           className="tap rounded-pill bg-raised px-3 py-1.5 text-xs font-semibold"
                         >
-                          {SLOT_LABELS[slot].ms}
+                          {SLOT_LABELS[slot].label}
                         </button>
                       ))}
                       <button
@@ -101,16 +101,16 @@ export default function RecipesPage() {
                         onClick={() => setLogging(null)}
                         className="tap rounded-pill px-3 py-1.5 text-xs text-faint"
                       >
-                        Batal
+                        Cancel
                       </button>
                     </div>
                   ) : (
                     <button
                       type="button"
                       onClick={() => setLogging(r.id)}
-                      className="tap w-full rounded-pill bg-salmon py-2.5 text-sm font-bold text-white"
+                      className="tap w-full rounded-pill bg-primary py-2.5 text-sm font-bold text-white"
                     >
-                      Masak ni hari ini
+                      Cook this today
                     </button>
                   )}
                 </div>
