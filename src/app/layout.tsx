@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { DataProvider } from '@/lib/store/provider'
 import { TabBar } from '@/components/TabBar'
 import { InstallHint } from '@/components/InstallHint'
+import { ServiceWorker } from '@/components/ServiceWorker'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {children}
             </main>
             <InstallHint />
+            <ServiceWorker />
             <TabBar />
           </div>
         </DataProvider>
