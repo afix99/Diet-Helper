@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   description: 'Pelan diet harian — log makanan, jejak progres, kutip lencana.',
   manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Diet Planner' },
+  icons: {
+    icon: [{ url: '/icon-192.png', sizes: '192x192', type: 'image/png' }],
+    // iOS requests this path directly when adding to the home screen.
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
 }
 
 export const viewport: Viewport = {
