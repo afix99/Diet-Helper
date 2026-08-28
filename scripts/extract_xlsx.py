@@ -189,6 +189,79 @@ def extract_prep(wb):
     return {"tasks": tasks, "storage": storage, "budget": budget}
 
 
+
+# --- Supplement & Hydration ------------------------------------------------
+def extract_supplements(wb):
+    ws = wb["Supplement & Hydration"]
+
+    supplements = []
+    for r in range(6, 15):
+        name = cell(ws, r, 1)
+        if not name:
+            continue
+        supplements.append(
+            {
+                "name": name,
+                "dose": cell(ws, r, 2),
+                "timing": cell(ws, r, 3),
+                "purpose": cell(ws, r, 4),
+                "foodAlternative": cell(ws, r, 5),
+            }
+        )
+
+    hydration = []
+    for r in range(6, 15):
+        time = cell(ws, r, 6)
+        if not time:
+            continue
+        note = cell(ws, r, 10)
+        hydration.append(
+            {
+                "time": time,
+                "beverage": cell(ws, r, 7),
+                # The last row is a range like "500-1000"; keep it as text.
+                "volumeMl": cell(ws, r, 8),
+                "notes": None if note in (None, "\u2014") else note,
+            }
+        )
+
+    micronutrients = []
+    for r in range(18, 30):
+        nutrient = cell(ws, r, 1)
+        if not nutrient:
+            continue
+        micronutrients.append(
+            {
+                "nutrient": nutrient,
+                "target": cell(ws, r, 2),
+                "sources": cell(ws, r, 3),
+            }
+        )
+
+    caffeine = []
+    for r in range(18, 24):
+        beverage = cell(ws, r, 6)
+        if not beverage:
+            continue
+        caffeine.append(
+            {
+                "beverage": beverage,
+                "serving": cell(ws, r, 7),
+                "caffeineMg": cell(ws, r, 8),
+                "max": cell(ws, r, 9),
+            }
+        )
+
+    return {
+        "supplements": supplements,
+        "hydration": hydration,
+        "micronutrients": micronutrients,
+        "caffeine": caffeine,
+        "caffeineCutoff": cell(ws, 25, 6),
+        "intro": cell(ws, 2, 1),
+    }
+
+
 # --- Dashboard defaults + Methodology --------------------------------------
 def extract_defaults(wb):
     ws = wb["Dashboard"]
@@ -233,6 +306,7 @@ def main():
         "prep": prep,
         "defaults": extract_defaults(wb),
         "methodology": extract_methodology(wb),
+        "supplements": extract_supplements(wb),
     }
 
     for name, data in datasets.items():
@@ -247,6 +321,12 @@ def main():
     assert len(datasets["vendors"]) == 7, f"expected 7 vendors, got {len(datasets['vendors'])}"
     assert all(f["kcal"] is not None for f in datasets["foods"]), "a food is missing kcal"
     assert all(r["steps"] for r in datasets["recipes"]), "a recipe is missing steps"
+    supp = datasets["supplements"]
+    assert len(supp["supplements"]) == 9, f"expected 9 supplements, got {len(supp['supplements'])}"
+    assert len(supp["micronutrients"]) == 12, (
+        f"expected 12 micronutrients, got {len(supp['micronutrients'])}"
+    )
+    assert len(supp["hydration"]) == 9, f"expected 9 hydration rows, got {len(supp['hydration'])}"
     print("\nIntegrity checks passed.")
 
 

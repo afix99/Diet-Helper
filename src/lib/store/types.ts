@@ -22,6 +22,12 @@ export interface AppData {
   /** Food ids pinned to the top of every picker. */
   favourites: string[]
   checkedPrep: string[]
+  /** Millilitres drunk, keyed by ISO date. */
+  water: Record<string, number>
+  /** Micronutrients ticked off, keyed by ISO date. */
+  micronutrients: Record<string, string[]>
+  /** Supplements taken, keyed by ISO date. */
+  supplements: Record<string, string[]>
 }
 
 /**

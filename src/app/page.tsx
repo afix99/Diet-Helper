@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { FoodPicker } from '@/components/FoodPicker'
+import { WaterCard } from '@/components/WaterCard'
 import { BudgetRing, Card, MacroBar, PageHeader, StatusPill } from '@/components/ui'
 import { useLogging } from '@/lib/logging'
 import { statusBand } from '@/lib/nutrition'
@@ -101,6 +102,8 @@ export default function TodayPage() {
           </Card>
         </Link>
       )}
+
+      <WaterCard date={date} />
 
       <div className="grid gap-3">
         {MEAL_SLOTS.map((slot) => {

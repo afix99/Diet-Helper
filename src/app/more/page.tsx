@@ -9,6 +9,12 @@ import { todayIso } from '@/lib/store/defaults'
 const LINKS = [
   { href: '/more/recipes', emoji: '👩‍🍳', ms: 'Resipi', en: 'Recipes · 7 salmon dishes' },
   { href: '/more/shop', emoji: '🛒', ms: 'Beli & Prep', en: 'Shopping list & Sunday prep' },
+  {
+    href: '/more/supplements',
+    emoji: '💊',
+    ms: 'Suplemen & Air',
+    en: 'Supplements, hydration & micronutrients',
+  },
   { href: '/more/badges', emoji: '🏅', ms: 'Lencana', en: 'Badges & streak' },
   { href: '/more/settings', emoji: '⚙️', ms: 'Tetapan', en: 'Profile, targets & disclaimer' },
 ]

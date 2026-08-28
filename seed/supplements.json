@@ -1,0 +1,225 @@
+{
+  "supplements": [
+    {
+      "name": "Omega-3 (EPA+DHA)",
+      "dose": "1,000–2,000 mg/day",
+      "timing": "With main meal",
+      "purpose": "Anti-inflammatory, cardiovascular, cognitive support",
+      "foodAlternative": "150g salmon (3–4x/week)"
+    },
+    {
+      "name": "Vitamin D3",
+      "dose": "1,000–2,000 IU/day",
+      "timing": "Morning, with fat",
+      "purpose": "Bone health, immune function, mood regulation",
+      "foodAlternative": "Sun exposure 15 min (10am–3pm)"
+    },
+    {
+      "name": "Magnesium",
+      "dose": "200–400 mg/day (bisglycinate)",
+      "timing": "Evening, before bed",
+      "purpose": "Muscle relaxation, sleep quality, insulin sensitivity",
+      "foodAlternative": "Pumpkin seeds, dark chocolate, leafy greens"
+    },
+    {
+      "name": "Probiotics",
+      "dose": "10–50 billion CFU, multi-strain",
+      "timing": "Morning, empty stomach",
+      "purpose": "Gut microbiome diversity, immune modulation",
+      "foodAlternative": "Greek yogurt, kimchi, tempeh"
+    },
+    {
+      "name": "Collagen Peptides",
+      "dose": "10g/day",
+      "timing": "Morning or post-workout",
+      "purpose": "Skin elasticity, joint support (mixed evidence)",
+      "foodAlternative": "Salmon skin, bone broth, chicken feet"
+    },
+    {
+      "name": "Multivitamin",
+      "dose": "1 tablet (gender-specific)",
+      "timing": "With breakfast",
+      "purpose": "Insurance against micronutrient gaps",
+      "foodAlternative": "Varied whole-food diet"
+    },
+    {
+      "name": "Creatine Monohydrate",
+      "dose": "3–5g/day",
+      "timing": "Any time, consistent",
+      "purpose": "Cognitive support, muscle phosphocreatine stores",
+      "foodAlternative": "Red meat, fish (1kg beef = ~5g creatine)"
+    },
+    {
+      "name": "Iron (if deficient)",
+      "dose": "Per blood test results",
+      "timing": "With vitamin C, away from calcium",
+      "purpose": "Oxygen transport, energy metabolism",
+      "foodAlternative": "Red meat, spinach, lentils + vitamin C"
+    },
+    {
+      "name": "B-Complex",
+      "dose": "1 tablet",
+      "timing": "With breakfast",
+      "purpose": "Energy metabolism, neurological function",
+      "foodAlternative": "Eggs, dairy, whole grains, leafy greens"
+    }
+  ],
+  "hydration": [
+    {
+      "time": "06:00–07:00",
+      "beverage": "Water (upon waking)",
+      "volumeMl": 500,
+      "notes": "Rehydrate after 7–8h fast"
+    },
+    {
+      "time": "08:00–09:00",
+      "beverage": "Black coffee / Teh O",
+      "volumeMl": 250,
+      "notes": "Caffeine: mild diuretic, net hydration positive"
+    },
+    {
+      "time": "10:00–11:00",
+      "beverage": "Water",
+      "volumeMl": 250,
+      "notes": null
+    },
+    {
+      "time": "12:00–13:00",
+      "beverage": "Water (before lunch)",
+      "volumeMl": 250,
+      "notes": "Promotes satiety, aids digestion"
+    },
+    {
+      "time": "14:00–15:00",
+      "beverage": "Green tea / Water",
+      "volumeMl": 250,
+      "notes": null
+    },
+    {
+      "time": "16:00–17:00",
+      "beverage": "Water",
+      "volumeMl": 250,
+      "notes": null
+    },
+    {
+      "time": "18:00–19:00",
+      "beverage": "Water (before dinner)",
+      "volumeMl": 250,
+      "notes": null
+    },
+    {
+      "time": "20:00–21:00",
+      "beverage": "Water / Herbal tea",
+      "volumeMl": 250,
+      "notes": "Limit fluids 1h before bed to reduce nocturia"
+    },
+    {
+      "time": "Exercise +",
+      "beverage": "Additional water",
+      "volumeMl": "500–1000",
+      "notes": "Add 500ml per 30 min moderate activity"
+    }
+  ],
+  "micronutrients": [
+    {
+      "nutrient": "Vitamin A",
+      "target": "700 mcg RAE",
+      "sources": "Carrot, spinach, papaya, eggs"
+    },
+    {
+      "nutrient": "Vitamin C",
+      "target": "75 mg",
+      "sources": "Guava, orange, broccoli, tomato"
+    },
+    {
+      "nutrient": "Vitamin D",
+      "target": "15 mcg (600 IU)",
+      "sources": "Salmon, egg yolk, sun exposure"
+    },
+    {
+      "nutrient": "Vitamin E",
+      "target": "15 mg",
+      "sources": "Almonds, sunflower seeds, avocado"
+    },
+    {
+      "nutrient": "Vitamin K",
+      "target": "90 mcg",
+      "sources": "Ulam, spinach, broccoli, spring onion"
+    },
+    {
+      "nutrient": "Calcium",
+      "target": "1,000 mg",
+      "sources": "Greek yogurt, skim milk, tofu, tempeh"
+    },
+    {
+      "nutrient": "Iron",
+      "target": "18 mg",
+      "sources": "Red meat, spinach, lentils + vitamin C"
+    },
+    {
+      "nutrient": "Magnesium",
+      "target": "310 mg",
+      "sources": "Pumpkin seeds, dark chocolate, oats"
+    },
+    {
+      "nutrient": "Zinc",
+      "target": "8 mg",
+      "sources": "Beef, pumpkin seeds, shellfish"
+    },
+    {
+      "nutrient": "Potassium",
+      "target": "2,600 mg",
+      "sources": "Banana, sweet potato, spinach, tomato"
+    },
+    {
+      "nutrient": "Omega-3 (EPA+DHA)",
+      "target": "1,000 mg",
+      "sources": "Salmon (3–4x/week), sardines, walnuts"
+    },
+    {
+      "nutrient": "Fibre",
+      "target": "30 g",
+      "sources": "Oats, brown rice, vegetables, fruit, chia"
+    }
+  ],
+  "caffeine": [
+    {
+      "beverage": "Black Coffee",
+      "serving": "1 cup (240ml)",
+      "caffeineMg": "95",
+      "max": "3 cups/day"
+    },
+    {
+      "beverage": "Teh Tarik",
+      "serving": "1 cup (300ml)",
+      "caffeineMg": "50",
+      "max": "2 cups/day"
+    },
+    {
+      "beverage": "Green Tea",
+      "serving": "1 cup (240ml)",
+      "caffeineMg": "35",
+      "max": "4 cups/day"
+    },
+    {
+      "beverage": "Milo",
+      "serving": "1 cup (240ml)",
+      "caffeineMg": "5",
+      "max": "No limit (sugar is the concern)"
+    },
+    {
+      "beverage": "Energy Drinks",
+      "serving": "1 can (250ml)",
+      "caffeineMg": "80",
+      "max": "AVOID — sugar + caffeine spike"
+    },
+    {
+      "beverage": "Pre-workout",
+      "serving": "1 scoop",
+      "caffeineMg": "150–300",
+      "max": "Only if training; not for daily use"
+    }
+  ],
+  "caffeineCutoff": "CAFFEINE CUT-OFF: No caffeine after 2:00 PM to preserve sleep architecture. Caffeine half-life is 5–6 hours; quarter-life is 10–12 hours.",
+  "intro": "Food-first approach. Supplements address gaps, not replace whole foods. Consult a registered dietitian before introducing new supplements."
+}

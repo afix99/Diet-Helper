@@ -12,6 +12,7 @@ import shoppingJson from '../../seed/shopping.json'
 import vendorsJson from '../../seed/vendors.json'
 import prepJson from '../../seed/prep.json'
 import methodologyJson from '../../seed/methodology.json'
+import supplementsJson from '../../seed/supplements.json'
 import type { Food, Recipe, Targets } from './types'
 
 export const FOODS: Food[] = foodsJson.map((f) => ({
@@ -89,3 +90,4 @@ export const SHOPPING_SEED = shoppingJson
 export const VENDORS = vendorsJson
 export const PREP = prepJson
 export const METHODOLOGY = methodologyJson
+export const SUPPLEMENTS = supplementsJson

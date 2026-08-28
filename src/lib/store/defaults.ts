@@ -51,5 +51,8 @@ export function defaultData(): AppData {
     shopping: defaultShopping(),
     favourites: [],
     checkedPrep: [],
+    water: {},
+    micronutrients: {},
+    supplements: {},
   }
 }

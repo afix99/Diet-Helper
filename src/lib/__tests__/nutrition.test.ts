@@ -17,6 +17,7 @@ import {
 import type { Targets } from '../types'
 import foods from '../../../seed/foods.json'
 import defaults from '../../../seed/defaults.json'
+import supplements from '../../../seed/supplements.json'
 
 const TARGETS: Targets = {
   kcal: 1500,
@@ -45,6 +46,28 @@ describe('seed data integrity', () => {
     expect(defaults.targets.protein).toBe(90)
     expect(defaults.startWeightKg).toBe(62)
     expect(defaults.goalWeightKg).toBe(55)
+  })
+
+  it('carries the full supplement and hydration protocol', () => {
+    expect(supplements.supplements).toHaveLength(9)
+    expect(supplements.micronutrients).toHaveLength(12)
+    expect(supplements.hydration).toHaveLength(9)
+    expect(supplements.caffeine).toHaveLength(6)
+    expect(supplements.caffeineCutoff).toContain('2:00 PM')
+  })
+
+  it('keeps the food-first alternative alongside every supplement', () => {
+    expect(supplements.supplements.every((s) => Boolean(s.foodAlternative))).toBe(true)
+    const omega = supplements.supplements.find((s) => s.name.startsWith('Omega-3'))
+    expect(omega?.foodAlternative).toContain('salmon')
+  })
+
+  it('sums the hydration schedule to roughly the daily water target', () => {
+    // Rows 1-8 are fixed volumes; the last is an exercise range stored as text.
+    const fixed = supplements.hydration
+      .map((h) => h.volumeMl)
+      .filter((v): v is number => typeof v === 'number')
+    expect(fixed.reduce((a, b) => a + b, 0)).toBe(2250)
   })
 
   it('preserves the stall-ordering notes that make the database useful', () => {

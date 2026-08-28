@@ -2,8 +2,9 @@
 
 A phone-first web app built from `Memey_Diet_Planner_v3.xlsx`. It keeps the
 spreadsheet's content — the 69-item Malaysian food database, seven salmon
-recipes, the Setiawangsa shopping system, the nine badges — and makes logging
-a meal take about five seconds instead of pinch-zooming a 12-column grid.
+recipes, the Setiawangsa shopping system, the supplement and micronutrient
+protocol, the nine badges — and makes logging a meal take about five seconds
+instead of pinch-zooming a 12-column grid.
 
 Bilingual throughout (Malay first, English alongside), installable on iOS and
 Android home screens, and works offline.
@@ -92,14 +93,17 @@ It asserts 69 foods and 7 recipes survived the round trip.
 - **The shopping list knows the plan.** "Add from this week's plan" pulls
   ingredients from recipes actually scheduled; the sheet's checklist was a
   fixed column with no link to what you meant to cook.
+- **Water is tracked, not just targeted.** `Dashboard!B20` sets a 2.5 L goal
+  and the Supplement sheet lays out an hourly schedule, but neither had
+  anywhere to record what you drank. Today has a one-tap glass counter.
 
 Tone follows the workbook's own: `✓ Ikut target`, `~ Dekat`, `▲ Lebih`. No
 alarm colours, no shaming copy.
 
 ## Not yet built
 
-The Supplement & Hydration sheet, micronutrient checklist, caffeine protocol,
-progress photos, and barcode or photo logging. The schema leaves room.
+Progress photos, body measurements beyond weight and waist/hip, and barcode
+or photo logging. The schema leaves room.
 
 ## Health note
 
