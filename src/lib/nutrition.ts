@@ -110,6 +110,7 @@ export interface DayRecord {
   date: string
   kcal: number
   protein: number
+  fibre: number
   salmonMeals: number
 }
 

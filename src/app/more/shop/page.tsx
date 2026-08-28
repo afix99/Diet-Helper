@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { Card, ListGroup, PageHeader, SegmentedControl } from '@/components/ui'
 import { PREP, RECIPES, VENDORS } from '@/lib/catalogue'
+import { aggregateIngredients } from '@/lib/ingredients'
 import { entriesFor, weekOf } from '@/lib/selectors'
 import { useData } from '@/lib/store/provider'
 import { defaultShopping, todayIso } from '@/lib/store/defaults'
@@ -43,21 +44,23 @@ export default function ShopPage() {
       setTimeout(() => setNote(null), 2600)
       return
     }
-    const wanted = new Map<string, string>()
+    // Aggregate rather than dedupe: three recipes wanting 150g salmon should
+    // produce one 450g line, not three identical ones.
+    const raws: string[] = []
     for (const id of planned) {
       const recipe = RECIPES.find((r) => r.id === id)
-      if (!recipe) continue
-      for (const ing of recipe.ingredients) wanted.set(ing.toLowerCase(), ing)
+      if (recipe) raws.push(...recipe.ingredients)
     }
+    const wanted = aggregateIngredients(raws)
     update((d) => {
       const existing = new Set(d.shopping.map((s) => s.item.toLowerCase()))
-      const added: ShoppingItem[] = [...wanted.entries()]
-        .filter(([key]) => !existing.has(key))
-        .map(([, item], i) => ({
+      const added: ShoppingItem[] = wanted
+        .filter((w) => !existing.has(w.label.toLowerCase()))
+        .map((w, i) => ({
           id: `plan-${Date.now()}-${i}`,
           category: 'FROM YOUR PLAN',
-          item,
-          qty: null,
+          item: w.label,
+          qty: w.count > 1 ? `for ${w.count} recipes` : null,
           estCostRm: null,
           vendor: null,
           priority: 'ESSENTIAL',
@@ -68,7 +71,7 @@ export default function ShopPage() {
         setTimeout(() => setNote(null), 2600)
         return d
       }
-      setNote(`Added ${added.length} ingredients from your plan.`)
+      setNote(`Added ${added.length} combined ingredients from your plan.`)
       setTimeout(() => setNote(null), 2600)
       return { ...d, shopping: [...d.shopping, ...added] }
     })

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { CustomFoodDialog } from './CustomFoodDialog'
+import { QuickAdd } from './QuickAdd'
 import { Sheet } from './ui'
 import { FOOD_CATEGORIES, RECIPES } from '@/lib/catalogue'
 import { useLogging } from '@/lib/logging'
@@ -29,6 +30,7 @@ export function FoodPicker({
   const { logFood, logRecipe } = useLogging()
   const [query, setQuery] = useState('')
   const [creating, setCreating] = useState(false)
+  const [quickAdding, setQuickAdding] = useState(false)
 
   const foods = useMemo(() => allFoods(data), [data])
   const recents = useMemo(() => recentFoods(data, slot), [data, slot])
@@ -60,6 +62,12 @@ export function FoodPicker({
 
   const label = SLOT_LABELS[slot]
 
+  // Hand off rather than stack: two nested sheets would mean two live
+  // aria-modal dialogs, and iOS never layers sheets like that either.
+  if (quickAdding) {
+    return <QuickAdd date={date} slot={slot} onClose={onClose} />
+  }
+
   return (
     <Sheet onClose={onClose} labelledBy="food-picker-title">
         <div className="flex items-center justify-between px-4 pb-2 pt-2">
@@ -75,6 +83,14 @@ export function FoodPicker({
         </div>
 
         <div className="px-4 pb-3">
+          <button
+            type="button"
+            onClick={() => setQuickAdding(true)}
+            className="tap mb-2 flex w-full items-center gap-2 rounded-pill bg-primary/10 px-4 py-2.5 text-secondary font-semibold text-primary"
+          >
+            <span aria-hidden>✎</span>
+            Describe a whole meal instead
+          </button>
           <input
             type="search"
             value={query}

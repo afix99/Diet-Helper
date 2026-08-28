@@ -3,8 +3,9 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Card, EmptyState, ListGroup, PageHeader, StatusPill } from '@/components/ui'
+import { insights } from '@/lib/insights'
 import { rollingAverage, round1, statusBand } from '@/lib/nutrition'
-import { dayRecords, latestWeight, weekOf } from '@/lib/selectors'
+import { dayRecords, latestWeight, weekDates, weekOf } from '@/lib/selectors'
 import { formatDay } from '@/lib/dates'
 import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
@@ -21,6 +22,20 @@ export default function ProgressPage() {
   )
   const trend = useMemo(() => rollingAverage(sorted.map((w) => w.weightKg)), [sorted])
   const latest = latestWeight(data)
+
+  // Observations run over the last four weeks of *logged* days, never planned
+  // ones, so a week filled in ahead can't skew them.
+  const coaching = useMemo(
+    () =>
+      insights({
+        days: dayRecords(data, weekDates(today, 28).filter((d) => d <= today)),
+        targets: data.targets,
+        weights: data.weights,
+        startWeightKg: data.profile.startWeightKg,
+        goalWeightKg: data.profile.goalWeightKg,
+      }),
+    [data, today]
+  )
   const toGoal = latest === null ? null : round1(latest - data.profile.goalWeightKg)
   const lost = latest === null ? null : round1(data.profile.startWeightKg - latest)
 
@@ -82,7 +97,7 @@ export default function ProgressPage() {
             step="0.1"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Today\u2019s weight (kg)"
+            placeholder="Today’s weight (kg)"
             aria-label="Today's weight in kg"
             className="min-w-0 flex-1 rounded-pill border border-line bg-surface px-4 py-2.5 text-body outline-none placeholder:text-faint focus:border-primary"
           />
@@ -115,6 +130,31 @@ export default function ProgressPage() {
           />
         )}
       </Card>
+
+      {coaching.length > 0 && (
+        <section className="mb-5">
+          <h2 className="mb-1.5 px-4 text-tertiary font-semibold uppercase tracking-wide text-faint">
+            What your log shows
+          </h2>
+          <div className="grid gap-2">
+            {coaching.map((i) => (
+              <div
+                key={i.id}
+                className={`rounded-card border-l-[3px] bg-surface p-3.5 shadow-card ${
+                  i.tone === 'good'
+                    ? 'border-l-avocado'
+                    : i.tone === 'watch'
+                      ? 'border-l-amber'
+                      : 'border-l-ocean'
+                }`}
+              >
+                <p className="text-body font-semibold">{i.title}</p>
+                <p className="mt-0.5 text-tertiary leading-relaxed text-muted">{i.detail}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <ListGroup header="This week">
         <ul>

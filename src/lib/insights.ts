@@ -1,0 +1,220 @@
+/**
+ * Observations drawn from the user's own log.
+ *
+ * MyNetDiary calls this an AI Coach. Everything genuinely useful it says about
+ * *your* diary is arithmetic over data we already hold, so this is rules — which
+ * has the advantage of being explainable, instant, offline and free.
+ *
+ * Two principles:
+ * - Every rule states its own minimum evidence and stays silent below it.
+ *   A "coach" that draws conclusions from two days is noise.
+ * - The workbook's non-judgemental voice carries over. Observations, not
+ *   scolding, and never a comment on appearance or worth.
+ */
+import { isOnTarget, round1, type DayRecord } from './nutrition'
+import type { Targets, WeightLog } from './types'
+
+export type InsightTone = 'good' | 'neutral' | 'watch'
+
+export interface Insight {
+  id: string
+  tone: InsightTone
+  title: string
+  detail: string
+}
+
+export interface InsightInput {
+  /** Days up to today, oldest first. Planned future days must be excluded. */
+  days: readonly DayRecord[]
+  targets: Targets
+  weights: readonly WeightLog[]
+  startWeightKg: number
+  goalWeightKg: number
+}
+
+const mean = (ns: readonly number[]) =>
+  ns.length === 0 ? 0 : ns.reduce((a, b) => a + b, 0) / ns.length
+
+/** Saturday and Sunday, from an ISO day key, in UTC to match the date helpers. */
+const isWeekend = (iso: string) => {
+  const day = new Date(`${iso}T00:00:00Z`).getUTCDay()
+  return day === 0 || day === 6
+}
+
+export function insights(input: InsightInput): Insight[] {
+  const { days, targets, weights, startWeightKg, goalWeightKg } = input
+  const logged = days.filter((d) => d.kcal > 0)
+  const out: Insight[] = []
+
+  // Nothing meaningful can be said from fewer than three logged days.
+  if (logged.length < 3) return out
+
+  // --- Weekday vs weekend ------------------------------------------------
+  const weekdays = logged.filter((d) => !isWeekend(d.date))
+  const weekends = logged.filter((d) => isWeekend(d.date))
+  if (weekdays.length >= 3 && weekends.length >= 2) {
+    const wd = Math.round(mean(weekdays.map((d) => d.kcal)))
+    const we = Math.round(mean(weekends.map((d) => d.kcal)))
+    const gap = we - wd
+    if (Math.abs(gap) >= 250) {
+      out.push({
+        id: 'weekend_gap',
+        tone: gap > 0 ? 'watch' : 'neutral',
+        title: gap > 0 ? 'Weekends run higher' : 'Weekends run lighter',
+        detail:
+          `You average ${wd} kcal on weekdays and ${we} at weekends — a ` +
+          `${Math.abs(gap)} kcal swing. Two heavy weekend days can cancel five ` +
+          `careful weekdays, so it is usually the cheapest thing to even out.`,
+      })
+    }
+  }
+
+  // --- Protein -----------------------------------------------------------
+  const proteinDays = logged.filter((d) => d.protein >= targets.protein).length
+  const proteinRate = proteinDays / logged.length
+  if (proteinRate >= 0.7) {
+    out.push({
+      id: 'protein_strong',
+      tone: 'good',
+      title: 'Protein is holding',
+      detail:
+        `You hit ${targets.protein}g on ${proteinDays} of ${logged.length} logged days. ` +
+        `That is the single biggest protector of muscle while losing weight.`,
+    })
+  } else if (proteinRate <= 0.35) {
+    const avg = Math.round(mean(logged.map((d) => d.protein)))
+    out.push({
+      id: 'protein_low',
+      tone: 'watch',
+      title: 'Protein is running short',
+      detail:
+        `Averaging ${avg}g against a ${targets.protein}g target. Chicken breast, ` +
+        `Greek yogurt or a tin of salmon each add 15–30g without much else.`,
+    })
+  }
+
+  // --- Consistency of logging -------------------------------------------
+  const rate = logged.length / days.length
+  if (days.length >= 7 && rate >= 0.85) {
+    out.push({
+      id: 'consistent',
+      tone: 'good',
+      title: 'Logging is consistent',
+      detail:
+        `${logged.length} of the last ${days.length} days logged. Self-monitoring ` +
+        `is the habit most strongly linked to keeping weight off — this is the one to protect.`,
+    })
+  } else if (days.length >= 7 && rate < 0.5) {
+    out.push({
+      id: 'gaps',
+      tone: 'neutral',
+      title: 'Plenty of gaps',
+      detail:
+        `${logged.length} of the last ${days.length} days logged. A rough entry counts — ` +
+        `describing a meal in the quick-add box beats skipping it.`,
+    })
+  }
+
+  // --- Fibre -------------------------------------------------------------
+  const avgFibreDays = logged.length
+  if (avgFibreDays >= 4) {
+    const under = logged.filter((d) => d.fibre < targets.fibre * 0.7)
+    if (under.length / avgFibreDays >= 0.7) {
+      out.push({
+        id: 'fibre_low',
+        tone: 'watch',
+        title: 'Fibre is low most days',
+        detail:
+          `Under ${Math.round(targets.fibre * 0.7)}g on ${under.length} of ${avgFibreDays} days. ` +
+          `Fibre is what makes a deficit feel survivable — oats, ulam, guava and berries are the cheap wins.`,
+      })
+    }
+  }
+
+  // --- Salmon / omega-3 --------------------------------------------------
+  if (days.length >= 7) {
+    const salmon = logged.reduce((sum, d) => sum + d.salmonMeals, 0)
+    const weeks = days.length / 7
+    const perWeek = salmon / weeks
+    if (perWeek >= 3) {
+      out.push({
+        id: 'omega_good',
+        tone: 'good',
+        title: 'Omega-3 is covered',
+        detail: `About ${round1(perWeek)} salmon meals a week — at or above the 3× target.`,
+      })
+    } else if (salmon === 0) {
+      out.push({
+        id: 'omega_none',
+        tone: 'neutral',
+        title: 'No oily fish logged',
+        detail:
+          `The plan leans on salmon for EPA/DHA. Ikan kembung and sardines are ` +
+          `cheaper and count just as much.`,
+      })
+    }
+  }
+
+  // --- Rate of loss ------------------------------------------------------
+  const sorted = [...weights].sort((a, b) => a.date.localeCompare(b.date))
+  if (sorted.length >= 2) {
+    const first = sorted[0]
+    const last = sorted[sorted.length - 1]
+    const dayGap =
+      (new Date(`${last.date}T00:00:00Z`).getTime() -
+        new Date(`${first.date}T00:00:00Z`).getTime()) /
+      86_400_000
+    if (dayGap >= 10) {
+      const perWeek = round1(((first.weightKg - last.weightKg) / dayGap) * 7)
+      if (perWeek >= 0.4 && perWeek <= 0.7) {
+        out.push({
+          id: 'rate_ideal',
+          tone: 'good',
+          title: 'Losing at a sustainable rate',
+          detail:
+            `About ${perWeek} kg a week, right in the 0.4–0.6 band the programme aims for. ` +
+            `Faster is mostly water and muscle.`,
+        })
+      } else if (perWeek > 0.9) {
+        out.push({
+          id: 'rate_fast',
+          tone: 'watch',
+          title: 'Dropping quite fast',
+          detail:
+            `About ${perWeek} kg a week. Above roughly 0.7 kg you start losing more ` +
+            `lean tissue. Eating a little more, not less, is usually the fix.`,
+        })
+      } else if (perWeek <= 0 && dayGap >= 21) {
+        out.push({
+          id: 'rate_stalled',
+          tone: 'neutral',
+          title: 'Weight has been flat',
+          detail:
+            `No net change over ${Math.round(dayGap)} days. Before cutting further, check ` +
+            `whether the last two weeks were logged as fully as the first.`,
+        })
+      }
+      const toGo = round1(last.weightKg - goalWeightKg)
+      if (perWeek > 0.15 && toGo > 0) {
+        const weeksLeft = Math.ceil(toGo / perWeek)
+        out.push({
+          id: 'eta',
+          tone: 'neutral',
+          title: `About ${weeksLeft} weeks to go`,
+          detail:
+            `${toGo} kg from ${goalWeightKg} kg at your current pace. A projection, not a promise — ` +
+            `rates slow as you get lighter.`,
+        })
+      }
+    }
+  } else if (sorted.length === 1 && sorted[0].weightKg !== startWeightKg) {
+    out.push({
+      id: 'weigh_again',
+      tone: 'neutral',
+      title: 'One weigh-in so far',
+      detail: 'Log a second, a week apart, and the trend line and pace estimate appear.',
+    })
+  }
+
+  return out
+}

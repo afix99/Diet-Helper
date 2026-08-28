@@ -70,6 +70,7 @@ export function dayRecords(data: AppData, dates: readonly string[]): DayRecord[]
       date,
       kcal: totals.kcal,
       protein: totals.protein,
+      fibre: totals.fibre,
       salmonMeals: entries.filter((e) => isSalmon(entryName(e, data.customFoods))).length,
     }
   })

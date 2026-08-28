@@ -28,10 +28,11 @@ const TARGETS: Targets = {
   waterMl: 2500,
 }
 
-const day = (kcal: number, protein = 0, salmonMeals = 0): DayRecord => ({
+const day = (kcal: number, protein = 0, salmonMeals = 0, fibre = 0): DayRecord => ({
   date: '2026-01-01',
   kcal,
   protein,
+  fibre,
   salmonMeals,
 })
 
