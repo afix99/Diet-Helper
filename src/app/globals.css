@@ -3,63 +3,86 @@
 @tailwind utilities;
 
 /*
- * Soft rose palette. Pink leads; supporting hues are muted so the primary
- * stays the only saturated thing on screen.
+ * iOS 26 surfaces with a warm pink cast. Pink stays the accent; the chrome
+ * moves toward system greys so the app reads native without going cold.
  *
  * Status colours deliberately avoid alarm-red: the workbook's own voice is
  * non-judgemental ("Close", "Over"), and the app keeps that. `clay` is a dusty
  * rose rather than a warning colour for exactly that reason.
  */
 :root {
-  --bg: 255 250 252;
+  /* Warm pink-tinted neutrals: iOS-like greys that never read cold. */
+  --bg: 246 242 245;
   --surface: 255 255 255;
-  --raised: 252 240 245;
-  --line: 240 224 232;
-  --ink: 42 28 35;
-  --muted: 122 100 110;
-  --faint: 168 148 158;
+  --raised: 250 244 247;
+  --line: 234 226 231;
+  --ink: 28 25 27;
+  --muted: 116 106 112;
+  --faint: 156 146 153;
 
   --primary: 214 87 132;
-  --avocado: 106 156 120;
-  --amber: 214 148 74;
-  --clay: 194 112 128;
-  --ocean: 106 140 186;
+  --avocado: 92 150 110;
+  --amber: 206 142 62;
+  --clay: 190 104 122;
+  --ocean: 92 130 182;
 
-  --font-sans: ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Liquid Glass, navigation layer only. Light film over a light backdrop. */
+  --glass-bg: 255 255 255;
+  --glass-alpha: 0.72;
+  --glass-border: 255 255 255;
+  --glass-border-alpha: 0.7;
+  --glass-shadow: 0 8px 32px -8px rgb(40 20 32 / 0.18), 0 2px 8px -2px rgb(40 20 32 / 0.1);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+    ui-rounded, system-ui, 'Segoe UI', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: 26 20 24;
-    --surface: 38 29 34;
-    --raised: 51 39 46;
-    --line: 70 54 63;
-    --ink: 247 238 243;
-    --muted: 180 160 172;
-    --faint: 134 116 128;
+    --bg: 20 17 20;
+    --surface: 31 27 30;
+    --raised: 42 36 41;
+    --line: 58 50 56;
+    --ink: 247 242 245;
+    --muted: 172 158 168;
+    --faint: 128 116 125;
 
     --primary: 244 146 180;
-    --avocado: 142 190 158;
-    --amber: 234 180 110;
-    --clay: 220 152 166;
-    --ocean: 146 176 220;
+    --avocado: 132 186 148;
+    --amber: 230 178 106;
+    --clay: 216 148 164;
+    --ocean: 142 172 216;
+
+    /* Glass over a dark backdrop needs a lighter film, not a darker one. */
+    --glass-bg: 58 50 56;
+    --glass-alpha: 0.68;
+    --glass-border: 255 255 255;
+    --glass-border-alpha: 0.14;
+    --glass-shadow: 0 8px 32px -8px rgb(0 0 0 / 0.55), 0 2px 8px -2px rgb(0 0 0 / 0.4);
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: 26 20 24;
-  --surface: 38 29 34;
-  --raised: 51 39 46;
-  --line: 70 54 63;
-  --ink: 247 238 243;
-  --muted: 180 160 172;
-  --faint: 134 116 128;
+  --bg: 20 17 20;
+  --surface: 31 27 30;
+  --raised: 42 36 41;
+  --line: 58 50 56;
+  --ink: 247 242 245;
+  --muted: 172 158 168;
+  --faint: 128 116 125;
 
   --primary: 244 146 180;
-  --avocado: 142 190 158;
-  --amber: 234 180 110;
-  --clay: 220 152 166;
-  --ocean: 146 176 220;
+  --avocado: 132 186 148;
+  --amber: 230 178 106;
+  --clay: 216 148 164;
+  --ocean: 142 172 216;
+
+  /* Glass over a dark backdrop needs a lighter film, not a darker one. */
+  --glass-bg: 58 50 56;
+  --glass-alpha: 0.68;
+  --glass-border: 255 255 255;
+  --glass-border-alpha: 0.14;
+  --glass-shadow: 0 8px 32px -8px rgb(0 0 0 / 0.55), 0 2px 8px -2px rgb(0 0 0 / 0.4);
 }
 
 html {
@@ -78,6 +101,72 @@ body {
 }
 
 @layer components {
+  /*
+   * Liquid Glass, approximated.
+   *
+   * Apple's material refracts its backdrop. On the web that needs
+   * `backdrop-filter: url(#svgFilter)` driving an feDisplacementMap, which
+   * only Chromium runs — Safari and Firefox accept the property and silently
+   * drop the SVG, leaving a flat blur. Since this app is installed to phone
+   * home screens, an effect that looks right in one engine and broken in
+   * another is the wrong trade.
+   *
+   * So the glass is built from blur + saturation, a specular top-edge
+   * highlight and a hairline border: layers every engine renders identically.
+   */
+  .glass {
+    background-color: rgb(var(--glass-bg) / var(--glass-alpha));
+    border: 1px solid rgb(var(--glass-border) / var(--glass-border-alpha));
+    box-shadow: var(--glass-shadow);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    position: relative;
+    isolation: isolate;
+  }
+
+  /* The specular sheen along the top edge, where light would catch glass. */
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.5) 0%,
+      rgb(255 255 255 / 0.08) 42%,
+      transparent 70%
+    );
+    z-index: -1;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .glass::before {
+      background: linear-gradient(
+        to bottom,
+        rgb(255 255 255 / 0.14) 0%,
+        rgb(255 255 255 / 0.03) 42%,
+        transparent 70%
+      );
+    }
+  }
+
+  :root[data-theme='dark'] .glass::before {
+    background: linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.14) 0%,
+      rgb(255 255 255 / 0.03) 42%,
+      transparent 70%
+    );
+  }
+
+  /* Where backdrop-filter is unavailable, fall back to an opaque surface. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass {
+      background-color: rgb(var(--surface));
+    }
+  }
+
   .card {
     @apply rounded-card border border-line bg-surface shadow-card;
   }

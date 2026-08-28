@@ -48,9 +48,9 @@ export function InstallHint() {
         <span aria-hidden className="text-xl">
           📲
         </span>
-        <div className="flex-1 text-sm">
+        <div className="flex-1 text-secondary">
           <p className="font-semibold">Add to your home screen</p>
-          <p className="mt-0.5 text-xs text-muted">
+          <p className="mt-0.5 text-tertiary text-muted">
             Tap <strong>Share</strong> → <strong>Add to Home Screen</strong>. Opens like a
             normal app — no App Store needed.
           </p>

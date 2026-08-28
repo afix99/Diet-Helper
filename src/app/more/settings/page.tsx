@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { BackLink } from '@/components/BackLink'
-import { Card, PageHeader } from '@/components/ui'
+import { Card, ListGroup, PageHeader } from '@/components/ui'
 import { METHODOLOGY, TARGET_NOTES } from '@/lib/catalogue'
 import { bmr, leanBodyMass, tdee } from '@/lib/nutrition'
 import { supabaseClient } from '@/lib/store'
@@ -30,7 +30,7 @@ export default function SettingsPage() {
   const [showDisclaimer, setShowDisclaimer] = useState(false)
   const [confirmingReset, setConfirmingReset] = useState(false)
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
+  if (!ready) return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
 
   const p = data.profile
   const basal = p.heightCm && p.age ? bmr(p.startWeightKg, p.heightCm, p.age, p.sex) : null
@@ -54,9 +54,8 @@ export default function SettingsPage() {
       <BackLink />
       <PageHeader title="Settings" subtitle="Profile, targets & data" />
 
-      <Card className="mb-4">
-        <h2 className="mb-3 text-sm font-bold">Profile</h2>
-        <div className="grid grid-cols-2 gap-3">
+      <ListGroup header="Profile">
+        <div className="grid grid-cols-2 gap-3 p-4">
           <NumField
             label="Starting weight (kg)"
             value={p.startWeightKg}
@@ -82,7 +81,7 @@ export default function SettingsPage() {
             onChange={(v) => setProfile({ bodyFatPct: v })}
           />
           <div>
-            <span className="mb-1 block text-xs font-semibold">Sex</span>
+            <span className="mb-1 block text-tertiary font-semibold">Sex</span>
             <div className="flex gap-1">
               {(['female', 'male'] as Sex[]).map((s) => (
                 <button
@@ -90,7 +89,7 @@ export default function SettingsPage() {
                   type="button"
                   onClick={() => setProfile({ sex: s })}
                   aria-pressed={p.sex === s}
-                  className={`tap flex-1 rounded-pill px-2 py-2 text-xs font-semibold ${
+                  className={`tap flex-1 rounded-pill px-2 py-2 text-tertiary font-semibold ${
                     p.sex === s ? 'bg-primary text-white' : 'bg-raised text-muted'
                   }`}
                 >
@@ -101,8 +100,8 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="mt-3">
-          <span className="mb-1 block text-xs font-semibold">
+        <div className="px-4 pb-4">
+          <span className="mb-1 block text-tertiary font-semibold">
             Activity level
           </span>
           <div className="flex gap-1">
@@ -122,12 +121,12 @@ export default function SettingsPage() {
             ))}
           </div>
         </div>
-      </Card>
+      </ListGroup>
 
-      <Card className="mb-4">
-        <h2 className="mb-2 text-sm font-bold">Calculated</h2>
+      <Card className="mb-5">
+        <h2 className="mb-2 text-title">Calculated</h2>
         {basal === null ? (
-          <p className="text-xs text-faint">Fill in height and age to calculate BMR &amp; TDEE.</p>
+          <p className="text-tertiary text-faint">Fill in height and age to calculate BMR &amp; TDEE.</p>
         ) : (
           <dl className="grid grid-cols-3 gap-2 text-center">
             <Calc label="BMR" value={`${basal}`} unit="kcal" />
@@ -141,9 +140,8 @@ export default function SettingsPage() {
         </p>
       </Card>
 
-      <Card className="mb-4">
-        <h2 className="mb-3 text-sm font-bold">Daily targets</h2>
-        <div className="grid gap-3">
+      <ListGroup header="Daily targets">
+        <div className="grid gap-3 p-4">
           {TARGET_FIELDS.map((f) => (
             <div key={f.key}>
               <NumField
@@ -157,11 +155,11 @@ export default function SettingsPage() {
             </div>
           ))}
         </div>
-      </Card>
+      </ListGroup>
 
-      <Card className="mb-4">
-        <h2 className="text-sm font-bold">Data</h2>
-        <p className="mt-1 text-xs text-muted">
+      <Card className="mb-5">
+        <h2 className="text-title">Data</h2>
+        <p className="mt-1 text-tertiary text-muted">
           {storeKind === 'supabase'
             ? 'Saved to your account and synced across devices.'
             : 'Saved in this browser only. Connect Supabase to sync across devices.'}
@@ -170,16 +168,16 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => supabaseClient()?.auth.signOut()}
-            className="tap mt-3 w-full rounded-pill border border-line py-2 text-xs font-semibold text-muted"
+            className="tap mt-3 w-full rounded-pill border border-line py-2 text-tertiary font-semibold text-muted"
           >
             Sign out
           </button>
         )}
       </Card>
 
-      <Card className="mb-4 border-clay/40">
-        <h2 className="text-sm font-bold">Reset</h2>
-        <p className="mt-1 text-xs text-muted">
+      <Card className="mb-5 border-clay/40">
+        <h2 className="text-title text-clay">Reset</h2>
+        <p className="mt-1 text-tertiary text-muted">
           Erases every food log, weight entry, water count and tick, and restores the original
           targets and shopping list. This cannot be undone.
         </p>
@@ -188,14 +186,14 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={resetEverything}
-              className="tap flex-1 rounded-pill bg-clay py-2.5 text-xs font-bold text-white"
+              className="tap flex-1 rounded-pill bg-clay py-2.5 text-tertiary font-bold text-white"
             >
               Yes, erase everything
             </button>
             <button
               type="button"
               onClick={() => setConfirmingReset(false)}
-              className="tap rounded-pill bg-raised px-4 py-2.5 text-xs font-semibold text-muted"
+              className="tap rounded-pill bg-raised px-4 py-2.5 text-tertiary font-semibold text-muted"
             >
               Cancel
             </button>
@@ -204,7 +202,7 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setConfirmingReset(true)}
-            className="tap mt-3 w-full rounded-pill border border-clay py-2.5 text-xs font-bold text-clay"
+            className="tap mt-3 w-full rounded-pill border border-clay py-2.5 text-tertiary font-bold text-clay"
           >
             Reset all data
           </button>
@@ -218,7 +216,7 @@ export default function SettingsPage() {
           aria-expanded={showDisclaimer}
           className="tap flex w-full items-center justify-between text-left"
         >
-          <span className="text-sm font-bold">Medical disclaimer</span>
+          <span className="text-title">Medical disclaimer</span>
           <span aria-hidden className="text-faint">
             {showDisclaimer ? '▲' : '▼'}
           </span>
@@ -226,7 +224,7 @@ export default function SettingsPage() {
         {showDisclaimer && (
           <div className="mt-3 grid gap-2 border-t border-line pt-3">
             {METHODOLOGY.disclaimer.map((para) => (
-              <p key={para} className="text-xs leading-relaxed text-muted">
+              <p key={para} className="text-tertiary leading-relaxed text-muted">
                 {para}
               </p>
             ))}
@@ -262,7 +260,7 @@ function NumField({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-semibold">{label}</span>
+      <span className="mb-1 block text-tertiary font-semibold">{label}</span>
       <input
         type="number"
         inputMode="decimal"
@@ -272,7 +270,7 @@ function NumField({
           const v = Number.parseFloat(e.target.value)
           onChange(Number.isFinite(v) ? v : null)
         }}
-        className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-base tabular-nums outline-none focus:border-primary"
+        className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-body tabular-nums outline-none focus:border-primary"
       />
     </label>
   )

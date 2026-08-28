@@ -13,7 +13,7 @@ export default function BadgesPage() {
   const list = useMemo(() => badgesFor(data, today), [data, today])
   const run = useMemo(() => streakFor(data, today), [data, today])
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
+  if (!ready) return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
 
   const unlocked = list.filter((b) => b.unlocked)
 
@@ -25,18 +25,18 @@ export default function BadgesPage() {
       <Card className="mb-4 text-center">
         <p className="text-5xl font-extrabold tabular-nums text-primary">
           {run.current}
-          <span className="ml-1 text-base font-semibold text-muted">
+          <span className="ml-1 text-body font-semibold text-muted">
             {run.current === 1 ? 'day' : 'days'}
           </span>
         </p>
-        <p className="mt-1 text-sm font-semibold">Current streak</p>
-        <p className="text-xs text-faint">Best run: {run.best} days</p>
+        <p className="mt-1 text-secondary font-semibold">Current streak</p>
+        <p className="text-tertiary text-faint">Best run: {run.best} days</p>
         {run.usingGrace ? (
-          <p className="mt-2 text-xs text-amber">
+          <p className="mt-2 text-tertiary text-amber">
             Missed a day — your streak is still alive. Log today to keep it going.
           </p>
         ) : (
-          <p className="mt-2 text-xs text-faint">
+          <p className="mt-2 text-tertiary text-faint">
             You can miss {run.graceRemaining} day this week without breaking the streak.
           </p>
         )}
@@ -54,7 +54,7 @@ export default function BadgesPage() {
             >
               {b.emoji}
             </span>
-            <p className="mt-1 text-xs font-bold leading-tight">{b.name}</p>
+            <p className="mt-1 text-tertiary font-bold leading-tight">{b.name}</p>
             <p className="text-[10px] leading-tight text-faint">{b.requirement}</p>
             {!b.unlocked && b.progress > 0 && (
               <div className="mt-2 h-1 overflow-hidden rounded-pill bg-raised">

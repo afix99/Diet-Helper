@@ -25,8 +25,20 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
       },
+      /* The iOS type scale, in the points Apple specifies. */
+      fontSize: {
+        'large-title': ['34px', { lineHeight: '41px', letterSpacing: '-0.02em', fontWeight: '700' }],
+        title: ['17px', { lineHeight: '22px', letterSpacing: '-0.01em', fontWeight: '600' }],
+        body: ['17px', { lineHeight: '22px', letterSpacing: '-0.01em' }],
+        secondary: ['15px', { lineHeight: '20px' }],
+        tertiary: ['13px', { lineHeight: '18px' }],
+        caption: ['11px', { lineHeight: '13px', fontWeight: '500' }],
+      },
       borderRadius: {
-        card: '1.25rem',
+        /* Larger radii approximate iOS continuous corners better than the
+           Tailwind defaults. */
+        card: '22px',
+        sheet: '28px',
         pill: '999px',
       },
       boxShadow: {

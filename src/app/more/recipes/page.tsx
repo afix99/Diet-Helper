@@ -37,8 +37,8 @@ export default function RecipesPage() {
                 aria-expanded={isOpen}
                 className="tap w-full text-left"
               >
-                <span className="block text-sm font-bold">{r.name}</span>
-                <span className="mt-1 flex flex-wrap gap-x-3 text-xs tabular-nums text-muted">
+                <span className="block text-secondary font-bold">{r.name}</span>
+                <span className="mt-1 flex flex-wrap gap-x-3 text-tertiary tabular-nums text-muted">
                   <span className="font-bold text-primary">{r.kcal} kcal</span>
                   <span>{r.minutes} min</span>
                   <span>P {r.protein}g</span>
@@ -48,13 +48,13 @@ export default function RecipesPage() {
               </button>
 
               {isOpen && (
-                <div className="mt-3 border-t border-line pt-3 text-sm">
-                  <h3 className="mb-1 text-xs font-bold uppercase tracking-wide text-faint">
+                <div className="mt-3 border-t border-line pt-3 text-secondary">
+                  <h3 className="mb-1 text-tertiary font-bold uppercase tracking-wide text-faint">
                     Ingredients
                   </h3>
                   <ul className="mb-3 grid gap-0.5">
                     {r.ingredients.map((ing) => (
-                      <li key={ing} className="flex gap-2 text-xs">
+                      <li key={ing} className="flex gap-2 text-tertiary">
                         <span aria-hidden className="text-primary">
                           •
                         </span>
@@ -63,12 +63,12 @@ export default function RecipesPage() {
                     ))}
                   </ul>
 
-                  <h3 className="mb-1 text-xs font-bold uppercase tracking-wide text-faint">
+                  <h3 className="mb-1 text-tertiary font-bold uppercase tracking-wide text-faint">
                     Steps
                   </h3>
                   <ol className="mb-3 grid gap-1.5">
                     {r.steps.map((step, i) => (
-                      <li key={step} className="flex gap-2 text-xs leading-relaxed">
+                      <li key={step} className="flex gap-2 text-tertiary leading-relaxed">
                         <span className="grid h-5 w-5 shrink-0 place-items-center rounded-pill bg-primary/15 text-[10px] font-bold text-primary">
                           {i + 1}
                         </span>
@@ -78,7 +78,7 @@ export default function RecipesPage() {
                   </ol>
 
                   {r.chefsNote && (
-                    <p className="mb-3 rounded-card bg-raised p-2.5 text-xs leading-relaxed text-muted">
+                    <p className="mb-3 rounded-card bg-raised p-2.5 text-tertiary leading-relaxed text-muted">
                       <span className="font-bold">Chef&apos;s note: </span>
                       {r.chefsNote}
                     </p>
@@ -91,7 +91,7 @@ export default function RecipesPage() {
                           key={slot}
                           type="button"
                           onClick={() => log(r.id, slot)}
-                          className="tap rounded-pill bg-raised px-3 py-1.5 text-xs font-semibold"
+                          className="tap rounded-pill bg-raised px-3 py-1.5 text-tertiary font-semibold"
                         >
                           {SLOT_LABELS[slot].label}
                         </button>
@@ -99,7 +99,7 @@ export default function RecipesPage() {
                       <button
                         type="button"
                         onClick={() => setLogging(null)}
-                        className="tap rounded-pill px-3 py-1.5 text-xs text-faint"
+                        className="tap rounded-pill px-3 py-1.5 text-tertiary text-faint"
                       >
                         Cancel
                       </button>
@@ -108,7 +108,7 @@ export default function RecipesPage() {
                     <button
                       type="button"
                       onClick={() => setLogging(r.id)}
-                      className="tap w-full rounded-pill bg-primary py-2.5 text-sm font-bold text-white"
+                      className="tap w-full rounded-pill bg-primary py-2.5 text-secondary font-bold text-white"
                     >
                       Cook this today
                     </button>
@@ -123,7 +123,7 @@ export default function RecipesPage() {
       {toast && (
         <div
           role="status"
-          className="fixed inset-x-4 bottom-24 z-50 animate-slide-up rounded-pill bg-ink px-4 py-3 text-center text-sm font-semibold text-bg shadow-lift"
+          className="fixed inset-x-4 bottom-24 z-50 animate-slide-up rounded-pill bg-ink px-4 py-3 text-center text-secondary font-semibold text-bg shadow-lift"
         >
           {toast}
         </div>

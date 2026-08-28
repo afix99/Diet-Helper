@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { CustomFoodDialog } from '@/components/CustomFoodDialog'
-import { Card, EmptyState, PageHeader } from '@/components/ui'
+import { EmptyState, PageHeader } from '@/components/ui'
 import { FOOD_CATEGORIES } from '@/lib/catalogue'
 import { useLogging } from '@/lib/logging'
 import { allFoods } from '@/lib/selectors'
@@ -33,7 +33,7 @@ export default function FoodsPage() {
     })
   }, [foods, query, category])
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
+  if (!ready) return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
 
   return (
     <>
@@ -44,7 +44,7 @@ export default function FoodsPage() {
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="tap shrink-0 rounded-pill bg-primary px-4 text-xs font-bold text-white"
+            className="tap shrink-0 rounded-pill bg-primary px-4 text-tertiary font-bold text-white"
           >
             + New
           </button>
@@ -57,7 +57,7 @@ export default function FoodsPage() {
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search foods, categories, notes…"
         aria-label="Search foods"
-        className="mb-3 w-full rounded-pill border border-line bg-surface px-4 py-3 text-base outline-none placeholder:text-faint focus:border-primary"
+        className="mb-3 w-full rounded-pill border border-line bg-surface px-4 py-3 text-body outline-none placeholder:text-faint focus:border-primary"
       />
 
       <div className="-mx-4 mb-4 flex gap-1.5 overflow-x-auto px-4 pb-1">
@@ -77,13 +77,13 @@ export default function FoodsPage() {
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="tap mx-auto block rounded-pill bg-primary px-5 py-2.5 text-sm font-bold text-white"
+            className="tap mx-auto block rounded-pill bg-primary px-5 py-2.5 text-secondary font-bold text-white"
           >
             {query.trim() ? `Add “${query.trim()}”` : 'Add a new food'}
           </button>
         </div>
       ) : (
-        <div className="grid gap-2">
+        <div className="overflow-hidden rounded-card bg-surface shadow-card">
           {shown.map((f) => (
             <FoodCard
               key={f.id}
@@ -125,7 +125,7 @@ function Chip({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`tap shrink-0 rounded-pill px-3 py-1.5 text-xs font-semibold ${
+      className={`tap shrink-0 rounded-pill px-3 py-1.5 text-tertiary font-semibold ${
         active ? 'bg-primary text-white' : 'bg-raised text-muted'
       }`}
     >
@@ -158,12 +158,12 @@ function FoodCard({
   // Only foods you added can be removed; the workbook catalogue is fixed.
   const isCustom = food.ownerId !== null
   return (
-    <Card className="!p-0">
+    <div className="border-b border-line last:border-0">
       <div className="flex items-stretch">
         <button type="button" onClick={onToggle} aria-expanded={open} className="tap flex-1 p-3 text-left">
-          <span className="block text-sm font-semibold">{food.name}</span>
-          <span className="block text-xs text-faint">{food.servingSize}</span>
-          <span className="mt-1 flex flex-wrap gap-x-3 text-xs tabular-nums text-muted">
+          <span className="block text-secondary font-semibold">{food.name}</span>
+          <span className="block text-tertiary text-faint">{food.servingSize}</span>
+          <span className="mt-1 flex flex-wrap gap-x-3 text-tertiary tabular-nums text-muted">
             <span className="font-bold text-primary">{food.kcal} kcal</span>
             <span>P {food.protein}g</span>
             <span>C {food.carbs}g</span>
@@ -186,7 +186,7 @@ function FoodCard({
       {open && (food.notes || isCustom) && (
         <div className="border-t border-line px-3 py-2">
           {food.notes && (
-            <p className="text-xs leading-relaxed text-muted">
+            <p className="text-tertiary leading-relaxed text-muted">
               {food.notes}
               {food.glycemicLoad !== null && food.glycemicLoad > 0 && (
                 <span className="mt-1 block text-faint">
@@ -198,20 +198,20 @@ function FoodCard({
           {isCustom &&
             (confirmingDelete ? (
               <div className="flex items-center gap-2">
-                <span className="flex-1 text-xs text-muted">
+                <span className="flex-1 text-tertiary text-muted">
                   Delete this food? Meals you already logged keep their name.
                 </span>
                 <button
                   type="button"
                   onClick={onDelete}
-                  className="tap rounded-pill bg-clay px-3 py-1.5 text-xs font-bold text-white"
+                  className="tap rounded-pill bg-clay px-3 py-1.5 text-tertiary font-bold text-white"
                 >
                   Delete
                 </button>
                 <button
                   type="button"
                   onClick={onCancelDelete}
-                  className="tap rounded-pill px-2 py-1.5 text-xs text-faint"
+                  className="tap rounded-pill px-2 py-1.5 text-tertiary text-faint"
                 >
                   Cancel
                 </button>
@@ -220,13 +220,13 @@ function FoodCard({
               <button
                 type="button"
                 onClick={onAskDelete}
-                className="tap text-xs font-semibold text-clay"
+                className="tap text-tertiary font-semibold text-clay"
               >
                 Delete this food
               </button>
             ))}
         </div>
       )}
-    </Card>
+    </div>
   )
 }

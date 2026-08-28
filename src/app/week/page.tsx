@@ -34,7 +34,7 @@ export default function WeekPage() {
 
   const shift = (weeks: number) => setAnchor(addDays(anchor, weeks * 7))
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
+  if (!ready) return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
 
   const weekTotal = dates.reduce((sum, d) => sum + dayTotals(data, d).kcal, 0)
   const loggedDays = dates.filter((d) => dayTotals(data, d).kcal > 0).length
@@ -49,7 +49,7 @@ export default function WeekPage() {
             ‹
           </button>
           <div className="text-center">
-            <p className="text-sm font-bold">
+            <p className="text-secondary font-bold">
               {formatDay(dates[0], {
                 day: 'numeric',
                 month: 'short',
@@ -60,7 +60,7 @@ export default function WeekPage() {
                 month: 'short',
               })}
             </p>
-            <p className="text-xs text-faint">
+            <p className="text-tertiary text-faint">
               {loggedDays}/7 days · avg{' '}
               {loggedDays > 0 ? Math.round(weekTotal / loggedDays) : 0} kcal
             </p>
@@ -73,8 +73,8 @@ export default function WeekPage() {
 
       {copySource && (
         <Card className="mb-3 border-primary bg-primary/5">
-          <p className="text-sm font-semibold">Copy to which day?</p>
-          <p className="mb-2 text-xs text-faint">Pick a day to copy this plan onto.</p>
+          <p className="text-secondary font-semibold">Copy to which day?</p>
+          <p className="mb-2 text-tertiary text-faint">Pick a day to copy this plan onto.</p>
           <div className="flex flex-wrap gap-1.5">
             {dates
               .filter((d) => d !== copySource)
@@ -86,7 +86,7 @@ export default function WeekPage() {
                     copyDay(copySource, d)
                     setCopySource(null)
                   }}
-                  className="tap rounded-pill bg-surface px-3 py-1.5 text-xs font-semibold"
+                  className="tap rounded-pill bg-surface px-3 py-1.5 text-tertiary font-semibold"
                 >
                   {DAY_LABELS[dates.indexOf(d)]}
                 </button>
@@ -94,7 +94,7 @@ export default function WeekPage() {
             <button
               type="button"
               onClick={() => setCopySource(null)}
-              className="tap rounded-pill px-3 py-1.5 text-xs text-faint"
+              className="tap rounded-pill px-3 py-1.5 text-tertiary text-faint"
             >
               Cancel
             </button>
@@ -117,11 +117,11 @@ export default function WeekPage() {
                 className="tap flex w-full items-center justify-between gap-2 text-left"
               >
                 <span className="min-w-0">
-                  <span className="block text-sm font-bold">
+                  <span className="block text-secondary font-bold">
                     {DAY_LABELS[i]}
-                    {isToday && <span className="ml-1.5 text-xs text-primary">· today</span>}
+                    {isToday && <span className="ml-1.5 text-tertiary text-primary">· today</span>}
                   </span>
-                  <span className="block text-xs tabular-nums text-faint">
+                  <span className="block text-tertiary tabular-nums text-faint">
                     {totals.kcal > 0
                       ? `${Math.round(totals.kcal)} kcal · ${Math.round(totals.protein)}g protein`
                       : 'Nothing planned yet'}
@@ -137,22 +137,22 @@ export default function WeekPage() {
                     return (
                       <div key={slot} className="mb-2 last:mb-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs font-semibold text-muted">
+                          <span className="text-tertiary font-semibold text-muted">
                             {SLOT_LABELS[slot].label}
                           </span>
                           <button
                             type="button"
                             onClick={() => setPicking({ date, slot })}
                             aria-label={`Add to ${SLOT_LABELS[slot].label}`}
-                            className="tap grid h-7 w-7 place-items-center rounded-pill bg-raised text-sm font-bold text-primary"
+                            className="tap grid h-7 w-7 place-items-center rounded-pill bg-raised text-secondary font-bold text-primary"
                           >
                             +
                           </button>
                         </div>
                         {entries.map((e) => (
                           <div key={e.id} className="flex items-center gap-2 py-1 pl-1">
-                            <span className="min-w-0 flex-1 truncate text-sm">{entryName(e, data.customFoods)}</span>
-                            <span className="shrink-0 text-xs tabular-nums text-faint">
+                            <span className="min-w-0 flex-1 truncate text-secondary">{entryName(e, data.customFoods)}</span>
+                            <span className="shrink-0 text-tertiary tabular-nums text-faint">
                               {Math.round(entryMacros(e).kcal)}
                             </span>
                             <button
@@ -172,7 +172,7 @@ export default function WeekPage() {
                     <button
                       type="button"
                       onClick={() => setCopySource(date)}
-                      className="tap mt-2 w-full rounded-pill border border-line py-2 text-xs font-semibold text-muted"
+                      className="tap mt-2 w-full rounded-pill border border-line py-2 text-tertiary font-semibold text-muted"
                     >
                       Copy this day to another
                     </button>

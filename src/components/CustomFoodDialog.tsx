@@ -90,14 +90,14 @@ export function CustomFoodDialog({
         className="relative max-h-[90dvh] overflow-y-auto rounded-t-[1.75rem] border-t border-line bg-bg p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lift animate-slide-up"
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-bold">New food</h2>
-          <button type="button" onClick={onClose} className="tap px-2 text-sm text-faint">
+          <h2 className="text-body font-bold">New food</h2>
+          <button type="button" onClick={onClose} className="tap px-2 text-secondary text-faint">
             Cancel
           </button>
         </div>
 
         <label className="mb-3 block">
-          <span className="mb-1 block text-xs font-semibold">
+          <span className="mb-1 block text-tertiary font-semibold">
             Name <span className="text-primary">*</span>
           </span>
           <input
@@ -105,17 +105,17 @@ export function CustomFoodDialog({
             value={draft.name}
             onChange={set('name')}
             placeholder="e.g. Mak's rendang"
-            className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-base outline-none focus:border-primary"
+            className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-body outline-none focus:border-primary"
           />
         </label>
 
         <label className="mb-3 block">
-          <span className="mb-1 block text-xs font-semibold">Serving size</span>
+          <span className="mb-1 block text-tertiary font-semibold">Serving size</span>
           <input
             value={draft.servingSize}
             onChange={set('servingSize')}
             placeholder="1 plate · 150g · 1 cup"
-            className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-base outline-none focus:border-primary"
+            className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-body outline-none focus:border-primary"
           />
         </label>
 
@@ -140,7 +140,7 @@ export function CustomFoodDialog({
         <button
           type="submit"
           disabled={!canSave}
-          className="tap mt-4 w-full rounded-pill bg-primary py-3 text-sm font-bold text-white disabled:opacity-40"
+          className="tap mt-4 w-full rounded-pill bg-primary py-3 text-secondary font-bold text-white disabled:opacity-40"
         >
           Save food
         </button>
@@ -162,7 +162,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-semibold">
+      <span className="mb-1 block text-tertiary font-semibold">
         {label} {required && <span className="text-primary">*</span>}
       </span>
       <input
@@ -173,7 +173,7 @@ function Field({
         value={value}
         onChange={onChange}
         placeholder="0"
-        className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-base tabular-nums outline-none focus:border-primary"
+        className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-body tabular-nums outline-none focus:border-primary"
       />
     </label>
   )

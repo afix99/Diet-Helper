@@ -32,7 +32,7 @@ export default function TodayPage() {
   const unlocked = useMemo(() => badgesFor(data, date).filter((b) => b.unlocked), [data, date])
 
   if (!ready) {
-    return <p className="py-20 text-center text-sm text-faint">Loading…</p>
+    return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
   }
 
   return (
@@ -62,7 +62,7 @@ export default function TodayPage() {
               pill visibly taller than the status pill beside it. */}
           <Link
             href="/more/settings"
-            className="tap inline-flex items-center px-2 text-xs font-semibold text-primary underline decoration-primary/30 underline-offset-4"
+            className="tap inline-flex items-center px-2 text-tertiary font-semibold text-primary underline decoration-primary/30 underline-offset-4"
           >
             Edit target
           </Link>
@@ -98,7 +98,7 @@ export default function TodayPage() {
                 <span key={b.id}>{b.emoji}</span>
               ))}
             </div>
-            <p className="flex-1 text-sm font-semibold">
+            <p className="flex-1 text-secondary font-semibold">
               {unlocked.length} {unlocked.length === 1 ? 'badge' : 'badges'}
               <span className="ml-1 font-normal text-faint">unlocked</span>
             </p>
@@ -119,8 +119,8 @@ export default function TodayPage() {
           return (
             <Card key={slot}>
               <div className="mb-2 flex items-baseline justify-between">
-                <h2 className="text-sm font-bold">{label.label}</h2>
-                <span className="text-xs tabular-nums text-faint">
+                <h2 className="text-secondary font-bold">{label.label}</h2>
+                <span className="text-tertiary tabular-nums text-faint">
                   {slotKcal > 0 ? `${Math.round(slotKcal)} kcal` : label.time}
                 </span>
               </div>
@@ -132,8 +132,8 @@ export default function TodayPage() {
                     return (
                       <li key={e.id} className="flex items-center gap-2 py-2">
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm">{entryName(e, data.customFoods)}</span>
-                          <span className="block text-xs text-faint tabular-nums">
+                          <span className="block truncate text-secondary">{entryName(e, data.customFoods)}</span>
+                          <span className="block text-tertiary text-faint tabular-nums">
                             {Math.round(m.kcal)} kcal · {Math.round(m.protein)}g P
                           </span>
                         </span>
@@ -142,18 +142,18 @@ export default function TodayPage() {
                             type="button"
                             aria-label="Decrease servings"
                             onClick={() => setServings(e.id, e.servings - 0.5)}
-                            className="tap grid h-8 w-8 place-items-center rounded-pill bg-raised text-sm font-bold"
+                            className="tap grid h-8 w-8 place-items-center rounded-pill bg-raised text-secondary font-bold"
                           >
                             −
                           </button>
-                          <span className="w-8 text-center text-xs font-semibold tabular-nums">
+                          <span className="w-8 text-center text-tertiary font-semibold tabular-nums">
                             ×{e.servings}
                           </span>
                           <button
                             type="button"
                             aria-label="Increase servings"
                             onClick={() => setServings(e.id, e.servings + 0.5)}
-                            className="tap grid h-8 w-8 place-items-center rounded-pill bg-raised text-sm font-bold"
+                            className="tap grid h-8 w-8 place-items-center rounded-pill bg-raised text-secondary font-bold"
                           >
                             +
                           </button>
@@ -175,7 +175,7 @@ export default function TodayPage() {
               <button
                 type="button"
                 onClick={() => setPicking(slot)}
-                className="tap w-full rounded-pill border border-dashed border-line py-2.5 text-sm font-semibold text-primary"
+                className="tap w-full rounded-pill border border-dashed border-line py-2.5 text-secondary font-semibold text-primary"
               >
                 + Add food
               </button>

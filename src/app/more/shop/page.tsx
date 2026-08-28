@@ -102,7 +102,7 @@ export default function ShopPage() {
     return { low: Math.round(low), high: Math.round(high) }
   }, [data.shopping])
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
+  if (!ready) return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
 
   return (
     <>
@@ -122,7 +122,7 @@ export default function ShopPage() {
             type="button"
             onClick={() => setTab(key)}
             aria-pressed={tab === key}
-            className={`tap flex-1 rounded-pill px-3 py-2 text-xs font-semibold ${
+            className={`tap flex-1 rounded-pill px-3 py-2 text-tertiary font-semibold ${
               tab === key ? 'bg-primary text-white' : 'bg-raised text-muted'
             }`}
           >
@@ -135,10 +135,10 @@ export default function ShopPage() {
         <>
           <Card className="mb-3">
             <div className="flex items-baseline justify-between">
-              <p className="text-sm font-bold">
+              <p className="text-secondary font-bold">
                 {done} of {data.shopping.length} bought
               </p>
-              <p className="text-sm font-bold tabular-nums text-primary">
+              <p className="text-secondary font-bold tabular-nums text-primary">
                 RM {budget.low}
                 {budget.high !== budget.low && `–${budget.high}`}
               </p>
@@ -155,21 +155,21 @@ export default function ShopPage() {
               <button
                 type="button"
                 onClick={addFromPlan}
-                className="tap rounded-pill bg-primary px-3 py-1.5 text-xs font-bold text-white"
+                className="tap rounded-pill bg-primary px-3 py-1.5 text-tertiary font-bold text-white"
               >
                 + From this week’s plan
               </button>
               <button
                 type="button"
                 onClick={reset}
-                className="tap rounded-pill bg-raised px-3 py-1.5 text-xs font-semibold text-muted"
+                className="tap rounded-pill bg-raised px-3 py-1.5 text-tertiary font-semibold text-muted"
               >
                 Clear ticks
               </button>
               <button
                 type="button"
                 onClick={restoreDefaults}
-                className="tap rounded-pill px-3 py-1.5 text-xs text-faint"
+                className="tap rounded-pill px-3 py-1.5 text-tertiary text-faint"
               >
                 Restore original list
               </button>
@@ -203,18 +203,18 @@ export default function ShopPage() {
                         </span>
                         <span className="min-w-0 flex-1">
                           <span
-                            className={`block text-sm ${
+                            className={`block text-secondary ${
                               s.checked ? 'text-faint line-through' : 'font-medium'
                             }`}
                           >
                             {s.item}
                           </span>
-                          <span className="block text-xs text-faint">
+                          <span className="block text-tertiary text-faint">
                             {[s.qty, s.vendor].filter(Boolean).join(' · ')}
                           </span>
                         </span>
                         {s.estCostRm && (
-                          <span className="shrink-0 text-xs tabular-nums text-muted">
+                          <span className="shrink-0 text-tertiary tabular-nums text-muted">
                             RM{s.estCostRm}
                           </span>
                         )}
@@ -231,33 +231,33 @@ export default function ShopPage() {
       {tab === 'prep' && (
         <div className="grid gap-3">
           <Card>
-            <h2 className="text-sm font-bold">Sunday protocol</h2>
-            <p className="text-xs text-faint">
+            <h2 className="text-secondary font-bold">Sunday protocol</h2>
+            <p className="text-tertiary text-faint">
               Batch prep on Sunday morning. Fewer daily decisions, better consistency.
             </p>
           </Card>
           {PREP.tasks.map((t) => (
             <Card key={t.timeBlock}>
               <div className="flex items-baseline justify-between gap-2">
-                <p className="text-sm font-bold tabular-nums text-primary">{t.timeBlock}</p>
-                <p className="text-xs text-faint">{t.duration}</p>
+                <p className="text-secondary font-bold tabular-nums text-primary">{t.timeBlock}</p>
+                <p className="text-tertiary text-faint">{t.duration}</p>
               </div>
-              <p className="mt-1 text-sm">{t.task}</p>
+              <p className="mt-1 text-secondary">{t.task}</p>
               {t.storage && t.storage !== '—' && (
-                <p className="mt-1 text-xs text-muted">📦 {t.storage}</p>
+                <p className="mt-1 text-tertiary text-muted">📦 {t.storage}</p>
               )}
             </Card>
           ))}
           <Card>
-            <h2 className="mb-2 text-sm font-bold">Storage</h2>
+            <h2 className="mb-2 text-secondary font-bold">Storage</h2>
             <ul className="divide-y divide-line">
               {PREP.storage.map((s) => (
                 <li key={s.food} className="py-2">
-                  <p className="text-sm font-medium">{s.food}</p>
-                  <p className="text-xs text-faint">
+                  <p className="text-secondary font-medium">{s.food}</p>
+                  <p className="text-tertiary text-faint">
                     Fridge {s.fridge} · Freezer {s.freezer}
                   </p>
-                  <p className="mt-0.5 text-xs text-muted">{s.reheat}</p>
+                  <p className="mt-0.5 text-tertiary text-muted">{s.reheat}</p>
                 </li>
               ))}
             </ul>
@@ -269,11 +269,11 @@ export default function ShopPage() {
         <div className="grid gap-3">
           {VENDORS.map((v) => (
             <Card key={v.name}>
-              <p className="text-sm font-bold">{v.name}</p>
-              <p className="text-xs text-faint">
+              <p className="text-secondary font-bold">{v.name}</p>
+              <p className="text-tertiary text-faint">
                 {v.hours} · {v.location}
               </p>
-              <p className="mt-1 text-xs text-muted">{v.strengths}</p>
+              <p className="mt-1 text-tertiary text-muted">{v.strengths}</p>
             </Card>
           ))}
         </div>
@@ -282,7 +282,7 @@ export default function ShopPage() {
       {note && (
         <div
           role="status"
-          className="fixed inset-x-4 bottom-24 z-50 animate-slide-up rounded-pill bg-ink px-4 py-3 text-center text-sm font-semibold text-bg shadow-lift"
+          className="fixed inset-x-4 bottom-24 z-50 animate-slide-up rounded-pill bg-ink px-4 py-3 text-center text-secondary font-semibold text-bg shadow-lift"
         >
           {note}
         </div>

@@ -38,7 +38,7 @@ export default function ProgressPage() {
     setInput('')
   }
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
+  if (!ready) return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
 
   return (
     <>
@@ -65,7 +65,7 @@ export default function ProgressPage() {
             be reachable from the screen that shows those numbers. */}
         <Link
           href="/more/settings"
-          className="tap mt-3 flex items-center justify-between rounded-xl bg-raised px-3 py-2 text-xs"
+          className="tap mt-3 flex items-center justify-between rounded-xl bg-raised px-3 py-2 text-tertiary"
         >
           <span className="text-muted">
             Starting weight{' '}
@@ -84,12 +84,12 @@ export default function ProgressPage() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Today\u2019s weight (kg)"
             aria-label="Today's weight in kg"
-            className="min-w-0 flex-1 rounded-pill border border-line bg-surface px-4 py-2.5 text-base outline-none placeholder:text-faint focus:border-primary"
+            className="min-w-0 flex-1 rounded-pill border border-line bg-surface px-4 py-2.5 text-body outline-none placeholder:text-faint focus:border-primary"
           />
           <button
             type="button"
             onClick={addWeight}
-            className="tap shrink-0 rounded-pill bg-primary px-5 text-sm font-bold text-white"
+            className="tap shrink-0 rounded-pill bg-primary px-5 text-secondary font-bold text-white"
           >
             Save
           </button>
@@ -101,7 +101,7 @@ export default function ProgressPage() {
       </Card>
 
       <Card className="mb-4">
-        <h2 className="mb-1 text-sm font-bold">Weight trend</h2>
+        <h2 className="mb-1 text-secondary font-bold">Weight trend</h2>
         {sorted.length < 2 ? (
           <EmptyState emoji="⚖️" title="Need at least 2 readings" hint="Log twice to see a trend" />
         ) : (
@@ -117,18 +117,18 @@ export default function ProgressPage() {
       </Card>
 
       <Card>
-        <h2 className="mb-2 text-sm font-bold">This week</h2>
+        <h2 className="mb-2 text-secondary font-bold">This week</h2>
         <ul className="divide-y divide-line">
           {dayRecords(data, weekOf(today)).map((d) => (
             <li key={d.date} className="flex items-center justify-between gap-2 py-2">
-              <span className="text-sm">
+              <span className="text-secondary">
                 {formatDay(d.date, {
                   weekday: 'short',
                   day: 'numeric',
                 })}
               </span>
               <span className="flex items-center gap-2">
-                <span className="text-xs tabular-nums text-faint">
+                <span className="text-tertiary tabular-nums text-faint">
                   {d.kcal > 0 ? `${Math.round(d.kcal)} kcal` : '—'}
                 </span>
                 <StatusPill band={statusBand(d.kcal, data.targets.kcal)} />
@@ -157,9 +157,9 @@ function Stat({
     <div>
       <p className={`text-2xl font-extrabold tabular-nums ${colour}`}>
         {value}
-        <span className="ml-0.5 text-xs font-semibold text-faint">{unit}</span>
+        <span className="ml-0.5 text-tertiary font-semibold text-faint">{unit}</span>
       </p>
-      <p className="text-xs font-semibold">{label}</p>
+      <p className="text-tertiary font-semibold">{label}</p>
     </div>
   )
 }

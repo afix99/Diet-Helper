@@ -1,24 +1,51 @@
 'use client'
 
 import Link from 'next/link'
-import { Card, PageHeader } from '@/components/ui'
+import { Icon, type IconName } from '@/components/icons'
+import { IconTile, ListGroup, ListRow, PageHeader, type TileTone } from '@/components/ui'
 import { badgesFor } from '@/lib/selectors'
 import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
 
-const LINKS = [
-  { href: '/more/recipes', emoji: '👩‍🍳', label: 'Recipes', hint: '7 salmon dishes' },
-  { href: '/more/shop', emoji: '🛒', label: 'Shop & Prep', hint: 'Shopping list & Sunday prep' },
+const LINKS: {
+  href: string
+  icon: IconName
+  tone: TileTone
+  label: string
+  hint: string
+}[] = [
+  {
+    href: '/more/recipes',
+    icon: 'book',
+    tone: 'primary',
+    label: 'Recipes',
+    hint: '7 salmon dishes',
+  },
+  {
+    href: '/more/shop',
+    icon: 'cart',
+    tone: 'avocado',
+    label: 'Shop & Prep',
+    hint: 'Shopping list & Sunday prep',
+  },
   {
     href: '/more/supplements',
-    emoji: '💊',
+    icon: 'pill',
+    tone: 'ocean',
     label: 'Supplements & Water',
     hint: 'Hydration & micronutrients',
   },
-  { href: '/more/badges', emoji: '🏅', label: 'Badges', hint: 'Streak & achievements' },
+  {
+    href: '/more/badges',
+    icon: 'medal',
+    tone: 'amber',
+    label: 'Badges',
+    hint: 'Streak & achievements',
+  },
   {
     href: '/more/settings',
-    emoji: '⚙️',
+    icon: 'gear',
+    tone: 'clay',
     label: 'Settings',
     hint: 'Calorie target, weight, reset',
   },
@@ -31,27 +58,23 @@ export default function MorePage() {
   return (
     <>
       <PageHeader title="More" />
-      <div className="grid gap-2">
+      <ListGroup>
         {LINKS.map((l) => (
-          <Link key={l.href} href={l.href}>
-            <Card className="flex items-center gap-3">
-              <span aria-hidden className="text-xl">
-                {l.emoji}
-              </span>
-              <span className="flex-1">
-                <span className="block text-sm font-bold">{l.label}</span>
-                <span className="block text-xs text-faint">{l.hint}</span>
-              </span>
-              {l.href === '/more/badges' && unlocked > 0 && (
-                <span className="pill bg-primary/15 text-primary">{unlocked}</span>
-              )}
-              <span aria-hidden className="text-faint">
-                ›
-              </span>
-            </Card>
+          <Link key={l.href} href={l.href} className="block">
+            <ListRow
+              icon={
+                <IconTile tone={l.tone}>
+                  <Icon name={l.icon} size={17} strokeWidth={2} />
+                </IconTile>
+              }
+              label={l.label}
+              secondary={l.hint}
+              value={l.href === '/more/badges' && unlocked > 0 ? unlocked : undefined}
+              chevron
+            />
           </Link>
         ))}
-      </div>
+      </ListGroup>
     </>
   )
 }

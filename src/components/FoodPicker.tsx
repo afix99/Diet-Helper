@@ -70,10 +70,10 @@ export function FoodPicker({
       <div className="relative flex max-h-[88dvh] flex-col rounded-t-[1.75rem] border-t border-line bg-bg shadow-lift animate-slide-up">
         <div className="flex items-center justify-between px-4 pb-2 pt-3">
           <div>
-            <p className="text-sm font-bold">{label.label}</p>
-            <p className="text-xs text-faint">Add an item</p>
+            <p className="text-secondary font-bold">{label.label}</p>
+            <p className="text-tertiary text-faint">Add an item</p>
           </div>
-          <button type="button" onClick={onClose} className="tap px-2 text-sm font-semibold text-primary">
+          <button type="button" onClick={onClose} className="tap px-2 text-secondary font-semibold text-primary">
             Done
           </button>
         </div>
@@ -85,7 +85,7 @@ export function FoodPicker({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search foods and recipes…"
             aria-label="Search foods"
-            className="w-full rounded-pill border border-line bg-surface px-4 py-3 text-base outline-none placeholder:text-faint focus:border-primary"
+            className="w-full rounded-pill border border-line bg-surface px-4 py-3 text-body outline-none placeholder:text-faint focus:border-primary"
           />
         </div>
 
@@ -124,23 +124,23 @@ export function FoodPicker({
                       className="tap flex w-full items-center justify-between gap-3 border-b border-line py-3 text-left"
                     >
                       <span>
-                        <span className="block text-sm font-semibold">{r.name}</span>
-                        <span className="block text-xs text-faint">{r.minutes} min</span>
+                        <span className="block text-secondary font-semibold">{r.name}</span>
+                        <span className="block text-tertiary text-faint">{r.minutes} min</span>
                       </span>
-                      <span className="text-sm font-bold tabular-nums text-primary">{r.kcal}</span>
+                      <span className="text-secondary font-bold tabular-nums text-primary">{r.kcal}</span>
                     </button>
                   ))}
                 </>
               )}
               {results.length === 0 && matchingRecipes.length === 0 ? (
                 <div className="py-8 text-center">
-                  <p className="text-sm text-faint">No matches.</p>
+                  <p className="text-secondary text-faint">No matches.</p>
                   {/* The moment you discover something is missing is the moment
                       you are willing to add it — so offer it right here. */}
                   <button
                     type="button"
                     onClick={() => setCreating(true)}
-                    className="tap mt-3 rounded-pill bg-primary px-5 py-2.5 text-sm font-bold text-white"
+                    className="tap mt-3 rounded-pill bg-primary px-5 py-2.5 text-secondary font-bold text-white"
                   >
                     Add &ldquo;{query.trim()}&rdquo;
                   </button>
@@ -197,8 +197,8 @@ function Rail({
             onClick={() => onPick(f)}
             className="tap w-36 shrink-0 rounded-card border border-line bg-surface p-3 text-left"
           >
-            <span className="block text-xs font-semibold leading-tight line-clamp-2">{f.name}</span>
-            <span className="mt-1 block text-sm font-bold tabular-nums text-primary">
+            <span className="block text-tertiary font-semibold leading-tight line-clamp-2">{f.name}</span>
+            <span className="mt-1 block text-secondary font-bold tabular-nums text-primary">
               {f.kcal}
               <span className="text-[10px] font-medium text-faint"> kcal</span>
             </span>
@@ -221,8 +221,8 @@ function RecipeRail({ onPick }: { onPick: (id: string) => void }) {
             onClick={() => onPick(r.id)}
             className="tap w-40 shrink-0 rounded-card border border-line bg-surface p-3 text-left"
           >
-            <span className="block text-xs font-semibold leading-tight line-clamp-2">{r.name}</span>
-            <span className="mt-1 block text-sm font-bold tabular-nums text-primary">
+            <span className="block text-tertiary font-semibold leading-tight line-clamp-2">{r.name}</span>
+            <span className="mt-1 block text-secondary font-bold tabular-nums text-primary">
               {r.kcal}
               <span className="text-[10px] font-medium text-faint"> kcal · {r.minutes}m</span>
             </span>
@@ -251,8 +251,8 @@ function CategoryBlock({
         aria-expanded={open}
         className="tap flex w-full items-center justify-between py-3 text-left"
       >
-        <span className="text-xs font-bold uppercase tracking-wide text-muted">{title}</span>
-        <span className="text-xs text-faint">
+        <span className="text-tertiary font-bold uppercase tracking-wide text-muted">{title}</span>
+        <span className="text-tertiary text-faint">
           {foods.length} <span aria-hidden>{open ? '▲' : '▼'}</span>
         </span>
       </button>
@@ -269,13 +269,13 @@ function FoodRow({ food, onPick }: { food: Food; onPick: (f: Food) => void }) {
       className="tap flex w-full items-center justify-between gap-3 border-b border-line py-3 text-left last:border-0"
     >
       <span className="min-w-0">
-        <span className="block truncate text-sm font-semibold">{food.name}</span>
-        <span className="block truncate text-xs text-faint">
+        <span className="block truncate text-secondary font-semibold">{food.name}</span>
+        <span className="block truncate text-tertiary text-faint">
           {food.servingSize}
           {food.protein > 0 && ` · ${food.protein}g protein`}
         </span>
       </span>
-      <span className="shrink-0 text-sm font-bold tabular-nums text-primary">{food.kcal}</span>
+      <span className="shrink-0 text-secondary font-bold tabular-nums text-primary">{food.kcal}</span>
     </button>
   )
 }

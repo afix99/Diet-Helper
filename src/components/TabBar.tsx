@@ -2,24 +2,30 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Icon, type IconName } from './icons'
 
-const TABS = [
-  { href: '/', label: 'Today', icon: '🍽️' },
-  { href: '/week', label: 'Week', icon: '🗓️' },
-  { href: '/foods', label: 'Foods', icon: '🔍' },
-  { href: '/progress', label: 'Progress', icon: '📈' },
-  { href: '/more', label: 'More', icon: '⋯' },
-] as const
+const TABS: { href: string; label: string; icon: IconName }[] = [
+  { href: '/', label: 'Today', icon: 'today' },
+  { href: '/week', label: 'Week', icon: 'calendar' },
+  { href: '/foods', label: 'Foods', icon: 'search' },
+  { href: '/progress', label: 'Progress', icon: 'chart' },
+  { href: '/more', label: 'More', icon: 'ellipsis' },
+]
 
+/**
+ * iOS 26 floats the tab bar as an inset capsule over the content rather than
+ * gluing it to the bottom edge, so the outer element is a positioning frame
+ * and the capsule itself carries the glass.
+ */
 export function TabBar() {
   const pathname = usePathname()
 
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/90 backdrop-blur-lg"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 pb-[calc(env(safe-area-inset-bottom)+10px)]"
     >
-      <ul className="mx-auto flex w-full max-w-2xl items-stretch pb-[env(safe-area-inset-bottom)]">
+      <ul className="glass pointer-events-auto mx-auto flex w-[calc(100%-40px)] max-w-md items-stretch rounded-pill px-1.5 py-1.5">
         {TABS.map((tab) => {
           const active = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href)
           return (
@@ -27,13 +33,18 @@ export function TabBar() {
               <Link
                 href={tab.href}
                 aria-current={active ? 'page' : undefined}
-                className={`tap flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-semibold ${
+                className={`tap relative flex flex-col items-center justify-center gap-1 rounded-pill py-1.5 text-caption transition-colors ${
                   active ? 'text-primary' : 'text-faint'
                 }`}
               >
-                <span aria-hidden className="text-lg leading-none">
-                  {tab.icon}
-                </span>
+                {/* Soft pill behind the selected tab, the way iOS marks it. */}
+                {active && (
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 -z-10 rounded-pill bg-primary/12"
+                  />
+                )}
+                <Icon name={tab.icon} size={23} strokeWidth={active ? 2 : 1.75} />
                 <span>{tab.label}</span>
               </Link>
             </li>

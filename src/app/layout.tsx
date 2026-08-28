@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <DataProvider>
           <div className="mx-auto flex min-h-[100dvh] w-full max-w-2xl flex-col">
-            <main className="flex-1 px-4 pb-32 pt-[max(1rem,env(safe-area-inset-top))]">
+            <main className="flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+108px)] pt-[max(0.5rem,env(safe-area-inset-top))]">
               <AuthGate>{children}</AuthGate>
             </main>
             <InstallHint />

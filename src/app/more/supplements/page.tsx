@@ -45,7 +45,7 @@ export default function SupplementsPage() {
       }
     })
 
-  if (!ready) return <p className="py-20 text-center text-sm text-faint">Loading…</p>
+  if (!ready) return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
 
   return (
     <>
@@ -53,7 +53,7 @@ export default function SupplementsPage() {
       <PageHeader title="Supplements & Water" subtitle="Hydration & micronutrients" />
 
       <Card className="mb-4 border-amber/40 bg-amber/5">
-        <p className="text-xs leading-relaxed text-muted">
+        <p className="text-tertiary leading-relaxed text-muted">
           <span className="font-bold">Food first.</span> Supplements close gaps; they don&apos;t
           replace real food. Talk to a registered dietitian before starting anything new.
         </p>
@@ -84,7 +84,7 @@ export default function SupplementsPage() {
 
       {tab === 'supplements' && (
         <div className="grid gap-3">
-          <p className="text-xs text-faint">
+          <p className="text-tertiary text-faint">
             {takenToday.length} of {SUPPLEMENTS.supplements.length} taken today
           </p>
           {SUPPLEMENTS.supplements.map((s) => {
@@ -106,12 +106,12 @@ export default function SupplementsPage() {
                     ✓
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-bold">{s.name}</span>
-                    <span className="block text-xs font-semibold text-primary">{s.dose}</span>
-                    <span className="mt-1 block text-xs text-muted">{s.purpose}</span>
-                    <span className="mt-1 block text-xs text-faint">🕐 {s.timing}</span>
+                    <span className="block text-secondary font-bold">{s.name}</span>
+                    <span className="block text-tertiary font-semibold text-primary">{s.dose}</span>
+                    <span className="mt-1 block text-tertiary text-muted">{s.purpose}</span>
+                    <span className="mt-1 block text-tertiary text-faint">🕐 {s.timing}</span>
                     {s.foodAlternative && (
-                      <span className="mt-1 block text-xs text-faint">
+                      <span className="mt-1 block text-tertiary text-faint">
                         🥗 From food: {s.foodAlternative}
                       </span>
                     )}
@@ -126,7 +126,7 @@ export default function SupplementsPage() {
       {tab === 'hydration' && (
         <div className="grid gap-2">
           <Card>
-            <p className="text-xs leading-relaxed text-muted">
+            <p className="text-tertiary leading-relaxed text-muted">
               A suggested schedule through the day. Log what you actually drink on the{' '}
               <span className="font-semibold">Today</span> screen.
             </p>
@@ -134,11 +134,11 @@ export default function SupplementsPage() {
           {SUPPLEMENTS.hydration.map((h) => (
             <Card key={h.time}>
               <div className="flex items-baseline justify-between gap-2">
-                <p className="text-sm font-bold tabular-nums text-ocean">{h.time}</p>
-                <p className="text-xs font-semibold tabular-nums text-muted">{h.volumeMl} ml</p>
+                <p className="text-secondary font-bold tabular-nums text-ocean">{h.time}</p>
+                <p className="text-tertiary font-semibold tabular-nums text-muted">{h.volumeMl} ml</p>
               </div>
-              <p className="mt-0.5 text-sm">{h.beverage}</p>
-              {h.notes && <p className="mt-1 text-xs text-faint">{h.notes}</p>}
+              <p className="mt-0.5 text-secondary">{h.beverage}</p>
+              {h.notes && <p className="mt-1 text-tertiary text-faint">{h.notes}</p>}
             </Card>
           ))}
         </div>
@@ -147,10 +147,10 @@ export default function SupplementsPage() {
       {tab === 'micro' && (
         <Card>
           <div className="mb-2 flex items-baseline justify-between">
-            <h2 className="text-sm font-bold">
+            <h2 className="text-secondary font-bold">
               Daily checklist
             </h2>
-            <span className="text-xs tabular-nums text-faint">
+            <span className="text-tertiary tabular-nums text-faint">
               {tickedToday.length}/{SUPPLEMENTS.micronutrients.length}
             </span>
           </div>
@@ -178,15 +178,15 @@ export default function SupplementsPage() {
                     <span className="min-w-0 flex-1">
                       <span className="flex items-baseline justify-between gap-2">
                         <span
-                          className={`text-sm font-semibold ${ticked ? 'text-faint' : ''}`}
+                          className={`text-secondary font-semibold ${ticked ? 'text-faint' : ''}`}
                         >
                           {m.nutrient}
                         </span>
-                        <span className="shrink-0 text-xs tabular-nums text-primary">
+                        <span className="shrink-0 text-tertiary tabular-nums text-primary">
                           {m.target}
                         </span>
                       </span>
-                      <span className="block text-xs text-faint">{m.sources}</span>
+                      <span className="block text-tertiary text-faint">{m.sources}</span>
                     </span>
                   </button>
                 </li>
@@ -203,11 +203,11 @@ export default function SupplementsPage() {
               {SUPPLEMENTS.caffeine.map((c) => (
                 <li key={c.beverage} className="flex items-center gap-2 py-2.5">
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold">{c.beverage}</span>
-                    <span className="block text-xs text-faint">{c.serving}</span>
+                    <span className="block text-secondary font-semibold">{c.beverage}</span>
+                    <span className="block text-tertiary text-faint">{c.serving}</span>
                   </span>
                   <span className="shrink-0 text-right">
-                    <span className="block text-sm font-bold tabular-nums text-primary">
+                    <span className="block text-secondary font-bold tabular-nums text-primary">
                       {c.caffeineMg}
                       <span className="text-[10px] font-medium text-faint"> mg</span>
                     </span>
@@ -219,7 +219,7 @@ export default function SupplementsPage() {
           </Card>
           {SUPPLEMENTS.caffeineCutoff && (
             <Card className="border-amber/40 bg-amber/5">
-              <p className="text-xs leading-relaxed text-muted">
+              <p className="text-tertiary leading-relaxed text-muted">
                 ⏰ {SUPPLEMENTS.caffeineCutoff}
               </p>
             </Card>
