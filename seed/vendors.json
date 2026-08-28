@@ -1,0 +1,44 @@
+[
+  {
+    "name": "ST Rosyam Mart Setiawangsa",
+    "hours": "24 hours",
+    "location": "Jln Setiawangsa 8",
+    "strengths": "Late-night availability. Basic pantry staples."
+  },
+  {
+    "name": "Giant Setiawangsa",
+    "hours": "7am–10pm",
+    "location": "Jln Setiawangsa 8",
+    "strengths": "Best value frozen salmon, brown rice, oats, bulk items."
+  },
+  {
+    "name": "AEON AU2 Setiawangsa",
+    "hours": "10am–10pm",
+    "location": "AEON Mall AU2",
+    "strengths": "Superior fresh fish counter. Request custom salmon portions."
+  },
+  {
+    "name": "Pasar Basah Dato Keramat",
+    "hours": "5am–7pm",
+    "location": "Lrg Keramat Dalam 8",
+    "strengths": "Freshest produce & fish. Lowest prices. Arrive before 9am."
+  },
+  {
+    "name": "Pasar Tani AU1 Keramat",
+    "hours": "Wed 8–11am ONLY",
+    "location": "Jln AU 1A/4A",
+    "strengths": "Cheapest ulam, herbs, and seasonal fruit. Wednesday exclusive."
+  },
+  {
+    "name": "Village Grocer Melawati",
+    "hours": "10am–10pm",
+    "location": "Melawati Mall",
+    "strengths": "Premium Norwegian salmon, Greek yogurt, organic produce."
+  },
+  {
+    "name": "Mydin Wholesale",
+    "hours": "9am–10pm",
+    "location": "AU3 Keramat",
+    "strengths": "Bulk dry goods at wholesale pricing. Rice, oats, spices."
+  }
+]

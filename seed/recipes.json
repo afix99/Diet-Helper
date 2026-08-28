@@ -1,0 +1,189 @@
+[
+  {
+    "slug": "sambal-salmon-bakar",
+    "name": "SAMBAL SALMON BAKAR",
+    "minutes": 15,
+    "kcal": 350,
+    "protein": 33,
+    "carbs": 8,
+    "fat": 18,
+    "fibre": 2,
+    "ingredients": [
+      "150g salmon fillet",
+      "1 tbsp sambal tumis",
+      "½ tsp turmeric powder",
+      "¼ tsp sea salt",
+      "1 limau kasturi",
+      "1 cup ulam (served)"
+    ],
+    "steps": [
+      "Pat salmon dry with paper towel. Rub turmeric and salt evenly.",
+      "Spread sambal tumis on flesh side.",
+      "Air-fry at 200°C for 12 min or oven-bake 200°C for 14 min.",
+      "Rest 2 min. Squeeze limau kasturi over top.",
+      "Serve with 1 cup steamed ulam and ½ cup brown rice."
+    ],
+    "chefsNote": "Grill, don't fry. Frozen Norwegian fillet is 30–40% cheaper than fresh and nutritionally equivalent."
+  },
+  {
+    "slug": "lemon-butter-pan-seared-salmon",
+    "name": "LEMON BUTTER PAN-SEARED SALMON",
+    "minutes": 12,
+    "kcal": 330,
+    "protein": 33,
+    "carbs": 2,
+    "fat": 20,
+    "fibre": 0,
+    "ingredients": [
+      "150g salmon fillet",
+      "1 tsp unsalted butter",
+      "1 clove garlic, minced",
+      "½ lemon (juice)",
+      "Black pepper",
+      "Parsley (optional)"
+    ],
+    "steps": [
+      "Pat salmon completely dry — this is critical for crispy skin.",
+      "Heat pan on medium-high. Place salmon skin-side down. Do not move for 5 min.",
+      "Flip carefully. Cook 3 min on flesh side.",
+      "Remove from heat. Add butter, garlic, lemon juice to pan. Swirl 30 seconds.",
+      "Pour over salmon. Season with black pepper."
+    ],
+    "chefsNote": "Crispy skin trick: the drier the surface, the better the Maillard reaction. Use a heavy-bottomed pan."
+  },
+  {
+    "slug": "setiawangsa-sunshine-bowl",
+    "name": "SETIAWANGSA SUNSHINE BOWL",
+    "minutes": 10,
+    "kcal": 380,
+    "protein": 35,
+    "carbs": 28,
+    "fat": 16,
+    "fibre": 8,
+    "ingredients": [
+      "100g mixed salad greens",
+      "100g cucumber, sliced",
+      "100g cherry tomatoes",
+      "150g salmon (flaked, fresh or canned)",
+      "½ avocado",
+      "1 tbsp olive oil",
+      "1 tbsp lemon juice",
+      "Pinch sea salt"
+    ],
+    "steps": [
+      "Arrange greens, cucumber, and tomatoes as base in a bowl.",
+      "Flake salmon over the top. Add avocado slices.",
+      "Whisk olive oil, lemon juice, and salt. Drizzle over bowl.",
+      "Optional: add chilli flakes or black pepper."
+    ],
+    "chefsNote": "Batch-prepare 2 bowls at night → lunch for tomorrow ready. Store dressing separately until serving."
+  },
+  {
+    "slug": "salmon-nasi-goreng-ringan",
+    "name": "SALMON NASI GORENG RINGAN",
+    "minutes": 15,
+    "kcal": 450,
+    "protein": 30,
+    "carbs": 52,
+    "fat": 14,
+    "fibre": 5,
+    "ingredients": [
+      "150g cooked brown rice (cold, day-old)",
+      "150g salmon, flaked",
+      "1 tsp cooking oil",
+      "2 cloves garlic, minced",
+      "1 red chilli, sliced",
+      "1 egg",
+      "1 cup mixed vegetables (carrot, peas, corn)",
+      "1 tbsp kicap cair",
+      "White pepper"
+    ],
+    "steps": [
+      "Heat oil in wok on high heat. Fry garlic and chilli 30 seconds.",
+      "Add salmon. Break into flakes. Cook 1 min.",
+      "Add cold rice. Stir-fry 3 min, breaking clumps.",
+      "Push rice to side. Crack egg into empty space. Scramble quickly.",
+      "Add vegetables, kicap, and pepper. Toss 2 min. Serve immediately."
+    ],
+    "chefsNote": "Cold rice = lower glycemic index + less sticky. Day-old rice is ideal for fried rice texture. Use only 1 tsp oil."
+  },
+  {
+    "slug": "steamed-ginger-soy-salmon",
+    "name": "STEAMED GINGER-SOY SALMON",
+    "minutes": 12,
+    "kcal": 300,
+    "protein": 33,
+    "carbs": 3,
+    "fat": 16,
+    "fibre": 0,
+    "ingredients": [
+      "150g salmon fillet",
+      "2cm ginger, julienned",
+      "1 stalk spring onion, sliced",
+      "1 tbsp light soy sauce",
+      "½ tsp sesame oil",
+      "1 tbsp water"
+    ],
+    "steps": [
+      "Place salmon on heatproof plate. Scatter ginger and spring onion on top.",
+      "Steam over boiling water for 8 minutes (covered).",
+      "Mix soy sauce, sesame oil, and water.",
+      "Pour sauce over steamed salmon. Garnish with extra spring onion."
+    ],
+    "chefsNote": "Zero added oil cooking method. The lightest dinner option in this collection. Pair with large portion of steamed vegetables."
+  },
+  {
+    "slug": "salmon-avocado-toast",
+    "name": "SALMON AVOCADO TOAST",
+    "minutes": 5,
+    "kcal": 340,
+    "protein": 25,
+    "carbs": 30,
+    "fat": 14,
+    "fibre": 6,
+    "ingredients": [
+      "2 slices wholemeal bread",
+      "½ avocado",
+      "1 tin canned salmon (150g, drained)",
+      "1 tsp lemon juice",
+      "Black pepper",
+      "Chilli flakes (optional)"
+    ],
+    "steps": [
+      "Toast bread until golden and crisp.",
+      "Mash avocado with lemon juice and pepper. Spread on toast.",
+      "Top with flaked canned salmon.",
+      "Add chilli flakes if desired. Serve immediately."
+    ],
+    "chefsNote": "The 'emergency breakfast' — keep a tin of salmon and avocado in stock. Under 5 minutes from fridge to plate."
+  },
+  {
+    "slug": "salmon-head-sup-budget-option",
+    "name": "SALMON HEAD SUP — BUDGET OPTION",
+    "minutes": 45,
+    "kcal": 280,
+    "protein": 25,
+    "carbs": 12,
+    "fat": 14,
+    "fibre": 2,
+    "ingredients": [
+      "1 salmon head (approx. 400g)",
+      "1L water",
+      "3cm ginger, sliced",
+      "2 cloves garlic",
+      "1 tomato, quartered",
+      "1 stalk spring onion",
+      "1 tbsp light soy",
+      "White pepper",
+      "1 cup bok choy"
+    ],
+    "steps": [
+      "Clean salmon head thoroughly. Remove gills.",
+      "Boil water with ginger and garlic.",
+      "Add salmon head. Simmer 25 min. Skim foam from surface.",
+      "Add tomato and bok choy. Cook 5 min.",
+      "Season with soy and pepper. Garnish with spring onion."
+    ],
+    "chefsNote": "Cheapest salmon cut at the wet market. Rich in collagen from the head. The broth itself is nutrient-dense and filling."
+  }
+]

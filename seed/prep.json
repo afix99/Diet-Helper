@@ -1,0 +1,139 @@
+{
+  "tasks": [
+    {
+      "timeBlock": "08:00–08:30",
+      "task": "Defrost salmon portions (if frozen). Wash & dry all vegetables.",
+      "duration": "30 min",
+      "storage": "—"
+    },
+    {
+      "timeBlock": "08:30–09:00",
+      "task": "Boil 6 eggs. Cook 3 cups brown rice (yields 6 portions).",
+      "duration": "30 min",
+      "storage": "Eggs: fridge 7 days. Rice: fridge 3 days."
+    },
+    {
+      "timeBlock": "09:00–09:45",
+      "task": "Marinate chicken breast (soy, ginger, garlic). Portion salmon into 150g bags.",
+      "duration": "45 min",
+      "storage": "Marinated chicken: fridge 24h. Salmon: freeze flat."
+    },
+    {
+      "timeBlock": "09:45–10:30",
+      "task": "Steam broccoli & mixed vegetables. Blanch 2 min only.",
+      "duration": "45 min",
+      "storage": "Fridge 4 days. Reheat by steaming."
+    },
+    {
+      "timeBlock": "10:30–11:00",
+      "task": "Wash & spin salad greens. Store with paper towel in airtight container.",
+      "duration": "30 min",
+      "storage": "Fridge 5 days. Paper towel absorbs moisture."
+    },
+    {
+      "timeBlock": "11:00–11:30",
+      "task": "Prepare overnight oats (3 jars): 40g oats + 150g yogurt + fruit.",
+      "duration": "30 min",
+      "storage": "Fridge 3 days. Grab-and-go breakfast."
+    },
+    {
+      "timeBlock": "11:30–12:00",
+      "task": "Portion nuts & snacks into small containers (15 almonds each).",
+      "duration": "30 min",
+      "storage": "Room temp. Prevents overeating from bulk bags."
+    },
+    {
+      "timeBlock": "12:00–12:30",
+      "task": "Clean kitchen. Review Weekly Meal Schedule. Adjust based on social plans.",
+      "duration": "30 min",
+      "storage": "—"
+    }
+  ],
+  "storage": [
+    {
+      "food": "Cooked salmon",
+      "fridge": "48 hours",
+      "freezer": "2 months",
+      "reheat": "Steam 5 min or microwave 60 sec covered"
+    },
+    {
+      "food": "Cooked chicken",
+      "fridge": "48 hours",
+      "freezer": "3 months",
+      "reheat": "Oven 180°C 10 min or pan with splash of water"
+    },
+    {
+      "food": "Boiled eggs",
+      "fridge": "7 days",
+      "freezer": "Not recommended",
+      "reheat": "Room temp or warm water 3 min"
+    },
+    {
+      "food": "Cooked rice",
+      "fridge": "3 days",
+      "freezer": "1 month",
+      "reheat": "Steam or microwave with damp cloth"
+    },
+    {
+      "food": "Steamed vegetables",
+      "fridge": "4 days",
+      "freezer": "2 months",
+      "reheat": "Steam 3 min. Avoid microwave — texture degrades."
+    },
+    {
+      "food": "Salad greens (washed)",
+      "fridge": "5 days",
+      "freezer": "Not recommended",
+      "reheat": "Serve cold. Do not heat."
+    },
+    {
+      "food": "Marinated raw meat",
+      "fridge": "24 hours",
+      "freezer": "3 months",
+      "reheat": "Thaw overnight in fridge. Never at room temp."
+    },
+    {
+      "food": "Overnight oats",
+      "fridge": "3 days",
+      "freezer": "Not recommended",
+      "reheat": "Serve cold. Add fresh fruit before eating."
+    }
+  ],
+  "budget": [
+    {
+      "category": "Protein (salmon, chicken, eggs, dairy)",
+      "weeklyCostRm": "106–116",
+      "share": "~45%"
+    },
+    {
+      "category": "Carbohydrates (rice, oats, bread, potatoes)",
+      "weeklyCostRm": "23",
+      "share": "~10%"
+    },
+    {
+      "category": "Vegetables & Fresh Produce",
+      "weeklyCostRm": "31",
+      "share": "~13%"
+    },
+    {
+      "category": "Fruit",
+      "weeklyCostRm": "29",
+      "share": "~12%"
+    },
+    {
+      "category": "Pantry & Condiments",
+      "weeklyCostRm": "63",
+      "share": "~26%"
+    },
+    {
+      "category": "TOTAL (Essential items only)",
+      "weeklyCostRm": "~170–180",
+      "share": "100%"
+    },
+    {
+      "category": "TOTAL (With recommended items)",
+      "weeklyCostRm": "~220–240",
+      "share": "—"
+    }
+  ]
+}

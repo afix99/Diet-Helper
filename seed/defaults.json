@@ -1,0 +1,35 @@
+{
+  "startWeightKg": 62,
+  "goalWeightKg": 55,
+  "programmeWeeks": 12,
+  "targets": {
+    "kcal": 1500,
+    "kcalRange": "1350–1650",
+    "kcalNote": "Moderate deficit: ~500 kcal below TDEE",
+    "protein": 90,
+    "proteinRange": "81–99",
+    "proteinNote": "1.4–1.6 g/kg target body weight; preserves LBM in deficit",
+    "carbs": 130,
+    "carbsRange": "117–143",
+    "carbsNote": "Sufficient for cognitive function & training performance",
+    "fat": 50,
+    "fatRange": "45–55",
+    "fatNote": "Minimum 0.8 g/kg; hormone production & nutrient absorption",
+    "fibre": 30,
+    "fibreRange": "25–35",
+    "fibreNote": "Promotes satiety & gut microbiome diversity",
+    "waterMl": 2500,
+    "waterMlRange": "2000–3000",
+    "waterMlNote": "Baseline; increase with activity & ambient temperature"
+  },
+  "principles": [
+    "1. ENERGY DEFICIT: A sustained caloric deficit of 300–500 kcal/day produces fat loss of 0.4–0.6 kg/week while minimising lean tissue catabolism.",
+    "2. PROTEIN PRIORITISATION: Protein intake ≥1.4 g/kg target weight preserves muscle mass, increases diet-induced thermogenesis, and enhances satiety signalling.",
+    "3. MICRONUTRIENT DENSITY: Minimum 5 servings/day of vegetables and 2 servings/day of fruit to ensure adequate fibre, vitamins, and phytonutrients.",
+    "4. MEAL FREQUENCY: 3 main meals + 1–2 snacks distributed across 10–12 hours supports stable blood glucose and reduces unplanned eating.",
+    "5. HYDRATION PROTOCOL: 250–500ml water upon waking; 250ml before each meal; additional intake during and after physical activity.",
+    "6. ADHERENCE MECHANISM: One flexible meal (≤800 kcal) per week to support psychological sustainability and social participation without compromising weekly deficit.",
+    "7. PROGRESS MONITORING: Weigh-in once weekly (morning, post-void, pre-breakfast, consistent clothing); track 7-day rolling average rather than daily fluctuations.",
+    "8. SLEEP & RECOVERY: 7–9 hours sleep; sleep restriction impairs ghrelin/leptin regulation and increases hedonic food cravings by 24–45%."
+  ]
+}

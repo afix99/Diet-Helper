@@ -1,0 +1,37 @@
+{
+  "methodology": [
+    "1. ENERGY BALANCE FRAMEWORK: This programme operates on the principle of sustained negative energy balance. A deficit of 300–500 kcal/day below Total Daily Energy Expenditure (TDEE) produces a fat loss rate of 0.4–0.6 kg/week. This rate minimises adaptive thermogenesis, preserves lean body mass, and supports hormonal homeostasis. Faster rates (>1 kg/week) increase risk of gallstone formation, muscle catabolism, and menstrual disruption in females.",
+    "2. PROTEIN THRESHOLD: Protein intake is set at 1.4–1.6 g/kg target body weight (90g/day for 55kg goal). This exceeds the RDA (0.8 g/kg) and aligns with sports nutrition consensus for body recomposition during caloric restriction. Higher protein preserves muscle protein synthesis, increases diet-induced thermogenesis (DIT: 20–30% of protein kcal vs 5–10% for carbs/fats), and enhances satiety via GLP-1 and PYY secretion.",
+    "3. MACRONUTRIENT DISTRIBUTION: The 1500 kcal target is distributed as 24% protein (90g), 35% carbohydrate (130g), and 30% fat (50g), with 8% fibre (30g). This moderate-carbohydrate approach supports thyroid function, training performance, and cognitive clarity while maintaining sufficient fat for steroid hormone synthesis and fat-soluble vitamin absorption.",
+    "4. MEAL PATTERNING: Three main meals plus 1–2 snacks distributed across a 10–12 hour eating window (e.g., 08:00–20:00) supports circadian alignment. Front-loading calories (larger breakfast/lunch, moderate dinner) improves glucose tolerance and reduces evening hyperphagia.",
+    "5. FOOD QUALITY HIERARCHY: The programme prioritises whole, minimally processed foods. The NOVA classification system guides selections: Group 1 (unprocessed/minimally processed) forms 80–90% of intake; Group 2 (culinary ingredients) 5–10%; Group 3 (processed foods) ≤10%; Group 4 (ultra-processed) ≤5% (weekly treat meal).",
+    "6. BEHAVIOURAL ADHERENCE MECHANISMS: (a) Flexible eating: one weekly meal ≤800 kcal prevents psychological restriction and supports social participation. (b) Meal prep: batch cooking on Sundays reduces decision fatigue and improves adherence by 40–60%. (c) Self-monitoring: daily food logging increases weight loss success by 2–3x versus non-logging (Burke et al., 2011). (d) Progress photos: visual feedback maintains motivation when scale weight plateaus.",
+    "7. HYDRATION & MICRONUTRIENTS: Water intake of 2.5L/day supports cellular metabolism, thermoregulation, and appetite regulation. The programme emphasises food-first micronutrient acquisition through 5+ vegetable servings and 2+ fruit servings daily. Supplements address only documented gaps (Vitamin D in equatorial latitudes with high indoor exposure; Omega-3 if salmon intake <2x/week).",
+    "8. SLEEP & STRESS INTEGRATION: Sleep restriction to <7 hours increases ghrelin (+28%) and reduces leptin (-18%), amplifying hedonic food cravings (Spiegel et al., 2004). Chronic cortisol elevation promotes visceral adiposity. The programme recommends 7–9 hours sleep and stress-reduction practices (walking, journaling, prayer/meditation) as non-negotiable adjuncts to nutrition."
+  ],
+  "references": [
+    "1. Arshad, F., et al. (2022). Meal preparation and dietary adherence in Malaysian adults: A cross-sectional study. Journal of Nutrition and Metabolism, 2022, 8845123.",
+    "2. Burke, L. E., et al. (2011). Self-monitoring in weight loss: A systematic review of the literature. Journal of the American Dietetic Association, 111(1), 92–102.",
+    "3. Helms, E. R., et al. (2014). Evidence-based recommendations for natural bodybuilding contest preparation: Nutrition and supplementation. Journal of the International Society of Sports Nutrition, 11(1), 20.",
+    "4. Institute of Medicine (2005). Dietary Reference Intakes for Energy, Carbohydrate, Fiber, Fat, Fatty Acids, Cholesterol, Protein, and Amino Acids. National Academies Press.",
+    "5. Leidy, H. J., et al. (2015). The role of protein in weight loss and maintenance. American Journal of Clinical Nutrition, 101(6), 1320S–1329S.",
+    "6. Monteiro, C. A., et al. (2019). Ultra-processed foods, diet quality, and health using the NOVA classification system. FAO.",
+    "7. Phillips, S. M., & Van Loon, L. J. (2011). Dietary protein for athletes: From requirements to optimum adaptation. Journal of Sports Sciences, 29(sup1), S29–S38.",
+    "8. Spiegel, K., et al. (2004). Brief communication: Sleep curtailment in healthy young men is associated with decreased leptin levels, elevated ghrelin levels, and increased hunger and appetite. Annals of Internal Medicine, 141(11), 846–850.",
+    "9. St-Onge, M. P., et al. (2016). Sleep and circadian rhythms in the development of obesity. Physiology & Behavior, 134, 178–186.",
+    "10. Tee, E. S., et al. (2013). Nutrient composition of Malaysian foods. Malaysian Food Composition Database Programme, Institute for Medical Research.",
+    "11. USDA (2024). FoodData Central. U.S. Department of Agriculture, Agricultural Research Service.",
+    "12. WHO (2015). Guideline: Sugars intake for adults and children. World Health Organization."
+  ],
+  "disclaimer": [
+    "This nutritional programme is intended for general educational purposes only. It does not constitute medical advice, diagnosis, or treatment. The recommendations herein are based on established nutritional science and are designed for healthy adults without diagnosed medical conditions.",
+    "Before commencing this or any dietary programme, individuals should consult a registered medical practitioner or accredited dietitian, particularly if they:",
+    "• Have a diagnosed medical condition (diabetes, hypertension, kidney disease, thyroid disorder, eating disorder history)",
+    "• Are pregnant, breastfeeding, or planning pregnancy",
+    "• Are under 18 years of age or over 65 years of age",
+    "• Are taking prescription medication that may interact with dietary changes",
+    "• Have a history of disordered eating or body dysmorphia",
+    "The programme author and distributor assume no liability for adverse outcomes resulting from unsupervised implementation. Individual results vary based on genetics, adherence, activity level, sleep quality, stress status, and metabolic health.",
+    "For personalised medical nutrition therapy in Malaysia, contact: Malaysian Dietitians' Association (MDA) or seek referral from a private hospital dietitian."
+  ]
+}

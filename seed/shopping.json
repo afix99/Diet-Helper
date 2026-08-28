@@ -1,0 +1,226 @@
+[
+  {
+    "category": "PROTEIN",
+    "item": "Salmon fillet, frozen, Norwegian",
+    "qty": "6 portions (900g)",
+    "estCostRm": "45–55",
+    "vendor": "Giant / AEON",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "PROTEIN",
+    "item": "Canned salmon in water",
+    "qty": "2 tins",
+    "estCostRm": "16",
+    "vendor": "Giant",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "PROTEIN",
+    "item": "Chicken breast, skinless",
+    "qty": "500g",
+    "estCostRm": "12",
+    "vendor": "Pasar Keramat",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "PROTEIN",
+    "item": "Whole eggs, grade A",
+    "qty": "1 dozen",
+    "estCostRm": "8",
+    "vendor": "Any",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "PROTEIN",
+    "item": "Tempeh",
+    "qty": "2 blocks",
+    "estCostRm": "4",
+    "vendor": "Pasar Keramat",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "PROTEIN",
+    "item": "Firm tofu",
+    "qty": "1 pack (400g)",
+    "estCostRm": "3",
+    "vendor": "Any",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "PROTEIN",
+    "item": "Greek yogurt, plain, low-fat",
+    "qty": "1 tub (500g)",
+    "estCostRm": "12",
+    "vendor": "Village Grocer / AEON",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "PROTEIN",
+    "item": "Skim milk",
+    "qty": "1L",
+    "estCostRm": "6",
+    "vendor": "Any",
+    "priority": "RECOMMENDED"
+  },
+  {
+    "category": "CARBS",
+    "item": "Brown rice",
+    "qty": "1kg",
+    "estCostRm": "8",
+    "vendor": "Giant / Mydin",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "CARBS",
+    "item": "Rolled oats",
+    "qty": "1kg",
+    "estCostRm": "10",
+    "vendor": "Giant / Mydin",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "CARBS",
+    "item": "Wholemeal bread",
+    "qty": "1 loaf",
+    "estCostRm": "5",
+    "vendor": "Any",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "CARBS",
+    "item": "Sweet potatoes",
+    "qty": "1kg",
+    "estCostRm": "5",
+    "vendor": "Pasar Keramat",
+    "priority": "RECOMMENDED"
+  },
+  {
+    "category": "VEGETABLES",
+    "item": "Mixed salad greens",
+    "qty": "2 bags",
+    "estCostRm": "10",
+    "vendor": "AEON / Village Grocer",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "VEGETABLES",
+    "item": "Cucumber & tomato",
+    "qty": "1kg combined",
+    "estCostRm": "5",
+    "vendor": "Pasar Keramat",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "VEGETABLES",
+    "item": "Broccoli",
+    "qty": "500g",
+    "estCostRm": "4",
+    "vendor": "Any",
+    "priority": "RECOMMENDED"
+  },
+  {
+    "category": "VEGETABLES",
+    "item": "Ulam pack (pegaga, pucuk paku, etc.)",
+    "qty": "1 pack",
+    "estCostRm": "3",
+    "vendor": "Pasar Tani",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "VEGETABLES",
+    "item": "Ginger & garlic",
+    "qty": "200g each",
+    "estCostRm": "4",
+    "vendor": "Any",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "VEGETABLES",
+    "item": "Spring onion & limau kasturi",
+    "qty": "1 bunch / 10 pcs",
+    "estCostRm": "5",
+    "vendor": "Any",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "FRUIT",
+    "item": "Apples",
+    "qty": "5 pcs",
+    "estCostRm": "8",
+    "vendor": "Any",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "FRUIT",
+    "item": "Bananas",
+    "qty": "1 comb",
+    "estCostRm": "5",
+    "vendor": "Any",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "FRUIT",
+    "item": "Papaya or watermelon",
+    "qty": "1 medium / ¼ fruit",
+    "estCostRm": "6",
+    "vendor": "Pasar Keramat",
+    "priority": "RECOMMENDED"
+  },
+  {
+    "category": "FRUIT",
+    "item": "Avocado",
+    "qty": "2 pcs",
+    "estCostRm": "10",
+    "vendor": "Village Grocer",
+    "priority": "RECOMMENDED"
+  },
+  {
+    "category": "PANTRY",
+    "item": "Almonds, raw",
+    "qty": "200g",
+    "estCostRm": "12",
+    "vendor": "Giant",
+    "priority": "RECOMMENDED"
+  },
+  {
+    "category": "PANTRY",
+    "item": "Sambal tumis (bottled)",
+    "qty": "1 jar",
+    "estCostRm": "8",
+    "vendor": "Any",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "PANTRY",
+    "item": "Light soy sauce",
+    "qty": "1 bottle",
+    "estCostRm": "5",
+    "vendor": "Any",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "PANTRY",
+    "item": "Extra virgin olive oil",
+    "qty": "250ml",
+    "estCostRm": "15",
+    "vendor": "Giant",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "PANTRY",
+    "item": "Turmeric powder & black pepper",
+    "qty": "50g each",
+    "estCostRm": "4",
+    "vendor": "Any",
+    "priority": "ESSENTIAL"
+  },
+  {
+    "category": "PANTRY",
+    "item": "Sesame oil",
+    "qty": "100ml",
+    "estCostRm": "6",
+    "vendor": "Any",
+    "priority": "RECOMMENDED"
+  }
+]
