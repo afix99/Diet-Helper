@@ -72,6 +72,7 @@ export function CustomFoodDialog({
       fibre: num(draft.fibre),
       glycemicLoad: null,
       notes: null,
+      source: 'custom',
     }
     const id = addCustomFood(food)
     onCreated?.({ ...food, id, slug: id, ownerId: 'local' })

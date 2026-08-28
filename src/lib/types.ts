@@ -39,6 +39,16 @@ export interface Macros {
   fibre: number
 }
 
+/**
+ * Where a food's numbers came from.
+ * - `workbook`: validated against Malaysian Food Composition Tables and USDA,
+ *   per the source spreadsheet.
+ * - `community`: public estimates for chain and street food. Real portions
+ *   vary a lot between vendors, so these are shown marked.
+ * - `custom`: entered by the user.
+ */
+export type FoodSource = 'workbook' | 'community' | 'custom'
+
 export interface Food extends Macros {
   id: string
   slug: string
@@ -48,6 +58,7 @@ export interface Food extends Macros {
   glycemicLoad: number | null
   notes: string | null
   ownerId: string | null
+  source: FoodSource
 }
 
 export interface Recipe extends Macros {

@@ -6,6 +6,7 @@
  * which matters because the whole design goal is a five-second log.
  */
 import foodsJson from '../../seed/foods.json'
+import viralFoodsJson from '../../seed/viral-foods.json'
 import recipesJson from '../../seed/recipes.json'
 import defaultsJson from '../../seed/defaults.json'
 import shoppingJson from '../../seed/shopping.json'
@@ -15,7 +16,21 @@ import methodologyJson from '../../seed/methodology.json'
 import supplementsJson from '../../seed/supplements.json'
 import type { Food, Recipe, Targets } from './types'
 
-export const FOODS: Food[] = foodsJson.map((f) => ({
+type RawFood = {
+  slug: string
+  category: string | null
+  name: string
+  servingSize: string | null
+  kcal: number | null
+  protein: number | null
+  carbs: number | null
+  fat: number | null
+  fibre: number | null
+  glycemicLoad: number | null
+  notes: string | null
+}
+
+const toFood = (f: RawFood, source: Food['source']): Food => ({
   id: f.slug,
   slug: f.slug,
   category: f.category ?? 'OTHER',
@@ -29,7 +44,18 @@ export const FOODS: Food[] = foodsJson.map((f) => ({
   glycemicLoad: f.glycemicLoad,
   notes: f.notes,
   ownerId: null,
-}))
+  source,
+})
+
+/**
+ * The workbook's validated foods first, then the chain and street-food pack.
+ * Order matters: search and the quick-add matcher scan in sequence, so a
+ * verified entry wins a tie against an estimated one.
+ */
+export const FOODS: Food[] = [
+  ...(foodsJson as RawFood[]).map((f) => toFood(f, 'workbook')),
+  ...(viralFoodsJson as RawFood[]).map((f) => toFood(f, 'community')),
+]
 
 /**
  * Recipe titles are stored SHOUTING in the workbook. Title-case them for

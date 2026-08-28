@@ -112,6 +112,22 @@ It asserts 69 foods and 7 recipes survived the round trip.
 Tone follows the workbook's own: `✓ Ikut target`, `~ Dekat`, `▲ Lebih`. No
 alarm colours, no shaming copy.
 
+## The food catalogue
+
+147 items in two sets, and the app keeps them visibly apart:
+
+- **69 workbook foods**, validated against the Malaysian Food Composition
+  Tables and USDA SR Legacy per the source spreadsheet.
+- **78 chain and street foods** — the full ZUS Coffee menu, ayam gepuk, kebab,
+  Ramly, nasi kandar, Tealive and boba, Korean fried chicken, KFC and the rest.
+  These are public estimates and are labelled **est.** in the list, because a
+  street portion genuinely varies between outlets. Sources for the same dish
+  disagreed by a factor of two while this was compiled, which is exactly why
+  they are not presented with the same authority as the workbook's numbers.
+
+Search and the quick-add matcher scan the workbook set first, so a verified
+entry wins a tie against an estimated one.
+
 ## Adding your own foods
 
 The 69-item catalogue won't have everything. Two ways in:

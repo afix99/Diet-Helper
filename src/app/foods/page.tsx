@@ -161,7 +161,14 @@ function FoodCard({
     <div className="border-b border-line last:border-0">
       <div className="flex items-stretch">
         <button type="button" onClick={onToggle} aria-expanded={open} className="tap flex-1 p-3 text-left">
-          <span className="block text-secondary font-semibold">{food.name}</span>
+          <span className="block text-secondary font-semibold">
+            {food.name}
+            {food.source === 'community' && (
+              <span className="ml-1.5 rounded px-1 py-px align-middle text-caption font-semibold text-faint ring-1 ring-line">
+                est.
+              </span>
+            )}
+          </span>
           <span className="block text-tertiary text-faint">{food.servingSize}</span>
           <span className="mt-1 flex flex-wrap gap-x-3 text-tertiary tabular-nums text-muted">
             <span className="font-bold text-primary">{food.kcal} kcal</span>
@@ -185,6 +192,12 @@ function FoodCard({
       </div>
       {open && (food.notes || isCustom) && (
         <div className="border-t border-line px-3 py-2">
+          {food.source === 'community' && (
+            <p className="mb-1 text-tertiary leading-relaxed text-faint">
+              Estimated from public figures. Chain and street portions vary a lot between
+              outlets, so treat this as a good guess rather than a label reading.
+            </p>
+          )}
           {food.notes && (
             <p className="text-tertiary leading-relaxed text-muted">
               {food.notes}

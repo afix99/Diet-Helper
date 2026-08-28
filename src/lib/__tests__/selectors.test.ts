@@ -81,6 +81,7 @@ describe('entryName', () => {
         glycemicLoad: null,
         notes: null,
         ownerId: 'local',
+        source: 'custom' as const,
       },
     ]
     expect(entryName(custom, customFoods)).toBe('Mak’s rendang')
@@ -103,6 +104,7 @@ describe('custom foods survive being deleted', () => {
     glycemicLoad: null,
     ownerId: 'local',
     notes: null,
+    source: 'custom' as const,
   }
 
   /** What logFood writes for a custom food: name snapshotted onto the entry. */
