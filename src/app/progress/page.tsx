@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Card, EmptyState, ListGroup, PageHeader, StatusPill } from '@/components/ui'
 import { insights } from '@/lib/insights'
+import { Icon } from '@/components/icons'
 import { rollingAverage, round1, statusBand } from '@/lib/nutrition'
 import { dayRecords, latestWeight, weekDates, weekOf } from '@/lib/selectors'
 import { formatDay } from '@/lib/dates'
@@ -94,7 +95,10 @@ export default function ProgressPage() {
             <strong className="text-ink">{data.profile.startWeightKg} kg</strong> · Goal{' '}
             <strong className="text-ink">{data.profile.goalWeightKg} kg</strong>
           </span>
-          <span className="font-semibold text-primary">Edit ›</span>
+          <span className="inline-flex items-center gap-0.5 font-semibold text-primary">
+            Edit
+            <Icon name="chevron" size={14} strokeWidth={2.5} />
+          </span>
         </Link>
 
         <div className="mt-4 flex gap-2">
@@ -125,7 +129,7 @@ export default function ProgressPage() {
       <Card className="mb-4">
         <h2 className="mb-1 text-secondary font-bold">Weight trend</h2>
         {sorted.length < 2 ? (
-          <EmptyState emoji="⚖️" title="Need at least 2 readings" hint="Log twice to see a trend" />
+          <EmptyState art="scales" title="Need at least 2 readings" hint="Log twice to see a trend" />
         ) : (
           <WeightChart
             points={sorted.map((w, i) => ({
@@ -305,7 +309,11 @@ function WeightChart({
         </text>
       </svg>
       <p className="mt-1 text-caption text-faint">
-        <span className="text-primary">━</span> 7-day average · <span>━</span> daily reading
+        <span className="mr-1 inline-block h-[3px] w-3.5 rounded-pill bg-primary align-middle" />
+        7-day average
+        <span className="mx-1">·</span>
+        <span className="mr-1 inline-block h-[3px] w-3.5 rounded-pill bg-line align-middle" />
+        daily reading
       </p>
     </div>
   )

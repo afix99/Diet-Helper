@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import { BadgeArt } from '@/components/Emoji'
 import { Card, PageHeader } from '@/components/ui'
 import { badgesFor, streakFor } from '@/lib/selectors'
 import { useData } from '@/lib/store/provider'
@@ -45,16 +46,27 @@ export default function BadgesPage() {
       </Card>
 
       <div className="grid grid-cols-2 gap-2">
-        {list.map((b) => (
+        {list.map((b, i) => (
           <Card
             key={b.id}
-            className={`text-center ${b.unlocked ? 'border-primary/40 bg-primary/5' : ''}`}
+            style={{ animationDelay: `${i * 55}ms` }}
+            className={`animate-rise-in text-center ${
+              b.unlocked ? 'border-primary/40 bg-primary/5' : ''
+            }`}
           >
-            <span
-              aria-hidden
-              className={`block text-3xl ${b.unlocked ? 'animate-pop-in' : 'opacity-25 grayscale'}`}
-            >
-              {b.emoji}
+            <span className="relative mx-auto block h-16 w-16">
+              {b.unlocked && (
+                <span
+                  aria-hidden
+                  className="absolute inset-0 animate-badge-glow rounded-full bg-primary/40"
+                />
+              )}
+              <BadgeArt
+                id={b.id}
+                unlocked={b.unlocked}
+                size={64}
+                className={`relative ${b.unlocked ? 'animate-badge-pop' : ''}`}
+              />
             </span>
             <p className="mt-1 text-tertiary font-bold leading-tight">{b.name}</p>
             <p className="text-caption leading-tight text-faint">{b.requirement}</p>

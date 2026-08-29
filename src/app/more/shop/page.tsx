@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { Card, ListGroup, PageHeader, SegmentedControl } from '@/components/ui'
+import { Icon } from '@/components/icons'
 import { PREP, RECIPES, VENDORS } from '@/lib/catalogue'
 import { aggregateIngredients } from '@/lib/ingredients'
 import { entriesFor, weekOf } from '@/lib/selectors'
@@ -190,7 +191,7 @@ export default function ShopPage() {
                               : 'border-line text-transparent'
                           }`}
                         >
-                          ✓
+                          {s.checked && <Icon name="check" size={13} strokeWidth={3} />}
                         </span>
                         <span className="min-w-0 flex-1">
                           <span

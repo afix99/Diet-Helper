@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabaseClient, supabaseConfigured } from '@/lib/store'
+import { Emoji } from './Emoji'
 
 /**
  * Sign-in wall — but only when Supabase is actually configured.
@@ -53,16 +54,16 @@ export function AuthGate({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-[80dvh] flex-col justify-center px-2">
       <div className="mb-6 text-center">
-        <span aria-hidden className="text-5xl">
-          🍽️
-        </span>
+        <Emoji name="bowl" size={56} />
         <h1 className="mt-3 text-2xl font-extrabold">Memey Diet Planner</h1>
         <p className="mt-1 text-secondary text-faint">Sign in to sync across devices</p>
       </div>
 
       {sent ? (
         <div className="card p-5 text-center">
-          <p className="text-secondary font-semibold">Link sent 📬</p>
+          <p className="flex items-center justify-center gap-1.5 text-secondary font-semibold">
+            Link sent <Emoji name="mail" size={18} />
+          </p>
           <p className="mt-1 text-tertiary text-muted">
             Check <strong>{email}</strong> and tap the link to sign in.
           </p>

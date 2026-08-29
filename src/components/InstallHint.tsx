@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Icon } from './icons'
+import { Emoji } from './Emoji'
 
 const DISMISSED = 'memey-diet-planner:install-hint-dismissed'
 
@@ -45,9 +47,7 @@ export function InstallHint() {
   return (
     <div className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-50 animate-slide-up">
       <div className="card flex items-start gap-3 p-3 shadow-lift">
-        <span aria-hidden className="text-xl">
-          📲
-        </span>
+        <Emoji name="phone" size={22} />
         <div className="flex-1 text-secondary">
           <p className="font-semibold">Add to your home screen</p>
           <p className="mt-0.5 text-tertiary text-muted">
@@ -61,7 +61,7 @@ export function InstallHint() {
           aria-label="Dismiss"
           className="tap -mr-1 -mt-1 rounded-pill px-2 text-faint"
         >
-          ✕
+          <Icon name="close" size={15} strokeWidth={2.25} />
         </button>
       </div>
     </div>

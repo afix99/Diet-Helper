@@ -1,9 +1,11 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { usePresence } from '@/hooks/usePresence'
 import { CustomFoodDialog } from './CustomFoodDialog'
 import { QuickAdd } from './QuickAdd'
 import { Sheet } from './ui'
+import { Icon } from './icons'
 import { FOOD_CATEGORIES, RECIPES } from '@/lib/catalogue'
 import { useLogging } from '@/lib/logging'
 import { allFoods, favouriteFoods, recentFoods } from '@/lib/selectors'
@@ -21,15 +23,18 @@ export function FoodPicker({
   date,
   slot,
   onClose,
+  leaving,
 }: {
   date: string
   slot: MealSlot
   onClose: () => void
+  leaving?: boolean
 }) {
   const { data } = useData()
   const { logFood, logRecipe } = useLogging()
   const [query, setQuery] = useState('')
   const [creating, setCreating] = useState(false)
+  const [heldCreating, creatingLeaving] = usePresence(creating || null)
   const [quickAdding, setQuickAdding] = useState(false)
 
   const foods = useMemo(() => allFoods(data), [data])
@@ -65,11 +70,11 @@ export function FoodPicker({
   // Hand off rather than stack: two nested sheets would mean two live
   // aria-modal dialogs, and iOS never layers sheets like that either.
   if (quickAdding) {
-    return <QuickAdd date={date} slot={slot} onClose={onClose} />
+    return <QuickAdd date={date} slot={slot} onClose={onClose} leaving={leaving} />
   }
 
   return (
-    <Sheet onClose={onClose} labelledBy="food-picker-title">
+    <Sheet onClose={onClose} leaving={leaving} labelledBy="food-picker-title">
         <div className="flex items-center justify-between px-4 pb-2 pt-2">
           <div>
             <p id="food-picker-title" className="text-secondary font-bold">
@@ -88,7 +93,7 @@ export function FoodPicker({
             onClick={() => setQuickAdding(true)}
             className="tap mb-2 flex w-full items-center gap-2 rounded-pill bg-primary/10 px-4 py-2.5 text-secondary font-semibold text-primary"
           >
-            <span aria-hidden>✎</span>
+            <Icon name="pencil" size={17} strokeWidth={2} />
             Describe a whole meal instead
           </button>
           <input
@@ -164,9 +169,10 @@ export function FoodPicker({
           )}
         </div>
 
-      {creating && (
+      {heldCreating && (
         <CustomFoodDialog
           initialName={query.trim()}
+          leaving={creatingLeaving}
           onClose={() => setCreating(false)}
           // Created straight from a search, so log it immediately.
           onCreated={(food) => {
@@ -263,8 +269,14 @@ function CategoryBlock({
         className="tap flex w-full items-center justify-between py-3 text-left"
       >
         <span className="text-tertiary font-bold uppercase tracking-wide text-muted">{title}</span>
-        <span className="text-tertiary text-faint">
-          {foods.length} <span aria-hidden>{open ? '▲' : '▼'}</span>
+        <span className="flex items-center gap-1 text-tertiary text-faint">
+          {foods.length}
+          <Icon
+            name="chevron"
+            size={13}
+            strokeWidth={2.5}
+            className={`transition-transform duration-200 ${open ? '-rotate-90' : 'rotate-90'}`}
+          />
         </span>
       </button>
       {open && <div className="pb-2">{foods.map((f) => <FoodRow key={f.id} food={f} onPick={onPick} />)}</div>}

@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { STATUS_LABELS, type StatusBand } from '@/lib/nutrition'
+import { useCountUp } from '@/hooks/useCountUp'
+import { Emoji, type EmojiName } from './Emoji'
 import { Icon } from './icons'
 
 /** iOS keeps back navigation in the nav bar, not floating in the content. */
@@ -84,11 +86,18 @@ export function PageHeader({
 export function Card({
   children,
   className = '',
+  style,
 }: {
   children: ReactNode
   className?: string
+  /** Used for per-item stagger delays on animated lists. */
+  style?: React.CSSProperties
 }) {
-  return <section className={`card p-4 ${className}`}>{children}</section>
+  return (
+    <section style={style} className={`card p-4 ${className}`}>
+      {children}
+    </section>
+  )
 }
 
 /**
@@ -222,7 +231,7 @@ export function StatusPill({ band }: { band: StatusBand }) {
   const label = STATUS_LABELS[band]
   return (
     <span className={`pill ${BAND_STYLES[band]}`}>
-      <span aria-hidden>{label.mark}</span>
+      <Icon name={label.icon} size={12} strokeWidth={2.75} />
       {label.label}
     </span>
   )
@@ -241,8 +250,10 @@ export function BudgetRing({
   target: number
   band: StatusBand
 }) {
-  const remaining = Math.round(target - consumed)
-  const pct = target > 0 ? Math.min(1, consumed / target) : 0
+  // The headline figure counts rather than snapping, so a change is legible.
+  const shown = useCountUp(consumed)
+  const remaining = Math.round(target - shown)
+  const pct = target > 0 ? Math.min(1, shown / target) : 0
   const size = 176
   const stroke = 14
   const r = (size - stroke) / 2
@@ -282,7 +293,7 @@ export function BudgetRing({
           {remaining >= 0 ? 'kcal left' : 'kcal over'}
         </span>
         <span className="mt-0.5 text-caption text-faint tabular-nums">
-          {Math.round(consumed)} / {target}
+          {Math.round(shown)} / {target}
         </span>
       </div>
     </div>
@@ -323,7 +334,7 @@ export function MacroBar({
       </div>
       <div className="h-2 overflow-hidden rounded-pill bg-raised">
         <div
-          className={`h-full rounded-pill ${fills[tone]} transition-[width] duration-500`}
+          className={`h-full rounded-pill ${fills[tone]} transition-[width] duration-700 ease-out`}
           style={{ width: `${pct * 100}%` }}
         />
       </div>
@@ -332,19 +343,17 @@ export function MacroBar({
 }
 
 export function EmptyState({
-  emoji,
+  art,
   title,
   hint,
 }: {
-  emoji: string
+  art: EmojiName
   title: string
   hint?: string
 }) {
   return (
     <div className="py-10 text-center">
-      <div aria-hidden className="text-4xl">
-        {emoji}
-      </div>
+      <Emoji name={art} size={44} className="opacity-90" />
       <p className="mt-2 font-semibold">{title}</p>
       {hint && <p className="text-secondary text-faint">{hint}</p>}
     </div>
@@ -418,11 +427,14 @@ export function Sheet({
   onClose,
   className = '',
   labelledBy,
+  leaving = false,
 }: {
   children: ReactNode
   onClose: () => void
   className?: string
   labelledBy?: string
+  /** Set by the parent's usePresence while the exit animation plays. */
+  leaving?: boolean
 }) {
   // Escape should dismiss, as it does for a system sheet on a hardware keyboard.
   useEffect(() => {
@@ -439,13 +451,19 @@ export function Sheet({
         type="button"
         aria-label="Close"
         onClick={onClose}
-        className="absolute inset-0 bg-ink/40 backdrop-blur-[2px]"
+        className={`absolute inset-0 bg-ink/40 backdrop-blur-[2px] ${
+          leaving ? 'animate-scrim-out' : 'animate-scrim-in'
+        }`}
       />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
-        className={`relative flex max-h-[88dvh] flex-col rounded-t-sheet border-t border-line bg-bg shadow-lift animate-slide-up ${className}`}
+        // Transform animations run on the compositor, so the sheet keeps
+        // gliding even while the food list below it is re-rendering.
+        className={`relative flex max-h-[88dvh] flex-col rounded-t-sheet border-t border-line bg-bg shadow-lift ${
+          leaving ? 'animate-sheet-out' : 'animate-sheet-in'
+        } ${className}`}
       >
         <span
           aria-hidden

@@ -1,6 +1,7 @@
 'use client'
 
 import { Card } from './ui'
+import { PressButton } from './PressButton'
 import { useData } from '@/lib/store/provider'
 
 const GLASS_ML = 250
@@ -57,13 +58,9 @@ export function WaterCard({ date }: { date: string }) {
       </div>
 
       <div className="flex gap-1.5">
-        <button
-          type="button"
-          onClick={() => add(GLASS_ML)}
-          className="tap flex-1 rounded-pill bg-ocean py-2 text-tertiary font-bold text-white"
-        >
+        <PressButton full onClick={() => add(GLASS_ML)} className="flex-1 !bg-ocean !py-2">
           + a glass (250ml)
-        </button>
+        </PressButton>
         <button
           type="button"
           onClick={() => add(500)}

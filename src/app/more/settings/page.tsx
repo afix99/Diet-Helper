@@ -2,6 +2,7 @@
 
 import { useId, useState } from 'react'
 import { Card, ListGroup, PageHeader, SegmentedControl } from '@/components/ui'
+import { Icon } from '@/components/icons'
 import { METHODOLOGY, TARGET_NOTES } from '@/lib/catalogue'
 import { bmr, leanBodyMass, tdee } from '@/lib/nutrition'
 import {
@@ -299,7 +300,8 @@ export default function SettingsPage() {
           >
             <p className="font-semibold">
               P {data.targets.protein}g · C {data.targets.carbs}g · F {data.targets.fat}g ={' '}
-              {macroTotal} kcal {balanced ? '✓' : ''}
+              {macroTotal} kcal{' '}
+              {balanced && <Icon name="check" size={14} strokeWidth={3} className="inline" />}
             </p>
             {!balanced && (
               <>
@@ -372,6 +374,31 @@ export default function SettingsPage() {
         )}
       </Card>
 
+      <Card className="mb-5">
+        <h2 className="text-title">Credits</h2>
+        <p className="mt-1 text-tertiary leading-relaxed text-muted">
+          Emoji artwork by{' '}
+          <a
+            href="https://github.com/jdecked/twemoji"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="font-semibold text-primary underline decoration-primary/30 underline-offset-2"
+          >
+            Twemoji
+          </a>
+          , licensed{' '}
+          <a
+            href="https://creativecommons.org/licenses/by/4.0/"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="font-semibold text-primary underline decoration-primary/30 underline-offset-2"
+          >
+            CC-BY 4.0
+          </a>
+          . Badge medallions drawn for this app.
+        </p>
+      </Card>
+
       <Card>
         <button
           type="button"
@@ -380,9 +407,14 @@ export default function SettingsPage() {
           className="tap flex w-full items-center justify-between text-left"
         >
           <span className="text-title">Medical disclaimer</span>
-          <span aria-hidden className="text-faint">
-            {showDisclaimer ? '▲' : '▼'}
-          </span>
+          <Icon
+            name="chevron"
+            size={14}
+            strokeWidth={2.5}
+            className={`text-faint transition-transform duration-200 ${
+              showDisclaimer ? '-rotate-90' : 'rotate-90'
+            }`}
+          />
         </button>
         {showDisclaimer && (
           <div className="mt-3 grid gap-2 border-t border-line pt-3">

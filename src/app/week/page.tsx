@@ -1,8 +1,10 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { usePresence } from '@/hooks/usePresence'
 import { FoodPicker } from '@/components/FoodPicker'
 import { Card, ListGroup, PageHeader, StatusPill } from '@/components/ui'
+import { Icon } from '@/components/icons'
 import { useLogging } from '@/lib/logging'
 import { statusBand } from '@/lib/nutrition'
 import { dayTotals, entriesForSlot, entryMacros, entryName, weekOf } from '@/lib/selectors'
@@ -28,6 +30,7 @@ export default function WeekPage() {
   const [anchor, setAnchor] = useState(today)
   const [open, setOpen] = useState<string>(today)
   const [picking, setPicking] = useState<{ date: string; slot: MealSlot } | null>(null)
+  const [heldPicking, pickingLeaving] = usePresence(picking)
   const [copySource, setCopySource] = useState<string | null>(null)
 
   const dates = useMemo(() => weekOf(anchor), [anchor])
@@ -45,8 +48,8 @@ export default function WeekPage() {
 
       <Card className="mb-4">
         <div className="flex items-center justify-between">
-          <button type="button" onClick={() => shift(-1)} className="tap px-2 text-lg" aria-label="Previous week">
-            ‹
+          <button type="button" onClick={() => shift(-1)} className="tap px-2" aria-label="Previous week">
+            <Icon name="chevron" size={20} strokeWidth={2.25} className="rotate-180" />
           </button>
           <div className="text-center">
             <p className="text-secondary font-bold">
@@ -65,8 +68,8 @@ export default function WeekPage() {
               {loggedDays > 0 ? Math.round(weekTotal / loggedDays) : 0} kcal
             </p>
           </div>
-          <button type="button" onClick={() => shift(1)} className="tap px-2 text-lg" aria-label="Next week">
-            ›
+          <button type="button" onClick={() => shift(1)} className="tap px-2" aria-label="Next week">
+            <Icon name="chevron" size={20} strokeWidth={2.25} />
           </button>
         </div>
       </Card>
@@ -166,7 +169,7 @@ export default function WeekPage() {
                               aria-label={`Remove ${entryName(e, data.customFoods)}`}
                               className="tap grid h-7 w-7 shrink-0 place-items-center rounded-pill text-faint"
                             >
-                              ✕
+                              <Icon name="close" size={14} strokeWidth={2.25} />
                             </button>
                           </div>
                         ))}
@@ -189,8 +192,13 @@ export default function WeekPage() {
         })}
       </ListGroup>
 
-      {picking && (
-        <FoodPicker date={picking.date} slot={picking.slot} onClose={() => setPicking(null)} />
+      {heldPicking && (
+        <FoodPicker
+          date={heldPicking.date}
+          slot={heldPicking.slot}
+          leaving={pickingLeaving}
+          onClose={() => setPicking(null)}
+        />
       )}
     </>
   )

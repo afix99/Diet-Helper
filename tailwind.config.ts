@@ -58,10 +58,67 @@ const config: Config = {
           from: { transform: 'translateY(8px)', opacity: '0' },
           to: { transform: 'translateY(0)', opacity: '1' },
         },
+        /* A sheet arriving from the bottom edge, and leaving the same way.
+           The overshoot curve lives in the timing function, not the frames,
+           so the exit can reverse it exactly. */
+        'sheet-in': {
+          from: { transform: 'translateY(100%)' },
+          to: { transform: 'translateY(0)' },
+        },
+        'sheet-out': {
+          from: { transform: 'translateY(0)' },
+          to: { transform: 'translateY(100%)' },
+        },
+        'scrim-in': { from: { opacity: '0' }, to: { opacity: '1' } },
+        'scrim-out': { from: { opacity: '1' }, to: { opacity: '0' } },
+        /* Ripple from the point the finger landed. */
+        ripple: {
+          from: { transform: 'scale(0)', opacity: '0.5' },
+          to: { transform: 'scale(1)', opacity: '0' },
+        },
+        /* A badge landing: overshoot, settle, with a rotational kick. */
+        'badge-pop': {
+          '0%': { transform: 'scale(0.4) rotate(-14deg)', opacity: '0' },
+          '55%': { transform: 'scale(1.14) rotate(5deg)', opacity: '1' },
+          '78%': { transform: 'scale(0.96) rotate(-2deg)' },
+          '100%': { transform: 'scale(1) rotate(0deg)', opacity: '1' },
+        },
+        /* Glow ring that expands and fades behind a newly unlocked badge. */
+        'badge-glow': {
+          '0%': { transform: 'scale(0.7)', opacity: '0.55' },
+          '100%': { transform: 'scale(1.9)', opacity: '0' },
+        },
+        /* Staggered list entry; the delay is set per item inline. */
+        'rise-in': {
+          from: { transform: 'translateY(10px)', opacity: '0' },
+          to: { transform: 'translateY(0)', opacity: '1' },
+        },
+        /* Skeleton shimmer while data loads. */
+        shimmer: {
+          from: { backgroundPosition: '-200% 0' },
+          to: { backgroundPosition: '200% 0' },
+        },
+        /* Slow breathing pulse, for the streak flame. */
+        breathe: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.12)' },
+        },
       },
       animation: {
         'pop-in': 'pop-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1)',
         'slide-up': 'slide-up 240ms ease-out',
+        ripple: 'ripple 560ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards',
+        /* A spring-ish arrival: fast out of the gate, settling with a little
+           weight. 280ms matches the hold in usePresence. */
+        'sheet-in': 'sheet-in 340ms cubic-bezier(0.22, 1, 0.36, 1) both',
+        'sheet-out': 'sheet-out 260ms cubic-bezier(0.5, 0, 0.75, 0) both',
+        'scrim-in': 'scrim-in 220ms ease-out both',
+        'scrim-out': 'scrim-out 240ms ease-in both',
+        'badge-pop': 'badge-pop 620ms cubic-bezier(0.34, 1.56, 0.64, 1) both',
+        'badge-glow': 'badge-glow 900ms ease-out forwards',
+        'rise-in': 'rise-in 380ms cubic-bezier(0.22, 0.61, 0.36, 1) both',
+        shimmer: 'shimmer 1.4s linear infinite',
+        breathe: 'breathe 2.6s ease-in-out infinite',
       },
     },
   },

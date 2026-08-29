@@ -7,7 +7,7 @@
  */
 // Stamped per build by scripts/stamp-sw.mjs: a new deploy gets a new cache,
 // and the activate handler below deletes every older one.
-const CACHE = 'memey-shell-1787993162754'
+const CACHE = 'memey-shell-1788009566694'
 const SHELL = ['/', '/week', '/foods', '/progress', '/more', '/manifest.webmanifest', '/icon-192.png']
 
 self.addEventListener('install', (event) => {

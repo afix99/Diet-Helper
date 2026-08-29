@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useLogging } from '@/lib/logging'
 import { Sheet } from './ui'
+import { PressButton } from './PressButton'
 import type { Food } from '@/lib/types'
 
 const CATEGORY = 'MY FOODS'
@@ -42,10 +43,12 @@ const num = (v: string) => {
 export function CustomFoodDialog({
   initialName = '',
   onClose,
+  leaving,
   onCreated,
 }: {
   initialName?: string
   onClose: () => void
+  leaving?: boolean
   onCreated?: (food: Food) => void
 }) {
   const { addCustomFood } = useLogging()
@@ -80,7 +83,7 @@ export function CustomFoodDialog({
   }
 
   return (
-    <Sheet onClose={onClose} labelledBy="new-food-title" className="z-[60]">
+    <Sheet onClose={onClose} leaving={leaving} labelledBy="new-food-title" className="z-[60]">
       <form
         onSubmit={save}
         className="overflow-y-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
@@ -135,13 +138,9 @@ export function CustomFoodDialog({
           rough entry is better than a skipped meal.
         </p>
 
-        <button
-          type="submit"
-          disabled={!canSave}
-          className="tap mt-4 w-full rounded-pill bg-primary py-3 text-secondary font-bold text-white disabled:opacity-40"
-        >
+        <PressButton type="submit" full hapticWeight="success" disabled={!canSave} className="mt-4">
           Save food
-        </button>
+        </PressButton>
       </form>
     </Sheet>
   )

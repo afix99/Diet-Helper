@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { Sheet } from './ui'
+import { PressButton } from './PressButton'
+import { Icon } from './icons'
 import { useLogging } from '@/lib/logging'
 import { parseQuickAdd } from '@/lib/quickAdd'
 import { allFoods } from '@/lib/selectors'
@@ -25,10 +27,12 @@ export function QuickAdd({
   date,
   slot,
   onClose,
+  leaving,
 }: {
   date: string
   slot: MealSlot
   onClose: () => void
+  leaving?: boolean
 }) {
   const { data } = useData()
   const { logFood } = useLogging()
@@ -47,7 +51,7 @@ export function QuickAdd({
   const totalKcal = Math.round(keep.reduce((sum, m) => sum + m.food.kcal * m.servings, 0))
 
   return (
-    <Sheet onClose={onClose} labelledBy="quick-add-title">
+    <Sheet onClose={onClose} leaving={leaving} labelledBy="quick-add-title">
       <div className="flex items-center justify-between px-4 pb-2 pt-2">
         <div>
           <p id="quick-add-title" className="text-secondary font-bold">
@@ -111,9 +115,7 @@ export function QuickAdd({
                       off ? 'border-line text-transparent' : 'border-avocado bg-avocado text-white'
                     }`}
                   >
-                    <span aria-hidden className="text-caption font-bold">
-                      ✓
-                    </span>
+                    {!off && <Icon name="check" size={13} strokeWidth={3} />}
                   </button>
                   <span className={`min-w-0 flex-1 ${off ? 'opacity-40' : ''}`}>
                     <span className="block truncate text-body">
@@ -143,16 +145,17 @@ export function QuickAdd({
           </p>
         )}
 
-        <button
-          type="button"
+        <PressButton
+          full
+          hapticWeight="success"
           onClick={commit}
           disabled={keep.length === 0}
-          className="tap mt-4 w-full rounded-pill bg-primary py-3 text-secondary font-bold text-white disabled:opacity-40"
+          className="mt-4"
         >
           {keep.length === 0
             ? 'Nothing to add yet'
             : `Add ${keep.length} ${keep.length === 1 ? 'item' : 'items'} · ${totalKcal} kcal`}
-        </button>
+        </PressButton>
       </div>
     </Sheet>
   )

@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { Emoji } from '@/components/Emoji'
 import { Card, ListGroup, PageHeader, SegmentedControl } from '@/components/ui'
+import { Icon } from '@/components/icons'
 import { SUPPLEMENTS } from '@/lib/catalogue'
 import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
@@ -93,16 +95,20 @@ export default function SupplementsPage() {
                       taken ? 'border-avocado bg-avocado text-white' : 'border-line text-transparent'
                     }`}
                   >
-                    ✓
+                    {taken && <Icon name="check" size={13} strokeWidth={3} />}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-secondary font-bold">{s.name}</span>
                     <span className="block text-tertiary font-semibold text-primary">{s.dose}</span>
                     <span className="mt-1 block text-tertiary text-muted">{s.purpose}</span>
-                    <span className="mt-1 block text-tertiary text-faint">🕐 {s.timing}</span>
+                    <span className="mt-1 flex items-center gap-1 text-tertiary text-faint">
+                      <Emoji name="clock" size={12} />
+                      {s.timing}
+                    </span>
                     {s.foodAlternative && (
                       <span className="mt-1 block text-tertiary text-faint">
-                        🥗 From food: {s.foodAlternative}
+                        <Emoji name="salad" size={12} className="mr-1" />
+                        From food: {s.foodAlternative}
                       </span>
                     )}
                   </span>
@@ -156,7 +162,7 @@ export default function SupplementsPage() {
                           : 'border-line text-transparent'
                       }`}
                     >
-                      ✓
+                      {ticked && <Icon name="check" size={13} strokeWidth={3} />}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-baseline justify-between gap-2">
@@ -206,7 +212,8 @@ export default function SupplementsPage() {
           {SUPPLEMENTS.caffeineCutoff && (
             <Card className="border-amber/40 bg-amber/5">
               <p className="text-tertiary leading-relaxed text-muted">
-                ⏰ {SUPPLEMENTS.caffeineCutoff}
+                <Emoji name="clock" size={12} className="mr-1" />
+                {SUPPLEMENTS.caffeineCutoff}
               </p>
             </Card>
           )}

@@ -21,6 +21,13 @@ export type IconName =
   | 'chevron'
   | 'plus'
   | 'close'
+  | 'check'
+  | 'pencil'
+  | 'lock'
+  | 'arrowUp'
+  | 'arrowDown'
+  | 'tilde'
+  | 'dash'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   // A bowl with steam — the app's own mark, matching the launcher icon.
@@ -94,6 +101,23 @@ const PATHS: Record<IconName, React.ReactNode> = {
   chevron: <path d="m9.5 5.5 6.5 6.5-6.5 6.5" />,
   plus: <path d="M12 5.25v13.5M5.25 12h13.5" />,
   close: <path d="m6.5 6.5 11 11M17.5 6.5l-11 11" />,
+  check: <path d="m4.75 12.5 5 5 9.5-11" />,
+  pencil: (
+    <>
+      <path d="M4 20.5h4.2L20 8.7a2.4 2.4 0 0 0-3.4-3.4L4.8 17.1z" />
+      <path d="m15.2 6.7 3.4 3.4" />
+    </>
+  ),
+  lock: (
+    <>
+      <rect x="4.75" y="10.5" width="14.5" height="10" rx="3" />
+      <path d="M8.25 10.5V7.75a3.75 3.75 0 0 1 7.5 0v2.75" />
+    </>
+  ),
+  arrowUp: <path d="M12 19V5.5M6 11.5 12 5.5l6 6" />,
+  arrowDown: <path d="M12 5v13.5M6 12.5l6 6 6-6" />,
+  tilde: <path d="M4 13c2.4-4 4.6-4 7 0s4.6 4 7 0" />,
+  dash: <path d="M6 12h12" />,
 }
 
 export function Icon({

@@ -2,7 +2,11 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import { usePresence } from '@/hooks/usePresence'
 import { FoodPicker } from '@/components/FoodPicker'
+import { PressButton } from '@/components/PressButton'
+import { BadgeArt, Emoji } from '@/components/Emoji'
+import { Icon } from '@/components/icons'
 import { QuickAdd } from '@/components/QuickAdd'
 import { WaterCard } from '@/components/WaterCard'
 import { BudgetRing, Card, MacroBar, PageHeader, StatusPill } from '@/components/ui'
@@ -26,6 +30,8 @@ export default function TodayPage() {
   const { removeEntry, setServings } = useLogging()
   const [picking, setPicking] = useState<MealSlot | null>(null)
   const [quickAdding, setQuickAdding] = useState<MealSlot | null>(null)
+  const [heldPicking, pickingLeaving] = usePresence(picking)
+  const [heldQuickAdding, quickAddLeaving] = usePresence(quickAdding)
   const date = todayIso()
 
   const totals = useMemo(() => dayTotals(data, date), [data, date])
@@ -60,7 +66,7 @@ export default function TodayPage() {
         action={
           run.current > 0 ? (
             <span className="pill bg-primary/15 text-primary" title="Streak">
-              <span aria-hidden>🔥</span>
+              <Emoji name="flame" size={14} className="animate-breathe" />
               {run.current}-day streak
             </span>
           ) : null
@@ -106,18 +112,16 @@ export default function TodayPage() {
       {unlocked.length > 0 && (
         <Link href="/more/badges" className="mb-4 block">
           <Card className="flex items-center gap-3">
-            <div className="flex -space-x-1.5 text-xl" aria-hidden>
+            <div className="flex -space-x-2" aria-hidden>
               {unlocked.slice(0, 5).map((b) => (
-                <span key={b.id}>{b.emoji}</span>
+                <BadgeArt key={b.id} id={b.id} unlocked size={30} />
               ))}
             </div>
             <p className="flex-1 text-secondary font-semibold">
               {unlocked.length} {unlocked.length === 1 ? 'badge' : 'badges'}
               <span className="ml-1 font-normal text-faint">unlocked</span>
             </p>
-            <span aria-hidden className="text-faint">
-              ›
-            </span>
+            <Icon name="chevron" size={16} strokeWidth={2.25} className="text-faint" />
           </Card>
         </Link>
       )}
@@ -126,14 +130,15 @@ export default function TodayPage() {
 
       {/* Buried inside the picker, nobody found this. It is the fastest way to
           log, so it belongs on the front screen. */}
-      <button
-        type="button"
+      <PressButton
+        full
+        hapticWeight="medium"
         onClick={() => setQuickAdding(nextOpenSlot)}
-        className="tap mb-3 flex w-full items-center justify-center gap-2 rounded-card bg-primary py-3 text-secondary font-bold text-white shadow-card"
+        className="mb-3 !rounded-card"
       >
-        <span aria-hidden>✎</span>
+        <Icon name="pencil" size={18} strokeWidth={2} />
         Describe a whole meal
-      </button>
+      </PressButton>
 
       <div className="grid gap-3">
         {MEAL_SLOTS.map((slot) => {
@@ -187,7 +192,7 @@ export default function TodayPage() {
                             onClick={() => removeEntry(e.id)}
                             className="tap grid h-8 w-8 place-items-center rounded-pill text-faint"
                           >
-                            ✕
+                            <Icon name="close" size={15} strokeWidth={2.25} />
                           </button>
                         </span>
                       </li>
@@ -208,9 +213,21 @@ export default function TodayPage() {
         })}
       </div>
 
-      {picking && <FoodPicker date={date} slot={picking} onClose={() => setPicking(null)} />}
-      {quickAdding && (
-        <QuickAdd date={date} slot={quickAdding} onClose={() => setQuickAdding(null)} />
+      {heldPicking && (
+        <FoodPicker
+          date={date}
+          slot={heldPicking}
+          leaving={pickingLeaving}
+          onClose={() => setPicking(null)}
+        />
+      )}
+      {heldQuickAdding && (
+        <QuickAdd
+          date={date}
+          slot={heldQuickAdding}
+          leaving={quickAddLeaving}
+          onClose={() => setQuickAdding(null)}
+        />
       )}
     </>
   )

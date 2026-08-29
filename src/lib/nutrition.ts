@@ -88,12 +88,15 @@ export function statusBand(kcal: number, targetKcal: number): StatusBand {
   return 'over'
 }
 
-export const STATUS_LABELS: Record<StatusBand, { label: string; mark: string }> = {
-  empty: { label: 'Not logged', mark: '—' },
-  under: { label: 'Well under', mark: '▼' },
-  on_target: { label: 'On target', mark: '✓' },
-  close: { label: 'Close', mark: '~' },
-  over: { label: 'Over', mark: '▲' },
+export const STATUS_LABELS: Record<
+  StatusBand,
+  { label: string; icon: 'dash' | 'arrowDown' | 'check' | 'tilde' | 'arrowUp' }
+> = {
+  empty: { label: 'Not logged', icon: 'dash' },
+  under: { label: 'Well under', icon: 'arrowDown' },
+  on_target: { label: 'On target', icon: 'check' },
+  close: { label: 'Close', icon: 'tilde' },
+  over: { label: 'Over', icon: 'arrowUp' },
 }
 
 /**
@@ -178,10 +181,10 @@ export interface BadgeContext {
 }
 
 export interface Badge {
+  /** Also the artwork filename: public/badges/<id>.png */
   id: string
   name: string
   requirement: string
-  emoji: string
   unlocked: boolean
   /** 0–1, for the progress ring on locked badges. */
   progress: number
@@ -204,7 +207,6 @@ export function badges(ctx: BadgeContext): Badge[] {
       id: 'first_step',
       name: 'First Step',
       requirement: 'Log any single day',
-      emoji: '👣',
       unlocked: logged >= 1,
       progress: ratio(logged, 1),
     },
@@ -212,7 +214,6 @@ export function badges(ctx: BadgeContext): Badge[] {
       id: 'three_in_a_row',
       name: 'Three in a Row',
       requirement: 'Hit a 3-day streak',
-      emoji: '🔥',
       unlocked: bestStreak >= 3,
       progress: ratio(bestStreak, 3),
     },
@@ -220,7 +221,6 @@ export function badges(ctx: BadgeContext): Badge[] {
       id: 'full_week',
       name: 'Full Week',
       requirement: 'Log all 7 days',
-      emoji: '📅',
       unlocked: logged >= 7,
       progress: ratio(logged, 7),
     },
@@ -228,7 +228,6 @@ export function badges(ctx: BadgeContext): Badge[] {
       id: 'omega_squad',
       name: 'Omega Squad',
       requirement: '3 salmon meals in a week',
-      emoji: '🐟',
       unlocked: salmon >= 3,
       progress: ratio(salmon, 3),
     },
@@ -236,7 +235,6 @@ export function badges(ctx: BadgeContext): Badge[] {
       id: 'protein_power',
       name: 'Protein Power',
       requirement: '4 days hitting your protein target',
-      emoji: '💪',
       unlocked: proteinDays >= 4,
       progress: ratio(proteinDays, 4),
     },
@@ -244,7 +242,6 @@ export function badges(ctx: BadgeContext): Badge[] {
       id: 'disiplin',
       name: 'Discipline',
       requirement: '5 days on your calorie target',
-      emoji: '🎯',
       unlocked: onTarget >= 5,
       progress: ratio(onTarget, 5),
     },
@@ -252,7 +249,6 @@ export function badges(ctx: BadgeContext): Badge[] {
       id: 'down_1kg',
       name: 'Down 1 kg',
       requirement: '1 kg below your starting weight',
-      emoji: '⚖️',
       unlocked: lost >= 1,
       progress: ratio(lost, 1),
     },
@@ -260,7 +256,6 @@ export function badges(ctx: BadgeContext): Badge[] {
       id: 'down_3kg',
       name: 'Down 3 kg',
       requirement: '3 kg below your starting weight',
-      emoji: '🏅',
       unlocked: lost >= 3,
       progress: ratio(lost, 3),
     },
@@ -268,7 +263,6 @@ export function badges(ctx: BadgeContext): Badge[] {
       id: 'goal_reached',
       name: 'Goal Reached',
       requirement: 'Reach your target weight',
-      emoji: '🏆',
       unlocked: latestWeightKg !== null && latestWeightKg <= goalWeightKg,
       progress:
         latestWeightKg === null

@@ -1,7 +1,9 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { usePresence } from '@/hooks/usePresence'
 import { CustomFoodDialog } from '@/components/CustomFoodDialog'
+import { Emoji } from '@/components/Emoji'
 import { EmptyState, PageHeader } from '@/components/ui'
 import { FOOD_CATEGORIES } from '@/lib/catalogue'
 import { useLogging } from '@/lib/logging'
@@ -16,6 +18,7 @@ export default function FoodsPage() {
   const [category, setCategory] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
+  const [heldAdding, addingLeaving] = usePresence(adding || null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const foods = useMemo(() => allFoods(data), [data])
@@ -73,7 +76,7 @@ export default function FoodsPage() {
 
       {shown.length === 0 ? (
         <div>
-          <EmptyState emoji="🔍" title="No matches" hint="Not in the list? Add it yourself." />
+          <EmptyState art="search" title="No matches" hint="Not in the list? Add it yourself." />
           <button
             type="button"
             onClick={() => setAdding(true)}
@@ -104,8 +107,12 @@ export default function FoodsPage() {
         </div>
       )}
 
-      {adding && (
-        <CustomFoodDialog initialName={query.trim()} onClose={() => setAdding(false)} />
+      {heldAdding && (
+        <CustomFoodDialog
+          initialName={query.trim()}
+          leaving={addingLeaving}
+          onClose={() => setAdding(false)}
+        />
       )}
     </>
   )
@@ -185,9 +192,7 @@ function FoodCard({
           aria-pressed={favourite}
           className="tap grid w-12 place-items-center text-lg"
         >
-          <span aria-hidden className={favourite ? '' : 'opacity-25 grayscale'}>
-            ⭐
-          </span>
+          <Emoji name="star" size={18} className={favourite ? '' : 'opacity-30 grayscale'} />
         </button>
       </div>
       {open && (food.notes || isCustom) && (

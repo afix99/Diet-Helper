@@ -180,6 +180,18 @@ body {
   .tap-row {
     @apply min-h-[44px] transition-colors active:bg-raised;
   }
+  /* Skeleton placeholder while data loads. */
+  .skeleton {
+    @apply animate-shimmer rounded-inner;
+    background-image: linear-gradient(
+      90deg,
+      rgb(var(--raised)) 25%,
+      rgb(var(--line)) 37%,
+      rgb(var(--raised)) 63%
+    );
+    background-size: 200% 100%;
+  }
+
   .pill {
     @apply inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-xs font-semibold;
   }
@@ -192,6 +204,8 @@ body {
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

@@ -135,7 +135,7 @@ export function scoreFood(phraseTokens: string[], food: Food): number {
   let hits = 0
   for (const pt of phraseTokens) {
     const exact = nameTokens.some((nt) => nt === pt)
-    // Singular/plural and stems: "eggs" ↔ "egg", "tomatoes" ↔ "tomato".
+    // Singular/plural and stems: "eggs" vs "egg", "tomatoes" vs "tomato".
     const loose =
       !exact &&
       nameTokens.some(
