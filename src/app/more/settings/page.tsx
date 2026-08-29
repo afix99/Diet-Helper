@@ -387,7 +387,15 @@ export default function SettingsPage() {
 
       <Card className="mb-5">
         <h2 className="text-title">Credits</h2>
-        <p className="mt-1 text-tertiary leading-relaxed text-muted">
+        <p className="mt-2 text-secondary font-semibold">Afiq Haikal</p>
+        <p className="text-tertiary text-muted">Programmer</p>
+
+        {/*
+          The Twemoji line is not optional decoration. That artwork is CC-BY 4.0,
+          and attribution is the single condition the licence attaches to using
+          it. Kept quiet, but kept.
+        */}
+        <p className="mt-3 border-t border-line pt-3 text-tertiary leading-relaxed text-faint">
           Emoji artwork by{' '}
           <a
             href="https://github.com/jdecked/twemoji"

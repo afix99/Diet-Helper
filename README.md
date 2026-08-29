@@ -152,6 +152,8 @@ or photo logging. The schema leaves room.
 
 ## Credits
 
+Programmer: **Afiq Haikal**.
+
 Emoji artwork is [Twemoji](https://github.com/jdecked/twemoji), licensed
 [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/) and vendored into
 `public/emoji/` by `scripts/fetch-emoji.mjs` — committed rather than hotlinked,
