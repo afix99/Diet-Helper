@@ -2,13 +2,17 @@ import { describe, expect, it } from 'vitest'
 import { FOODS, FOOD_CATEGORIES } from '../catalogue'
 import { parseQuickAdd } from '../quickAdd'
 import viral from '../../../seed/viral-foods.json'
+import fruits from '../../../seed/fruits.json'
 
 const names = (s: string) => parseQuickAdd(s, FOODS).matches.map((m) => m.food.name)
 
 describe('the food pack', () => {
-  it('adds the chain and street-food entries on top of the workbook', () => {
+  const ADDED = [viral, fruits]
+
+  it('adds every pack on top of the workbook, losing nothing', () => {
     expect(viral.length).toBeGreaterThanOrEqual(70)
-    expect(FOODS).toHaveLength(69 + viral.length)
+    const added = ADDED.reduce((n, pack) => n + pack.length, 0)
+    expect(FOODS).toHaveLength(69 + added)
   })
 
   it('keeps every workbook food marked as verified', () => {
@@ -17,13 +21,13 @@ describe('the food pack', () => {
 
   it('marks every added food as an estimate', () => {
     const community = FOODS.filter((f) => f.source === 'community')
-    expect(community).toHaveLength(viral.length)
+    expect(community).toHaveLength(ADDED.reduce((n, pack) => n + pack.length, 0))
     // The distinction is the point: vendor variance is large, so these must
     // never be presented with the same authority as the workbook's numbers.
     expect(community.every((f) => f.source !== 'workbook')).toBe(true)
   })
 
-  it('has no duplicate ids across the two sources', () => {
+  it('has no duplicate ids across any source', () => {
     expect(new Set(FOODS.map((f) => f.id)).size).toBe(FOODS.length)
   })
 

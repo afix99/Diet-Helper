@@ -9,6 +9,18 @@ import type { ActivityLevel, Macros, Sex, Targets } from './types'
 
 export const EMPTY_MACROS: Macros = { kcal: 0, protein: 0, carbs: 0, fat: 0, fibre: 0 }
 
+/**
+ * The floor below which a day's intake stops being a diet and starts being a
+ * problem. Widely cited as the lowest an adult should sustain without
+ * supervision; the app uses it in two places and they must not drift apart —
+ * as the lowest calorie target the starter guide will ever suggest, and as the
+ * threshold for warning that logged intake has been too low.
+ *
+ * It is a rule of thumb, not a clinical boundary, which is why the warning it
+ * drives suggests a professional rather than pretending to be one.
+ */
+export const MIN_DAILY_KCAL = 1200
+
 const ACTIVITY_FACTORS: Record<ActivityLevel, number> = {
   sedentary: 1.2, // Dashboard!D8
   moderate: 1.55, // Dashboard!B9

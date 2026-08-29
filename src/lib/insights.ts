@@ -12,6 +12,7 @@
  *   scolding, and never a comment on appearance or worth.
  */
 import { isOnTarget, round1, type DayRecord } from './nutrition'
+import { underEating, type UnderEatingProfile } from './underEating'
 import type { Targets, WeightLog } from './types'
 
 export type InsightTone = 'good' | 'neutral' | 'watch'
@@ -30,6 +31,10 @@ export interface InsightInput {
   weights: readonly WeightLog[]
   startWeightKg: number
   goalWeightKg: number
+  /** Today's key, so the intake check can exclude a day still in progress. */
+  today?: string
+  /** Height, age and sex, for the resting-burn line. Optional. */
+  profile?: UnderEatingProfile
 }
 
 const mean = (ns: readonly number[]) =>
@@ -45,6 +50,28 @@ export function insights(input: InsightInput): Insight[] {
   const { days, targets, weights, startWeightKg, goalWeightKg } = input
   const logged = days.filter((d) => d.kcal > 0)
   const out: Insight[] = []
+
+  /*
+   * Intake safety runs before the three-day evidence gate and outside it.
+   * Every other rule here is an observation that can afford to wait for more
+   * data; this one is the reason someone might need to act now, and two low
+   * days is already the threshold it was designed around.
+   */
+  if (input.today && input.profile) {
+    const low = underEating(days, input.profile, input.today)
+    if (low.triggered) {
+      out.push({
+        id: 'intake_too_low',
+        tone: 'watch',
+        title: 'Intake has been very low',
+        detail:
+          `${low.lowDays.length} of the last few logged days came in under ` +
+          `${low.floor.toLocaleString('en-GB')} kcal. If that is under-logging rather ` +
+          `than under-eating, ignore this. If it isn't, eating this little costs muscle ` +
+          `and sleep and gets harder to hold — and it is worth raising with a doctor.`,
+      })
+    }
+  }
 
   // Nothing meaningful can be said from fewer than three logged days.
   if (logged.length < 3) return out

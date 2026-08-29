@@ -40,6 +40,8 @@ export default function ProgressPage() {
         targets: data.targets,
         weights: data.weights,
         startWeightKg: data.profile.startWeightKg,
+        today,
+        profile: data.profile,
         goalWeightKg: data.profile.goalWeightKg,
       }),
     [data, today]

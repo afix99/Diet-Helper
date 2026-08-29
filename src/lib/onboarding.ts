@@ -5,7 +5,7 @@
  * preference: it describes this device's UI, not the person's diet, and it must
  * be readable without waiting on the store to load.
  */
-import { bmr, tdee } from './nutrition'
+import { MIN_DAILY_KCAL, bmr, tdee } from './nutrition'
 import type { ActivityLevel, Sex } from './types'
 
 export const ONBOARDING_KEY = 'memey-onboarding'
@@ -21,7 +21,7 @@ export const SUGGESTED_DEFICIT = 400
  * arithmetic, always, and the deficit itself is capped so the suggestion can
  * never drift further from maintenance than this.
  */
-export const MIN_SUGGESTED_KCAL = 1200
+export const MIN_SUGGESTED_KCAL = MIN_DAILY_KCAL
 export const MAX_DEFICIT = 500
 
 export interface SuggestInput {

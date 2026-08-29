@@ -52,6 +52,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
         // Debounced so holding a stepper doesn't hammer storage.
         if (saveTimer.current) clearTimeout(saveTimer.current)
         saveTimer.current = setTimeout(() => {
+          // Cleared before saving, so the pagehide flush below can tell a
+          // genuinely pending write from one that already landed. Without this
+          // the ref stays set forever and every navigation re-saves.
+          saveTimer.current = null
           void store.save(next)
         }, 300)
         return next
@@ -63,10 +67,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Don't lose the last edit if the tab closes inside the debounce window.
   useEffect(() => {
     const flush = () => {
-      if (saveTimer.current) {
-        clearTimeout(saveTimer.current)
-        void store.save(data)
-      }
+      if (!saveTimer.current) return
+      clearTimeout(saveTimer.current)
+      saveTimer.current = null
+      void store.save(data)
     }
     window.addEventListener('pagehide', flush)
     return () => window.removeEventListener('pagehide', flush)

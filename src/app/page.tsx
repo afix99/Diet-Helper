@@ -8,6 +8,7 @@ import { PressButton } from '@/components/PressButton'
 import { BadgeArt, Emoji } from '@/components/Emoji'
 import { Icon } from '@/components/icons'
 import { QuickAdd } from '@/components/QuickAdd'
+import { UnderEatingCard } from '@/components/UnderEatingCard'
 import { WaterCard } from '@/components/WaterCard'
 import { BudgetRing, Card, MacroBar, PageHeader, StatusPill } from '@/components/ui'
 import { useLogging } from '@/lib/logging'
@@ -125,6 +126,8 @@ export default function TodayPage() {
           </Card>
         </Link>
       )}
+
+      <UnderEatingCard date={date} />
 
       <WaterCard date={date} />
 

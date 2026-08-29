@@ -7,6 +7,7 @@
  */
 import foodsJson from '../../seed/foods.json'
 import viralFoodsJson from '../../seed/viral-foods.json'
+import fruitsJson from '../../seed/fruits.json'
 import recipesJson from '../../seed/recipes.json'
 import defaultsJson from '../../seed/defaults.json'
 import shoppingJson from '../../seed/shopping.json'
@@ -54,6 +55,7 @@ const toFood = (f: RawFood, source: Food['source']): Food => ({
  */
 export const FOODS: Food[] = [
   ...(foodsJson as RawFood[]).map((f) => toFood(f, 'workbook')),
+  ...(fruitsJson as RawFood[]).map((f) => toFood(f, 'community')),
   ...(viralFoodsJson as RawFood[]).map((f) => toFood(f, 'community')),
 ]
 
