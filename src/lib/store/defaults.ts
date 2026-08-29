@@ -1,5 +1,6 @@
 import { DEFAULT_TARGETS, DEFAULTS, SHOPPING_SEED } from '../catalogue'
 import { todayIso } from '../dates'
+import { DEFAULT_PRESET } from '../targets'
 
 export { todayIso }
 import type { Profile } from '../types'
@@ -52,5 +53,7 @@ export function defaultData(): AppData {
     water: {},
     micronutrients: {},
     supplements: {},
+    targetLocks: {},
+    targetPreset: DEFAULT_PRESET,
   }
 }

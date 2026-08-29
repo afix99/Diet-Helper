@@ -1,9 +1,17 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, ListGroup, PageHeader } from '@/components/ui'
+import { useId, useState } from 'react'
+import { Card, ListGroup, PageHeader, SegmentedControl } from '@/components/ui'
 import { METHODOLOGY, TARGET_NOTES } from '@/lib/catalogue'
 import { bmr, leanBodyMass, tdee } from '@/lib/nutrition'
+import {
+  PRESETS,
+  distributeTargets,
+  energyBalance,
+  macroKcal,
+  reconciles,
+  type PresetId,
+} from '@/lib/targets'
 import { supabaseClient } from '@/lib/store'
 import { defaultData } from '@/lib/store/defaults'
 import { useData } from '@/lib/store/provider'
@@ -39,8 +47,121 @@ export default function SettingsPage() {
   const setProfile = (patch: Partial<typeof p>) =>
     update((d) => ({ ...d, profile: { ...d.profile, ...patch } }))
 
+  /**
+   * Changing calories redistributes every unlocked target. Editing a macro by
+   * hand locks it, which is the least surprising reading of the gesture: you
+   * typed a number, so it should stay.
+   */
   const setTarget = (key: keyof Targets, value: number) =>
-    update((d) => ({ ...d, targets: { ...d.targets, [key]: value } }))
+    update((d) => {
+      if (key === 'kcal') {
+        return {
+          ...d,
+          targets: distributeTargets({
+            kcal: value,
+            goalWeightKg: d.profile.goalWeightKg,
+            bodyWeightKg: d.profile.startWeightKg,
+            preset: d.targetPreset,
+            locks: d.targetLocks,
+            current: d.targets,
+          }),
+        }
+      }
+      const locks = { ...d.targetLocks, [key]: true }
+      const withEdit = { ...d.targets, [key]: value }
+      return {
+        ...d,
+        targetLocks: locks,
+        targets: distributeTargets({
+          kcal: withEdit.kcal,
+          goalWeightKg: d.profile.goalWeightKg,
+            bodyWeightKg: d.profile.startWeightKg,
+          preset: d.targetPreset,
+          locks,
+          current: withEdit,
+        }),
+      }
+    })
+
+  const toggleLock = (key: keyof Targets) =>
+    update((d) => {
+      const locks = { ...d.targetLocks, [key]: !d.targetLocks[key] }
+      return {
+        ...d,
+        targetLocks: locks,
+        targets: distributeTargets({
+          kcal: d.targets.kcal,
+          goalWeightKg: d.profile.goalWeightKg,
+            bodyWeightKg: d.profile.startWeightKg,
+          preset: d.targetPreset,
+          locks,
+          current: d.targets,
+        }),
+      }
+    })
+
+  const applyPreset = (preset: PresetId) =>
+    update((d) => ({
+      ...d,
+      targetPreset: preset,
+      // A preset is a deliberate reset of the shape, so it clears hand-set values.
+      targetLocks: {},
+      targets: distributeTargets({
+        kcal: d.targets.kcal,
+        goalWeightKg: d.profile.goalWeightKg,
+            bodyWeightKg: d.profile.startWeightKg,
+        preset,
+        current: d.targets,
+      }),
+    }))
+
+  const recalculate = () =>
+    update((d) => ({
+      ...d,
+      targetLocks: {},
+      targets: distributeTargets({
+        kcal: d.targets.kcal,
+        goalWeightKg: d.profile.goalWeightKg,
+            bodyWeightKg: d.profile.startWeightKg,
+        preset: d.targetPreset,
+        current: d.targets,
+      }),
+    }))
+
+  const macroTotal = macroKcal(data.targets)
+  const balanced = reconciles(data.targets)
+  const energy = energyBalance(p, data.targets.kcal)
+
+  /**
+   * The workbook's notes were fixed strings, so the calorie one kept claiming a
+   * deficit whatever number you typed. These describe the values actually set.
+   */
+  const noteFor = (key: keyof Targets): string => {
+    const t = data.targets
+    const w = p.goalWeightKg || 0
+    const perKg = (g: number) => (w > 0 ? `${(g / w).toFixed(1)} g/kg of goal weight` : '')
+    const share = (g: number, kcalPerG: number) =>
+      t.kcal > 0 ? `${Math.round(((g * kcalPerG) / t.kcal) * 100)}% of calories` : ''
+
+    switch (key) {
+      case 'kcal':
+        if (energy.balance === 'unknown') return 'Add height and age to see how this compares to your TDEE.'
+        if (energy.balance === 'maintenance') return `About maintenance — your TDEE is ${energy.tdee} kcal.`
+        return energy.balance === 'deficit'
+          ? `${Math.abs(energy.diff ?? 0)} kcal below your TDEE of ${energy.tdee}. Roughly ${(Math.abs(energy.diff ?? 0) * 7 / 7700).toFixed(1)} kg a week.`
+          : `${energy.diff} kcal above your TDEE of ${energy.tdee} — a surplus, so weight will trend up.`
+      case 'protein':
+        return `${perKg(t.protein)} · set by body weight, so it holds steady when calories change.`
+      case 'carbs':
+        return `${share(t.carbs, 4)} · fills whatever calories protein and fat leave.`
+      case 'fat':
+        return `${share(t.fat, 9)} · never below 0.8 g/kg, for hormone production.`
+      case 'fibre':
+        return '14 g per 1000 kcal, the adequate intake figure.'
+      case 'waterMl':
+        return `35 ml per kg of body weight. ${TARGET_NOTES.waterMl}`
+    }
+  }
 
   /** Wipes food logs, weights, water and ticks, back to a fresh install. */
   const resetEverything = () => {
@@ -143,19 +264,59 @@ export default function SettingsPage() {
       </Card>
 
       <ListGroup header="Daily targets">
-        <div className="grid gap-3 p-4">
-          {TARGET_FIELDS.map((f) => (
-            <div key={f.key}>
-              <NumField
-                label={`${f.label} (${f.unit})`}
-                value={data.targets[f.key]}
-                onChange={(v) => setTarget(f.key, v ?? 0)}
-              />
-              {TARGET_NOTES[f.key] && (
-                <p className="mt-1 text-caption leading-snug text-faint">{TARGET_NOTES[f.key]}</p>
-              )}
-            </div>
-          ))}
+        <div className="p-4">
+          <SegmentedControl
+            label="Macro split"
+            value={data.targetPreset}
+            onChange={applyPreset}
+            options={PRESETS.map((x) => ({ value: x.id, label: x.label }))}
+          />
+          <p className="-mt-3 mb-4 text-caption leading-snug text-faint">
+            {PRESETS.find((x) => x.id === data.targetPreset)?.description}
+          </p>
+
+          <div className="grid gap-3">
+            {TARGET_FIELDS.map((f) => (
+              <div key={f.key}>
+                <NumField
+                  label={`${f.label} (${f.unit})`}
+                  value={data.targets[f.key]}
+                  onChange={(v) => setTarget(f.key, v ?? 0)}
+                  locked={f.key === 'kcal' ? undefined : Boolean(data.targetLocks[f.key])}
+                  onToggleLock={f.key === 'kcal' ? undefined : () => toggleLock(f.key)}
+                />
+                <p className="mt-1 text-caption leading-snug text-faint">{noteFor(f.key)}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* The macros must describe the same diet as the calorie goal. Show
+              whether they currently do, rather than leaving it to be discovered. */}
+          <div
+            className={`mt-4 rounded-inner px-3 py-2.5 text-tertiary ${
+              balanced ? 'bg-avocado/10 text-avocado' : 'bg-amber/10 text-amber'
+            }`}
+          >
+            <p className="font-semibold">
+              P {data.targets.protein}g · C {data.targets.carbs}g · F {data.targets.fat}g ={' '}
+              {macroTotal} kcal {balanced ? '✓' : ''}
+            </p>
+            {!balanced && (
+              <>
+                <p className="mt-0.5 leading-snug">
+                  These add up to {macroTotal} kcal, not {data.targets.kcal}. Locked values are
+                  holding the rest out of balance.
+                </p>
+                <button
+                  type="button"
+                  onClick={recalculate}
+                  className="tap mt-2 w-full rounded-pill bg-amber py-2 text-tertiary font-bold text-white"
+                >
+                  Recalculate to match {data.targets.kcal} kcal
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </ListGroup>
 
@@ -254,16 +415,45 @@ function NumField({
   value,
   step = 1,
   onChange,
+  locked,
+  onToggleLock,
 }: {
   label: string
   value: number | null
   step?: number
   onChange: (v: number | null) => void
+  /** Omit for fields that aren't part of the macro distribution. */
+  locked?: boolean
+  onToggleLock?: () => void
 }) {
+  const id = useId()
+  /*
+   * The lock button is a sibling of the input rather than a child of its
+   * <label>: nested inside, its text folds into the input's accessible name,
+   * which becomes "Protein (g) Auto" for anyone using a screen reader.
+   */
   return (
-    <label className="block">
-      <span className="mb-1 block text-tertiary font-semibold">{label}</span>
+    <div>
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <label htmlFor={id} className="text-tertiary font-semibold">
+          {label}
+        </label>
+        {onToggleLock && (
+          <button
+            type="button"
+            onClick={onToggleLock}
+            aria-pressed={locked}
+            aria-label={`${locked ? 'Unlock' : 'Lock'} ${label}`}
+            className={`rounded-pill px-2 py-0.5 text-caption font-semibold ${
+              locked ? 'bg-primary/15 text-primary' : 'text-faint'
+            }`}
+          >
+            {locked ? 'Locked' : 'Auto'}
+          </button>
+        )}
+      </div>
       <input
+        id={id}
         type="number"
         inputMode="decimal"
         step={step}
@@ -272,8 +462,8 @@ function NumField({
           const v = Number.parseFloat(e.target.value)
           onChange(Number.isFinite(v) ? v : null)
         }}
-        className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-body tabular-nums outline-none focus:border-primary"
+        className="w-full rounded-inner border border-line bg-surface px-3 py-2 text-body tabular-nums outline-none focus:border-primary"
       />
-    </label>
+    </div>
   )
 }

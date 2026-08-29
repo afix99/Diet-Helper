@@ -1,3 +1,4 @@
+import type { PresetId } from '../targets'
 import type { Food, LogEntry, Profile, Targets, WeightLog } from '../types'
 
 export interface ShoppingItem {
@@ -28,6 +29,10 @@ export interface AppData {
   micronutrients: Record<string, string[]>
   /** Supplements taken, keyed by ISO date. */
   supplements: Record<string, string[]>
+  /** Macro targets the user set by hand; these survive redistribution. */
+  targetLocks: Partial<Record<keyof Targets, boolean>>
+  /** Which distribution shape drives the unlocked targets. */
+  targetPreset: PresetId
 }
 
 /**
