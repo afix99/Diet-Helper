@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { defaultData } from './defaults'
+import { hasRealContent, readLocalData } from './local'
 import type { AppData, DataStore } from './types'
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -41,7 +42,18 @@ export class SupabaseStore implements DataStore {
 
     if (error) throw error
     if (!data) {
-      const fresh = { ...defaultData(), profile: { ...defaultData().profile, id: user.id } }
+      /*
+       * First sign-in on this account. Someone who has been logging locally
+       * for weeks would otherwise land on an empty diary, with their real one
+       * still sitting in localStorage under a key nothing reads any more —
+       * indistinguishable from data loss. Adopt it instead.
+       *
+       * The local copy is deliberately left in place: if this upload fails
+       * halfway, the only surviving record should not be the one we deleted.
+       */
+      const local = readLocalData()
+      const base = hasRealContent(local) ? { ...defaultData(), ...local } : defaultData()
+      const fresh = { ...base, profile: { ...base.profile, id: user.id } } as AppData
       await this.save(fresh)
       return fresh
     }

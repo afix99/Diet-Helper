@@ -150,6 +150,17 @@ deleting the food never orphans your history.
 Progress photos, body measurements beyond weight and waist/hip, and barcode
 or photo logging. The schema leaves room.
 
+## Accounts and sync
+
+Off by default: with no credentials the app runs entirely on browser storage,
+which means one diary per browser and no sync. Setting two environment variables
+switches on per-user accounts backed by Postgres with row-level security.
+
+Full steps in `SETUP-SUPABASE.md`. The isolation is verifiable rather than
+asserted — `./scripts/verify-rls.sh` applies the real migration to a throwaway
+Postgres and tries to make one user read, overwrite, delete and forge another's
+data. All seven attempts must fail.
+
 ## Credits
 
 Programmer: **Afiq Haikal**.

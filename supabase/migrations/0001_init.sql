@@ -13,6 +13,18 @@ create table if not exists public.planner_data (
 
 alter table public.planner_data enable row level security;
 
+-- Supabase grants these by default on the public schema, but saying it here
+-- makes the migration self-sufficient and the intent explicit: the API roles
+-- get table access, and RLS -- not the absence of a grant -- is what keeps one
+-- user out of another's row.
+do $$ begin
+  if exists (select 1 from pg_roles where rolname = 'authenticated') then
+    grant usage on schema public to authenticated;
+    grant select, insert, update, delete on public.planner_data to authenticated;
+  end if;
+  -- anon deliberately gets nothing: there is no such thing as an anonymous diary.
+end $$;
+
 -- A user may only ever touch their own row. Separate policies per command so
 -- that a mistake in one cannot silently widen the others.
 create policy "read own planner data"
