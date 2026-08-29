@@ -133,7 +133,7 @@ export default function ShopPage() {
               <p className="text-secondary font-bold">
                 {done} of {data.shopping.length} bought
               </p>
-              <p className="text-secondary font-bold tabular-nums text-primary">
+              <p className="text-secondary font-bold tabular-nums text-primary-ink">
                 RM {budget.low}
                 {budget.high !== budget.low && `–${budget.high}`}
               </p>
@@ -150,7 +150,7 @@ export default function ShopPage() {
               <button
                 type="button"
                 onClick={addFromPlan}
-                className="tap rounded-pill bg-primary px-3 py-1.5 text-tertiary font-bold text-white"
+                className="tap rounded-pill bg-primary px-3 py-1.5 text-tertiary font-bold text-on-primary"
               >
                 + From this week’s plan
               </button>
@@ -187,7 +187,7 @@ export default function ShopPage() {
                           aria-hidden
                           className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border text-caption font-bold ${
                             s.checked
-                              ? 'border-avocado bg-avocado text-white'
+                              ? 'border-avocado bg-avocado text-on-primary'
                               : 'border-line text-transparent'
                           }`}
                         >
@@ -229,7 +229,7 @@ export default function ShopPage() {
             {PREP.tasks.map((t) => (
               <div key={t.timeBlock} className="px-4 py-2.5 [&+div]:border-t [&+div]:border-line">
                 <div className="flex items-baseline justify-between gap-2">
-                  <p className="text-secondary font-bold tabular-nums text-primary">
+                  <p className="text-secondary font-bold tabular-nums text-primary-ink">
                     {t.timeBlock}
                   </p>
                   <p className="text-tertiary text-faint">{t.duration}</p>

@@ -127,7 +127,7 @@ export default function WeekPage() {
                 <span className="min-w-0">
                   <span className="block text-secondary font-bold">
                     {DAY_LABELS[i]}
-                    {isToday && <span className="ml-1.5 text-tertiary text-primary">· today</span>}
+                    {isToday && <span className="ml-1.5 text-tertiary text-primary-ink">· today</span>}
                   </span>
                   <span className="block text-tertiary tabular-nums text-faint">
                     {totals.kcal > 0
@@ -152,7 +152,7 @@ export default function WeekPage() {
                             type="button"
                             onClick={() => setPicking({ date, slot })}
                             aria-label={`Add to ${SLOT_LABELS[slot].label}`}
-                            className="tap grid h-7 w-7 place-items-center rounded-pill bg-raised text-secondary font-bold text-primary"
+                            className="tap grid h-7 w-7 place-items-center rounded-pill bg-raised text-secondary font-bold text-primary-ink"
                           >
                             +
                           </button>

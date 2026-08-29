@@ -7,10 +7,10 @@ import { Icon } from './icons'
 type Variant = 'primary' | 'quiet' | 'outline' | 'destructive'
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-primary text-white shadow-card',
+  primary: 'bg-primary text-on-primary shadow-card',
   quiet: 'bg-raised text-muted',
   outline: 'border border-line text-muted',
-  destructive: 'bg-clay text-white',
+  destructive: 'bg-clay text-on-primary',
 }
 
 interface Ripple {
@@ -97,7 +97,7 @@ export function PressButton({
         <span
           key={r.id}
           aria-hidden
-          className="pointer-events-none absolute -z-10 animate-ripple rounded-full bg-white/35"
+          className="pointer-events-none absolute -z-10 animate-ripple rounded-full bg-current/25"
           style={{ left: r.x, top: r.y, width: r.size, height: r.size }}
         />
       ))}

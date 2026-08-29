@@ -34,7 +34,7 @@ export function TabBar() {
                 href={tab.href}
                 aria-current={active ? 'page' : undefined}
                 className={`tap relative flex flex-col items-center justify-center gap-1 rounded-pill py-1.5 text-caption transition-colors ${
-                  active ? 'text-primary' : 'text-faint'
+                  active ? 'text-primary-ink' : 'text-faint'
                 }`}
               >
                 {/* Soft pill behind the selected tab, the way iOS marks it. */}

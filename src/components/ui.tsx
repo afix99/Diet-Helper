@@ -12,7 +12,7 @@ export function BackButton({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-0.5 text-body text-primary active:opacity-60"
+      className="inline-flex items-center gap-0.5 text-body text-primary-ink active:opacity-60"
     >
       <Icon name="chevron" size={18} strokeWidth={2.5} className="-ml-1.5 rotate-180" />
       {label}
@@ -212,7 +212,7 @@ export function IconTile({
   return (
     <span
       aria-hidden
-      className={`grid h-7 w-7 shrink-0 place-items-center rounded-[8px] text-white ${TILE_TONES[tone]}`}
+      className={`grid h-7 w-7 shrink-0 place-items-center rounded-[8px] text-on-primary ${TILE_TONES[tone]}`}
     >
       {children}
     </span>

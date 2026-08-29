@@ -99,7 +99,7 @@ export function CustomFoodDialog({
 
         <label className="mb-3 block">
           <span className="mb-1 block text-tertiary font-semibold">
-            Name <span className="text-primary">*</span>
+            Name <span className="text-primary-ink">*</span>
           </span>
           <input
             autoFocus
@@ -160,7 +160,7 @@ function Field({
   return (
     <label className="block">
       <span className="mb-1 block text-tertiary font-semibold">
-        {label} {required && <span className="text-primary">*</span>}
+        {label} {required && <span className="text-primary-ink">*</span>}
       </span>
       <input
         type="number"

@@ -47,7 +47,7 @@ export default function FoodsPage() {
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="tap shrink-0 rounded-pill bg-primary px-4 text-tertiary font-bold text-white"
+            className="tap shrink-0 rounded-pill bg-primary px-4 text-tertiary font-bold text-on-primary"
           >
             + New
           </button>
@@ -80,7 +80,7 @@ export default function FoodsPage() {
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="tap mx-auto block rounded-pill bg-primary px-5 py-2.5 text-secondary font-bold text-white"
+            className="tap mx-auto block rounded-pill bg-primary px-5 py-2.5 text-secondary font-bold text-on-primary"
           >
             {query.trim() ? `Add “${query.trim()}”` : 'Add a new food'}
           </button>
@@ -133,7 +133,7 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={`tap shrink-0 rounded-pill px-3 py-1.5 text-tertiary font-semibold ${
-        active ? 'bg-primary text-white' : 'bg-raised text-muted'
+        active ? 'bg-primary text-on-primary' : 'bg-raised text-muted'
       }`}
     >
       {children}
@@ -178,7 +178,7 @@ function FoodCard({
           </span>
           <span className="block text-tertiary text-faint">{food.servingSize}</span>
           <span className="mt-1 flex flex-wrap gap-x-3 text-tertiary tabular-nums text-muted">
-            <span className="font-bold text-primary">{food.kcal} kcal</span>
+            <span className="font-bold text-primary-ink">{food.kcal} kcal</span>
             <span>P {food.protein}g</span>
             <span>C {food.carbs}g</span>
             <span>F {food.fat}g</span>
@@ -222,7 +222,7 @@ function FoodCard({
                 <button
                   type="button"
                   onClick={onDelete}
-                  className="tap rounded-pill bg-clay px-3 py-1.5 text-tertiary font-bold text-white"
+                  className="tap rounded-pill bg-clay px-3 py-1.5 text-tertiary font-bold text-on-primary"
                 >
                   Delete
                 </button>

@@ -95,7 +95,7 @@ export default function ProgressPage() {
             <strong className="text-ink">{data.profile.startWeightKg} kg</strong> · Goal{' '}
             <strong className="text-ink">{data.profile.goalWeightKg} kg</strong>
           </span>
-          <span className="inline-flex items-center gap-0.5 font-semibold text-primary">
+          <span className="inline-flex items-center gap-0.5 font-semibold text-primary-ink">
             Edit
             <Icon name="chevron" size={14} strokeWidth={2.5} />
           </span>
@@ -115,7 +115,7 @@ export default function ProgressPage() {
           <button
             type="button"
             onClick={addWeight}
-            className="tap shrink-0 rounded-pill bg-primary px-5 text-secondary font-bold text-white"
+            className="tap shrink-0 rounded-pill bg-primary px-5 text-secondary font-bold text-on-primary"
           >
             Save
           </button>
@@ -230,7 +230,7 @@ function Stat({
   unit: string
   tone?: 'ink' | 'primary' | 'avocado'
 }) {
-  const colour = tone === 'primary' ? 'text-primary' : tone === 'avocado' ? 'text-avocado' : ''
+  const colour = tone === 'primary' ? 'text-primary-ink' : tone === 'avocado' ? 'text-avocado' : ''
   return (
     <div>
       <p className={`text-2xl font-extrabold tabular-nums ${colour}`}>

@@ -65,7 +65,7 @@ export default function TodayPage() {
         })}
         action={
           run.current > 0 ? (
-            <span className="pill bg-primary/15 text-primary" title="Streak">
+            <span className="pill bg-primary/15 text-primary-ink" title="Streak">
               <Emoji name="flame" size={14} className="animate-breathe" />
               {run.current}-day streak
             </span>
@@ -81,7 +81,7 @@ export default function TodayPage() {
               pill visibly taller than the status pill beside it. */}
           <Link
             href="/more/settings"
-            className="tap inline-flex items-center px-2 text-tertiary font-semibold text-primary underline decoration-primary/30 underline-offset-4"
+            className="tap inline-flex items-center px-2 text-tertiary font-semibold text-primary-ink underline decoration-primary-ink/30 underline-offset-4"
           >
             Edit target
           </Link>
@@ -204,7 +204,7 @@ export default function TodayPage() {
               <button
                 type="button"
                 onClick={() => setPicking(slot)}
-                className="tap w-full rounded-pill border border-dashed border-line py-2.5 text-secondary font-semibold text-primary"
+                className="tap w-full rounded-pill border border-dashed border-line py-2.5 text-secondary font-semibold text-primary-ink"
               >
                 + Add food
               </button>

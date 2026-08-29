@@ -59,7 +59,7 @@ export function QuickAdd({
           </p>
           <p className="text-tertiary text-faint">{SLOT_LABELS[slot].label}</p>
         </div>
-        <button type="button" onClick={onClose} className="tap px-2 text-secondary font-semibold text-primary">
+        <button type="button" onClick={onClose} className="tap px-2 text-secondary font-semibold text-primary-ink">
           Cancel
         </button>
       </div>
@@ -112,7 +112,7 @@ export function QuickAdd({
                       )
                     }
                     className={`grid h-6 w-6 shrink-0 place-items-center rounded-md border ${
-                      off ? 'border-line text-transparent' : 'border-avocado bg-avocado text-white'
+                      off ? 'border-line text-transparent' : 'border-avocado bg-avocado text-on-primary'
                     }`}
                   >
                     {!off && <Icon name="check" size={13} strokeWidth={3} />}
@@ -120,7 +120,7 @@ export function QuickAdd({
                   <span className={`min-w-0 flex-1 ${off ? 'opacity-40' : ''}`}>
                     <span className="block truncate text-body">
                       {m.servings !== 1 && (
-                        <span className="font-semibold text-primary">{m.servings}× </span>
+                        <span className="font-semibold text-primary-ink">{m.servings}× </span>
                       )}
                       {m.food.name}
                     </span>

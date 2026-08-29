@@ -82,7 +82,7 @@ export function FoodPicker({
             </p>
             <p className="text-tertiary text-faint">Add an item</p>
           </div>
-          <button type="button" onClick={onClose} className="tap px-2 text-secondary font-semibold text-primary">
+          <button type="button" onClick={onClose} className="tap px-2 text-secondary font-semibold text-primary-ink">
             Done
           </button>
         </div>
@@ -91,7 +91,7 @@ export function FoodPicker({
           <button
             type="button"
             onClick={() => setQuickAdding(true)}
-            className="tap mb-2 flex w-full items-center gap-2 rounded-pill bg-primary/10 px-4 py-2.5 text-secondary font-semibold text-primary"
+            className="tap mb-2 flex w-full items-center gap-2 rounded-pill bg-primary/10 px-4 py-2.5 text-secondary font-semibold text-primary-ink"
           >
             <Icon name="pencil" size={17} strokeWidth={2} />
             Describe a whole meal instead
@@ -144,7 +144,7 @@ export function FoodPicker({
                         <span className="block text-secondary font-semibold">{r.name}</span>
                         <span className="block text-tertiary text-faint">{r.minutes} min</span>
                       </span>
-                      <span className="text-secondary font-bold tabular-nums text-primary">{r.kcal}</span>
+                      <span className="text-secondary font-bold tabular-nums text-primary-ink">{r.kcal}</span>
                     </button>
                   ))}
                 </>
@@ -157,7 +157,7 @@ export function FoodPicker({
                   <button
                     type="button"
                     onClick={() => setCreating(true)}
-                    className="tap mt-3 rounded-pill bg-primary px-5 py-2.5 text-secondary font-bold text-white"
+                    className="tap mt-3 rounded-pill bg-primary px-5 py-2.5 text-secondary font-bold text-on-primary"
                   >
                     Add &ldquo;{query.trim()}&rdquo;
                   </button>
@@ -215,7 +215,7 @@ function Rail({
             className="tap w-36 shrink-0 rounded-card border border-line bg-surface p-3 text-left"
           >
             <span className="block text-tertiary font-semibold leading-tight line-clamp-2">{f.name}</span>
-            <span className="mt-1 block text-secondary font-bold tabular-nums text-primary">
+            <span className="mt-1 block text-secondary font-bold tabular-nums text-primary-ink">
               {f.kcal}
               <span className="text-caption font-medium text-faint"> kcal</span>
             </span>
@@ -239,7 +239,7 @@ function RecipeRail({ onPick }: { onPick: (id: string) => void }) {
             className="tap w-40 shrink-0 rounded-card border border-line bg-surface p-3 text-left"
           >
             <span className="block text-tertiary font-semibold leading-tight line-clamp-2">{r.name}</span>
-            <span className="mt-1 block text-secondary font-bold tabular-nums text-primary">
+            <span className="mt-1 block text-secondary font-bold tabular-nums text-primary-ink">
               {r.kcal}
               <span className="text-caption font-medium text-faint"> kcal · {r.minutes}m</span>
             </span>
@@ -298,7 +298,7 @@ function FoodRow({ food, onPick }: { food: Food; onPick: (f: Food) => void }) {
           {food.protein > 0 && ` · ${food.protein}g protein`}
         </span>
       </span>
-      <span className="shrink-0 text-secondary font-bold tabular-nums text-primary">{food.kcal}</span>
+      <span className="shrink-0 text-secondary font-bold tabular-nums text-primary-ink">{food.kcal}</span>
     </button>
   )
 }

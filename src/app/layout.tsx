@@ -4,6 +4,7 @@ import { DataProvider } from '@/lib/store/provider'
 import { TabBar } from '@/components/TabBar'
 import { InstallHint } from '@/components/InstallHint'
 import { ServiceWorker } from '@/components/ServiceWorker'
+import { DEFAULT_THEME, THEME_COLORS, THEME_KEY } from '@/lib/theme'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -19,10 +20,10 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fffafc' },
-    { media: '(prefers-color-scheme: dark)', color: '#1a1418' },
-  ],
+  // A single value, kept in sync by applyTheme() in src/lib/theme.ts. Media-query
+  // variants would fight the explicit choice, since 'light' on a dark phone has
+  // to win over prefers-color-scheme.
+  themeColor: '#faf6f8',
   width: 'device-width',
   initialScale: 1,
   // Let the notch area take the page background on installed iOS PWAs.
@@ -32,6 +33,25 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/*
+          Runs before first paint, so an installed app never flashes the wrong
+          theme on launch. Deliberately inline and dependency-free: anything
+          loaded as a module would run after the first frame, which is exactly
+          the flash this prevents. Kept in sync with src/lib/theme.ts.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var c=localStorage.getItem(${JSON.stringify(
+              THEME_KEY
+            )});if(c!=='light'&&c!=='dark'&&c!=='system')c=${JSON.stringify(
+              DEFAULT_THEME
+            )};if(c==='system'){document.documentElement.removeAttribute('data-theme')}else{document.documentElement.setAttribute('data-theme',c)}var r=c==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):c;var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',r==='dark'?${JSON.stringify(
+              THEME_COLORS.dark
+            )}:${JSON.stringify(THEME_COLORS.light)})}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body>
         <DataProvider>
           <div className="mx-auto flex min-h-[100dvh] w-full max-w-2xl flex-col">

@@ -92,14 +92,14 @@ export default function SupplementsPage() {
                   <span
                     aria-hidden
                     className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border text-caption font-bold ${
-                      taken ? 'border-avocado bg-avocado text-white' : 'border-line text-transparent'
+                      taken ? 'border-avocado bg-avocado text-on-primary' : 'border-line text-transparent'
                     }`}
                   >
                     {taken && <Icon name="check" size={13} strokeWidth={3} />}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-secondary font-bold">{s.name}</span>
-                    <span className="block text-tertiary font-semibold text-primary">{s.dose}</span>
+                    <span className="block text-tertiary font-semibold text-primary-ink">{s.dose}</span>
                     <span className="mt-1 block text-tertiary text-muted">{s.purpose}</span>
                     <span className="mt-1 flex items-center gap-1 text-tertiary text-faint">
                       <Emoji name="clock" size={12} />
@@ -158,7 +158,7 @@ export default function SupplementsPage() {
                       aria-hidden
                       className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border text-caption font-bold ${
                         ticked
-                          ? 'border-avocado bg-avocado text-white'
+                          ? 'border-avocado bg-avocado text-on-primary'
                           : 'border-line text-transparent'
                       }`}
                     >
@@ -171,7 +171,7 @@ export default function SupplementsPage() {
                         >
                           {m.nutrient}
                         </span>
-                        <span className="shrink-0 text-tertiary tabular-nums text-primary">
+                        <span className="shrink-0 text-tertiary tabular-nums text-primary-ink">
                           {m.target}
                         </span>
                       </span>
@@ -199,7 +199,7 @@ export default function SupplementsPage() {
                     <span className="block text-tertiary text-faint">{c.serving}</span>
                   </span>
                   <span className="shrink-0 text-right">
-                    <span className="block text-secondary font-bold tabular-nums text-primary">
+                    <span className="block text-secondary font-bold tabular-nums text-primary-ink">
                       {c.caffeineMg}
                       <span className="text-caption font-medium text-faint"> mg</span>
                     </span>

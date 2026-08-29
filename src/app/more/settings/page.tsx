@@ -15,6 +15,7 @@ import {
 } from '@/lib/targets'
 import { supabaseClient } from '@/lib/store'
 import { defaultData } from '@/lib/store/defaults'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { useData } from '@/lib/store/provider'
 import type { ActivityLevel, Sex, Targets } from '@/lib/types'
 
@@ -178,6 +179,16 @@ export default function SettingsPage() {
         back={{ href: '/more', label: 'More' }}
       />
 
+      <ListGroup
+        header="Appearance"
+        footer="Dark is not automatically kinder on the eyes. A dark screen widens the pupil, which lets in more optical blur, so bright text on it can look like it is glowing. If reading feels like hard work, try Light."
+        className="mb-5"
+      >
+        <div className="p-4">
+          <ThemeToggle />
+        </div>
+      </ListGroup>
+
       <ListGroup header="Profile">
         <div className="grid grid-cols-2 gap-3 p-4">
           <NumField
@@ -214,7 +225,7 @@ export default function SettingsPage() {
                   onClick={() => setProfile({ sex: s })}
                   aria-pressed={p.sex === s}
                   className={`tap flex-1 rounded-pill px-2 py-2 text-tertiary font-semibold ${
-                    p.sex === s ? 'bg-primary text-white' : 'bg-raised text-muted'
+                    p.sex === s ? 'bg-primary text-on-primary' : 'bg-raised text-muted'
                   }`}
                 >
                   {s === 'female' ? 'Female' : 'Male'}
@@ -236,7 +247,7 @@ export default function SettingsPage() {
                 onClick={() => setProfile({ activityLevel: a.value })}
                 aria-pressed={p.activityLevel === a.value}
                 className={`tap flex-1 rounded-pill px-2 py-2 text-caption font-semibold ${
-                  p.activityLevel === a.value ? 'bg-primary text-white' : 'bg-raised text-muted'
+                  p.activityLevel === a.value ? 'bg-primary text-on-primary' : 'bg-raised text-muted'
                 }`}
               >
                 {a.label}
@@ -312,7 +323,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={recalculate}
-                  className="tap mt-2 w-full rounded-pill bg-amber py-2 text-tertiary font-bold text-white"
+                  className="tap mt-2 w-full rounded-pill bg-amber py-2 text-tertiary font-bold text-on-primary"
                 >
                   Recalculate to match {data.targets.kcal} kcal
                 </button>
@@ -351,7 +362,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={resetEverything}
-              className="tap flex-1 rounded-pill bg-clay py-2.5 text-tertiary font-bold text-white"
+              className="tap flex-1 rounded-pill bg-clay py-2.5 text-tertiary font-bold text-on-primary"
             >
               Yes, erase everything
             </button>
@@ -382,7 +393,7 @@ export default function SettingsPage() {
             href="https://github.com/jdecked/twemoji"
             target="_blank"
             rel="noreferrer noopener"
-            className="font-semibold text-primary underline decoration-primary/30 underline-offset-2"
+            className="font-semibold text-primary-ink underline decoration-primary-ink/30 underline-offset-2"
           >
             Twemoji
           </a>
@@ -391,7 +402,7 @@ export default function SettingsPage() {
             href="https://creativecommons.org/licenses/by/4.0/"
             target="_blank"
             rel="noreferrer noopener"
-            className="font-semibold text-primary underline decoration-primary/30 underline-offset-2"
+            className="font-semibold text-primary-ink underline decoration-primary-ink/30 underline-offset-2"
           >
             CC-BY 4.0
           </a>
@@ -433,7 +444,7 @@ export default function SettingsPage() {
 function Calc({ label, value, unit }: { label: string; value: string; unit: string }) {
   return (
     <div>
-      <dd className="text-xl font-extrabold tabular-nums text-primary">
+      <dd className="text-xl font-extrabold tabular-nums text-primary-ink">
         {value}
         <span className="ml-0.5 text-caption font-semibold text-faint">{unit}</span>
       </dd>
@@ -477,7 +488,7 @@ function NumField({
             aria-pressed={locked}
             aria-label={`${locked ? 'Unlock' : 'Lock'} ${label}`}
             className={`rounded-pill px-2 py-0.5 text-caption font-semibold ${
-              locked ? 'bg-primary/15 text-primary' : 'text-faint'
+              locked ? 'bg-primary/15 text-primary-ink' : 'text-faint'
             }`}
           >
             {locked ? 'Locked' : 'Auto'}

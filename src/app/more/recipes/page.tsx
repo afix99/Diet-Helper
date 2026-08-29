@@ -41,7 +41,7 @@ export default function RecipesPage() {
               >
                 <span className="block text-secondary font-bold">{r.name}</span>
                 <span className="mt-1 flex flex-wrap gap-x-3 text-tertiary tabular-nums text-muted">
-                  <span className="font-bold text-primary">{r.kcal} kcal</span>
+                  <span className="font-bold text-primary-ink">{r.kcal} kcal</span>
                   <span>{r.minutes} min</span>
                   <span>P {r.protein}g</span>
                   <span>C {r.carbs}g</span>
@@ -57,7 +57,7 @@ export default function RecipesPage() {
                   <ul className="mb-3 grid gap-0.5">
                     {r.ingredients.map((ing) => (
                       <li key={ing} className="flex gap-2 text-tertiary">
-                        <span aria-hidden className="text-primary">
+                        <span aria-hidden className="text-primary-ink">
                           •
                         </span>
                         <span>{ing}</span>
@@ -71,7 +71,7 @@ export default function RecipesPage() {
                   <ol className="mb-3 grid gap-1.5">
                     {r.steps.map((step, i) => (
                       <li key={step} className="flex gap-2 text-tertiary leading-relaxed">
-                        <span className="grid h-5 w-5 shrink-0 place-items-center rounded-pill bg-primary/15 text-caption font-bold text-primary">
+                        <span className="grid h-5 w-5 shrink-0 place-items-center rounded-pill bg-primary/15 text-caption font-bold text-primary-ink">
                           {i + 1}
                         </span>
                         <span>{step}</span>
@@ -110,7 +110,7 @@ export default function RecipesPage() {
                     <button
                       type="button"
                       onClick={() => setLogging(r.id)}
-                      className="tap w-full rounded-pill bg-primary py-2.5 text-secondary font-bold text-white"
+                      className="tap w-full rounded-pill bg-primary py-2.5 text-secondary font-bold text-on-primary"
                     >
                       Cook this today
                     </button>

@@ -12,19 +12,35 @@
  */
 :root {
   /* Warm pink-tinted neutrals: iOS-like greys that never read cold. */
-  --bg: 246 242 245;
+  --bg: 250 246 248;
   --surface: 255 255 255;
-  --raised: 250 244 247;
-  --line: 234 226 231;
-  --ink: 28 25 27;
-  --muted: 116 106 112;
-  --faint: 156 146 153;
+  --raised: 244 238 241;
+  --line: 231 222 228;
+  --ink: 33 29 32;
+  --muted: 95 87 96;
+  --faint: 135 126 134;
 
-  --primary: 214 87 132;
-  --avocado: 92 150 110;
-  --amber: 206 142 62;
-  --clay: 190 104 122;
-  --ocean: 92 130 182;
+  /*
+   * The accent splits into three roles because one value cannot do both jobs:
+   * a fill sitting behind white text wants to be dark, and accent text sitting
+   * on a light ground wants to be darker still. Sharing one token left
+   * white-on-pink at 4.46:1, under the 4.5:1 floor.
+   *
+   *   --primary            fills: the calorie ring, primary buttons, active tab
+   *   --primary-ink        accent TEXT and icons
+   *   --on-primary         text placed ON a primary fill
+   *   --primary-container  tonal fill for larger areas, so the accent can be
+   *                        present without being loud
+   */
+  --primary: 192 76 116;
+  --primary-ink: 166 58 95;
+  --on-primary: 255 255 255;
+  --primary-container: 246 227 234;
+
+  --avocado: 54 120 78;
+  --amber: 153 100 36;
+  --clay: 165 64 90;
+  --ocean: 65 106 159;
 
   /* Liquid Glass, navigation layer only. Light film over a light backdrop. */
   --glass-bg: 255 255 255;
@@ -39,19 +55,35 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: 20 17 20;
-    --surface: 31 27 30;
-    --raised: 42 36 41;
-    --line: 58 50 56;
-    --ink: 247 242 245;
-    --muted: 172 158 168;
-    --faint: 128 116 125;
+    --bg: 26 23 27;
+    --surface: 35 32 37;
+    --raised: 44 40 46;
+    --line: 58 53 60;
+    /*
+     * Body text is deliberately NOT pushed to near-white. #F7F2F5 on the old
+     * ground measured 16.9:1 — about as much negative-polarity contrast as sRGB
+     * can produce, and the condition that makes glyphs halo for the ~50% of
+     * adults with astigmatism. This lands at 13.4:1 instead. Raising it "for
+     * accessibility" would undo the fix; check-contrast.mjs enforces the ceiling.
+     */
+    --ink: 228 222 226;
+    --muted: 168 159 166;
+    --faint: 125 116 123;
 
-    --primary: 244 146 180;
-    --avocado: 132 186 148;
-    --amber: 230 178 106;
-    --clay: 216 148 164;
-    --ocean: 142 172 216;
+    /*
+     * Saturation drops 82% -> 46% here. The old dark accent was MORE saturated
+     * than the light one, which is backwards: high chroma at high luminance on
+     * a near-black ground is exactly what makes a colour buzz.
+     */
+    --primary: 221 163 184;
+    --primary-ink: 221 163 184;
+    --on-primary: 42 26 33;
+    --primary-container: 67 48 58;
+
+    --avocado: 134 193 155;
+    --amber: 213 177 123;
+    --clay: 208 149 164;
+    --ocean: 146 174 211;
 
     /* Glass over a dark backdrop needs a lighter film, not a darker one. */
     --glass-bg: 58 50 56;
@@ -63,19 +95,35 @@
 }
 
 :root[data-theme='dark'] {
-  --bg: 20 17 20;
-  --surface: 31 27 30;
-  --raised: 42 36 41;
-  --line: 58 50 56;
-  --ink: 247 242 245;
-  --muted: 172 158 168;
-  --faint: 128 116 125;
+  --bg: 26 23 27;
+  --surface: 35 32 37;
+  --raised: 44 40 46;
+  --line: 58 53 60;
+  /*
+   * Body text is deliberately NOT pushed to near-white. #F7F2F5 on the old
+   * ground measured 16.9:1 — about as much negative-polarity contrast as sRGB
+   * can produce, and the condition that makes glyphs halo for the ~50% of
+   * adults with astigmatism. This lands at 13.4:1 instead. Raising it "for
+   * accessibility" would undo the fix; check-contrast.mjs enforces the ceiling.
+   */
+  --ink: 228 222 226;
+  --muted: 168 159 166;
+  --faint: 125 116 123;
 
-  --primary: 244 146 180;
-  --avocado: 132 186 148;
-  --amber: 230 178 106;
-  --clay: 216 148 164;
-  --ocean: 142 172 216;
+  /*
+   * Saturation drops 82% -> 46% here. The old dark accent was MORE saturated
+   * than the light one, which is backwards: high chroma at high luminance on
+   * a near-black ground is exactly what makes a colour buzz.
+   */
+  --primary: 221 163 184;
+  --primary-ink: 221 163 184;
+  --on-primary: 42 26 33;
+  --primary-container: 67 48 58;
+
+  --avocado: 134 193 155;
+  --amber: 213 177 123;
+  --clay: 208 149 164;
+  --ocean: 146 174 211;
 
   /* Glass over a dark backdrop needs a lighter film, not a darker one. */
   --glass-bg: 58 50 56;
@@ -89,6 +137,18 @@ html {
   -webkit-text-size-adjust: 100%;
   /* Fill the notch area with the app background on installed iOS PWAs. */
   background-color: rgb(var(--bg));
+  /* So native controls, scrollbars and form fields follow the chosen theme
+     rather than the OS one. Set per theme below. */
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) {
+    color-scheme: dark;
+  }
+}
+html[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 body {
@@ -98,6 +158,38 @@ body {
   -webkit-font-smoothing: antialiased;
   /* Prevent iOS rubber-band revealing white behind the fixed tab bar. */
   overscroll-behavior-y: none;
+}
+
+/*
+ * A static wash behind everything, so a dark ground has depth instead of
+ * reading as a flat void with text floating on it.
+ *
+ * Deliberately not animated. Motion in the periphery competes with the numbers
+ * you opened the app to read, and costs battery on a screen used in
+ * forty-second bursts — it would make eye strain worse, not better. Depth is
+ * what a flat field is missing, not movement.
+ *
+ * Fixed and behind all content, tinted from the accent so it re-colours itself
+ * with the theme.
+ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 62% at 50% -8%,
+      rgb(var(--primary) / 0.07) 0%,
+      rgb(var(--primary) / 0.028) 42%,
+      transparent 72%
+    ),
+    radial-gradient(
+      90% 48% at 12% 104%,
+      rgb(var(--ocean) / 0.035) 0%,
+      transparent 64%
+    );
 }
 
 @layer components {

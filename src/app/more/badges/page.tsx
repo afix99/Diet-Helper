@@ -26,7 +26,7 @@ export default function BadgesPage() {
       />
 
       <Card className="mb-4 text-center">
-        <p className="text-5xl font-extrabold tabular-nums text-primary">
+        <p className="text-5xl font-extrabold tabular-nums text-primary-ink">
           {run.current}
           <span className="ml-1 text-body font-semibold text-muted">
             {run.current === 1 ? 'day' : 'days'}
@@ -75,7 +75,7 @@ export default function BadgesPage() {
                 <div className="h-full bg-primary/50" style={{ width: `${b.progress * 100}%` }} />
               </div>
             )}
-            {b.unlocked && <p className="mt-1 text-caption font-bold text-primary">UNLOCKED</p>}
+            {b.unlocked && <p className="mt-1 text-caption font-bold text-primary-ink">UNLOCKED</p>}
           </Card>
         ))}
       </div>

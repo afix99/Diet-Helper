@@ -84,7 +84,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
           <button
             type="submit"
             disabled={busy}
-            className="tap rounded-pill bg-primary py-3 text-secondary font-bold text-white disabled:opacity-50"
+            className="tap rounded-pill bg-primary py-3 text-secondary font-bold text-on-primary disabled:opacity-50"
           >
             {busy ? 'Sending…' : 'Send sign-in link'}
           </button>
