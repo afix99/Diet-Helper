@@ -16,6 +16,7 @@ import {
 import { supabaseClient } from '@/lib/store'
 import { defaultData } from '@/lib/store/defaults'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { openStarterGuide } from '@/components/OnboardingGate'
 import { useData } from '@/lib/store/provider'
 import type { ActivityLevel, Sex, Targets } from '@/lib/types'
 
@@ -187,6 +188,22 @@ export default function SettingsPage() {
         <div className="p-4">
           <ThemeToggle />
         </div>
+      </ListGroup>
+
+      <ListGroup header="Starter guide" className="mb-5">
+        <button
+          type="button"
+          onClick={openStarterGuide}
+          className="tap flex w-full items-center justify-between px-4 py-3 text-left"
+        >
+          <span>
+            <span className="block text-secondary font-semibold">Show the starter guide</span>
+            <span className="block text-tertiary text-muted">
+              Six cards covering setup and how to log
+            </span>
+          </span>
+          <Icon name="chevron" size={16} strokeWidth={2.25} className="shrink-0 text-faint" />
+        </button>
       </ListGroup>
 
       <ListGroup header="Profile">

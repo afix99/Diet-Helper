@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { AuthGate } from '@/components/AuthGate'
 import { DataProvider } from '@/lib/store/provider'
+import { OnboardingGate } from '@/components/OnboardingGate'
 import { TabBar } from '@/components/TabBar'
 import { InstallHint } from '@/components/InstallHint'
 import { ServiceWorker } from '@/components/ServiceWorker'
@@ -58,6 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <main className="flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+108px)] pt-[max(0.5rem,env(safe-area-inset-top))]">
               <AuthGate>{children}</AuthGate>
             </main>
+            <OnboardingGate />
             <InstallHint />
             <ServiceWorker />
             <TabBar />
