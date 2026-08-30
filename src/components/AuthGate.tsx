@@ -88,13 +88,6 @@ export function AuthGate({ children }: { children: ReactNode }) {
           >
             {busy ? 'Sending…' : 'Send sign-in link'}
           </button>
-          <button
-            type="button"
-            onClick={() => client.auth.signInWithOAuth({ provider: 'google' })}
-            className="tap rounded-pill border border-line py-3 text-secondary font-semibold"
-          >
-            Continue with Google
-          </button>
           {error && <p className="text-tertiary text-clay">{error}</p>}
         </form>
       )}

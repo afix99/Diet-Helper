@@ -57,9 +57,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <DataProvider>
           <div className="mx-auto flex min-h-[100dvh] w-full max-w-2xl flex-col">
             <main className="flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+108px)] pt-[max(0.5rem,env(safe-area-inset-top))]">
-              <AuthGate>{children}</AuthGate>
+              {/*
+                The starter guide lives INSIDE the auth gate. Outside it, its
+                full-screen overlay covers the sign-in wall, so a signed-out
+                person is asked for their body weight before they can sign in —
+                and answers it into a diary that is about to be replaced.
+              */}
+              <AuthGate>
+                <OnboardingGate />
+                {children}
+              </AuthGate>
             </main>
-            <OnboardingGate />
             <InstallHint />
             <ServiceWorker />
             <TabBar />
