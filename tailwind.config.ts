@@ -101,6 +101,26 @@ const config: Config = {
           from: { backgroundPosition: '-200% 0' },
           to: { backgroundPosition: '200% 0' },
         },
+        /* The ring acknowledging that a number under it just changed. Small on
+           purpose: it sits behind the headline figure, and a big bounce there
+           would fight the count-up rather than support it. */
+        'ring-pulse': {
+          '0%': { transform: 'scale(1)' },
+          '35%': { transform: 'scale(1.035)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        /* A tint washing across a row that has just arrived, so the eye is led
+           to the thing that appeared rather than having to hunt for it. */
+        'land-flash': {
+          '0%': { backgroundColor: 'rgb(var(--primary) / 0.16)' },
+          '100%': { backgroundColor: 'rgb(var(--primary) / 0)' },
+        },
+        /* A chip handing itself over: it shrinks away as the entry it becomes
+           pops in below. */
+        'chip-commit': {
+          '0%': { transform: 'scale(1)', opacity: '1' },
+          '100%': { transform: 'scale(0.82)', opacity: '0' },
+        },
         /* Slow breathing pulse, for the streak flame. */
         breathe: {
           '0%, 100%': { transform: 'scale(1)' },
@@ -120,6 +140,9 @@ const config: Config = {
         'badge-pop': 'badge-pop 620ms cubic-bezier(0.34, 1.56, 0.64, 1) both',
         'badge-glow': 'badge-glow 900ms ease-out forwards',
         'rise-in': 'rise-in 380ms cubic-bezier(0.22, 0.61, 0.36, 1) both',
+        'ring-pulse': 'ring-pulse 420ms cubic-bezier(0.34, 1.4, 0.64, 1)',
+        'land-flash': 'land-flash 900ms ease-out forwards',
+        'chip-commit': 'chip-commit 220ms cubic-bezier(0.5, 0, 0.75, 0) forwards',
         shimmer: 'shimmer 1.4s linear infinite',
         breathe: 'breathe 2.6s ease-in-out infinite',
       },

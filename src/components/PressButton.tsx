@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState, type ReactNode } from 'react'
 import { haptic } from '@/lib/haptics'
+import { sound, type Cue } from '@/lib/sound'
 import { Icon } from './icons'
 
 type Variant = 'primary' | 'quiet' | 'outline' | 'destructive'
@@ -23,10 +24,11 @@ interface Ripple {
 /**
  * The app's one button.
  *
- * Three bits of feedback, because a tap on glass gives none of its own: the
- * surface dips, a ripple grows from where the finger actually landed, and the
- * phone ticks. Together they make a press feel acknowledged rather than
- * hopeful.
+ * Four bits of feedback, because a tap on glass gives none of its own: the
+ * surface dips, a ripple grows from where the finger actually landed, the phone
+ * ticks, and a short tone lands in the ear. Together they make a press feel
+ * acknowledged rather than hopeful — which matters most for the presses that
+ * are a chore, because a chore with no payoff is the one that stops happening.
  *
  * `loading` and `success` are handled here so no screen has to invent its own
  * pending state, and both keep the button's width so nothing jumps.
@@ -41,6 +43,7 @@ export function PressButton({
   disabled = false,
   className = '',
   hapticWeight = 'light',
+  cue = 'tap',
   type = 'button',
   'aria-label': ariaLabel,
 }: {
@@ -53,6 +56,8 @@ export function PressButton({
   disabled?: boolean
   className?: string
   hapticWeight?: 'light' | 'medium' | 'success'
+  /** The sound this press makes. Pass 'log' when the press files something. */
+  cue?: Cue
   type?: 'button' | 'submit'
   'aria-label'?: string
 }) {
@@ -85,7 +90,11 @@ export function PressButton({
         busy
           ? undefined
           : () => {
+              // One moment, three channels: the surface dips, the phone ticks,
+              // and something small happens in the ear. Any of them can be off
+              // or unsupported without the others noticing.
               haptic(success ? 'success' : hapticWeight)
+              sound(cue)
               onClick?.()
             }
       }

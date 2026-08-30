@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePresence } from '@/hooks/usePresence'
 import { FoodPicker } from '@/components/FoodPicker'
@@ -8,20 +8,18 @@ import { PressButton } from '@/components/PressButton'
 import { BadgeArt, Emoji } from '@/components/Emoji'
 import { Icon } from '@/components/icons'
 import { QuickAdd } from '@/components/QuickAdd'
+import { MealSlotCard } from '@/components/MealSlotCard'
 import { MacroFateSheet } from '@/components/MacroFateSheet'
 import { UnderEatingCard } from '@/components/UnderEatingCard'
 import { WaterCard } from '@/components/WaterCard'
 import { BudgetRing, Card, MacroBar, PageHeader, StatusPill } from '@/components/ui'
-import { useLogging } from '@/lib/logging'
 import { statusBand } from '@/lib/nutrition'
+import { sound } from '@/lib/sound'
 import { targetRisk } from '@/lib/targets'
 import type { MacroKey } from '@/lib/macroFate'
 import {
   badgesFor,
   dayTotals,
-  entriesForSlot,
-  entryMacros,
-  entryName,
   latestWeight,
   streakFor,
 } from '@/lib/selectors'
@@ -32,10 +30,13 @@ import { MEAL_SLOTS, SLOT_LABELS, type MealSlot } from '@/lib/types'
 
 export default function TodayPage() {
   const { data, ready } = useData()
-  const { removeEntry, setServings } = useLogging()
   const [picking, setPicking] = useState<MealSlot | null>(null)
   const [quickAdding, setQuickAdding] = useState<MealSlot | null>(null)
   const [explaining, setExplaining] = useState<MacroKey | null>(null)
+  /* One meal open at a time. Six expanded cards was a wall in front of the one
+     thing anyone opens this screen to do. */
+  const [openSlot, setOpenSlot] = useState<MealSlot>(() => slotForNow())
+  const [showMacros, setShowMacros] = useState(false)
   const [heldPicking, pickingLeaving] = usePresence(picking)
   const [heldQuickAdding, quickAddLeaving] = usePresence(quickAdding)
   const [heldExplaining, explainLeaving] = usePresence(explaining)
@@ -55,6 +56,34 @@ export default function TodayPage() {
     [data]
   )
   const band = statusBand(totals.kcal, data.targets.kcal)
+  /*
+   * A target being reached is the one moment on this screen worth marking, so
+   * it gets a glow and a cue. Once each, per target, per day: the whole value
+   * of a small celebration is that it does not keep happening.
+   */
+  const hit = useMemo(() => {
+    const t = data.targets
+    return [
+      totals.protein >= t.protein,
+      totals.fibre >= t.fibre,
+      ready && totals.kcal > 0 && band === 'on_target',
+    ].filter(Boolean).length
+  }, [totals, data.targets, band, ready])
+  const [glow, setGlow] = useState(0)
+  const lastHit = useRef<number | null>(null)
+  useEffect(() => {
+    if (lastHit.current === null) {
+      // First render of the day's data is not an achievement, it is a load.
+      lastHit.current = hit
+      return
+    }
+    if (hit > lastHit.current) {
+      setGlow((n) => n + 1)
+      sound('goal')
+    }
+    lastHit.current = hit
+  }, [hit])
+
   const run = useMemo(() => streakFor(data, date), [data, date])
   const unlocked = useMemo(() => badgesFor(data, date).filter((b) => b.unlocked), [data, date])
 
@@ -82,7 +111,16 @@ export default function TodayPage() {
       />
 
       <Card className="mb-4">
-        <BudgetRing consumed={totals.kcal} target={data.targets.kcal} band={band} />
+        <div className="relative">
+          {glow > 0 && (
+            <span
+              key={glow}
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-44 w-44 -translate-x-1/2 -translate-y-1/2 animate-badge-glow rounded-full bg-avocado/40"
+            />
+          )}
+          <BudgetRing consumed={totals.kcal} target={data.targets.kcal} band={band} />
+        </div>
         <div className="mt-3 flex items-center justify-center gap-2">
           <StatusPill band={band} />
           {/* No background: the 44px tap minimum would otherwise make this
@@ -107,7 +145,32 @@ export default function TodayPage() {
           </Link>
         )}
 
-        <div className="mt-5 stack gap-3">
+        <button
+          type="button"
+          onClick={() => setShowMacros((v) => !v)}
+          aria-expanded={showMacros}
+          data-macro-toggle
+          className="tap mt-4 flex w-full items-center justify-center gap-2 text-tertiary tabular-nums text-muted"
+        >
+          <span>
+            <b className="font-semibold">P</b> {Math.round(totals.protein)}
+            <span className="mx-1 text-faint">·</span>
+            <b className="font-semibold">C</b> {Math.round(totals.carbs)}
+            <span className="mx-1 text-faint">·</span>
+            <b className="font-semibold">F</b> {Math.round(totals.fat)}
+            <span className="mx-1 text-faint">·</span>
+            <b className="font-semibold">Fibre</b> {Math.round(totals.fibre)}
+          </span>
+          <Icon
+            name="chevron"
+            size={13}
+            strokeWidth={2.5}
+            className={`text-faint transition-transform ${showMacros ? '-rotate-90' : 'rotate-90'}`}
+          />
+        </button>
+
+        {showMacros && (
+        <div className="mt-4 stack gap-3">
           <MacroBar
             label="Protein"
             value={totals.protein}
@@ -137,6 +200,7 @@ export default function TodayPage() {
             onExplain={() => setExplaining('fibre')}
           />
         </div>
+        )}
       </Card>
 
       {unlocked.length > 0 && (
@@ -173,76 +237,16 @@ export default function TodayPage() {
       </PressButton>
 
       <div className="stack gap-3">
-        {MEAL_SLOTS.map((slot) => {
-          const entries = entriesForSlot(data, date, slot)
-          const slotKcal = entries.reduce((sum, e) => sum + entryMacros(e).kcal, 0)
-          const label = SLOT_LABELS[slot]
-          return (
-            <Card key={slot}>
-              <div className="mb-2 flex items-baseline justify-between">
-                <h2 className="text-secondary font-bold">{label.label}</h2>
-                <span className="text-tertiary tabular-nums text-faint">
-                  {slotKcal > 0 ? `${Math.round(slotKcal)} kcal` : label.time}
-                </span>
-              </div>
-
-              {entries.length > 0 && (
-                <ul className="mb-2 divide-y divide-line">
-                  {entries.map((e) => {
-                    const m = entryMacros(e)
-                    return (
-                      <li key={e.id} className="flex items-center gap-2 py-2">
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-secondary">{entryName(e, data.customFoods)}</span>
-                          <span className="block text-tertiary text-faint tabular-nums">
-                            {Math.round(m.kcal)} kcal · {Math.round(m.protein)}g P
-                          </span>
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            aria-label="Decrease servings"
-                            onClick={() => setServings(e.id, e.servings - 0.5)}
-                            className="tap grid h-8 w-8 place-items-center rounded-pill bg-raised text-secondary font-bold"
-                          >
-                            −
-                          </button>
-                          <span className="w-8 text-center text-tertiary font-semibold tabular-nums">
-                            ×{e.servings}
-                          </span>
-                          <button
-                            type="button"
-                            aria-label="Increase servings"
-                            onClick={() => setServings(e.id, e.servings + 0.5)}
-                            className="tap grid h-8 w-8 place-items-center rounded-pill bg-raised text-secondary font-bold"
-                          >
-                            +
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Remove ${entryName(e, data.customFoods)}`}
-                            onClick={() => removeEntry(e.id)}
-                            className="tap grid h-8 w-8 place-items-center rounded-pill text-faint"
-                          >
-                            <Icon name="close" size={15} strokeWidth={2.25} />
-                          </button>
-                        </span>
-                      </li>
-                    )
-                  })}
-                </ul>
-              )}
-
-              <button
-                type="button"
-                onClick={() => setPicking(slot)}
-                className="tap w-full rounded-pill border border-dashed border-line py-2.5 text-secondary font-semibold text-primary-ink"
-              >
-                + Add food
-              </button>
-            </Card>
-          )
-        })}
+        {MEAL_SLOTS.map((slot) => (
+          <MealSlotCard
+            key={slot}
+            date={date}
+            slot={slot}
+            open={openSlot === slot}
+            onToggle={() => setOpenSlot(slot)}
+            onOpenPicker={() => setPicking(slot)}
+          />
+        ))}
       </div>
 
       {heldPicking && (

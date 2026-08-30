@@ -2,6 +2,7 @@
 
 import { Card } from './ui'
 import { PressButton } from './PressButton'
+import { sound } from '@/lib/sound'
 import { useData } from '@/lib/store/provider'
 
 const GLASS_ML = 250
@@ -58,19 +59,25 @@ export function WaterCard({ date }: { date: string }) {
       </div>
 
       <div className="flex gap-1.5">
-        <PressButton full onClick={() => add(GLASS_ML)} className="flex-1 !bg-ocean !py-2">
+        <PressButton full cue="water" onClick={() => add(GLASS_ML)} className="flex-1 !bg-ocean !py-2">
           + a glass (250ml)
         </PressButton>
         <button
           type="button"
-          onClick={() => add(500)}
+          onClick={() => {
+            sound('water')
+            add(500)
+          }}
           className="tap rounded-pill bg-raised px-4 py-2 text-tertiary font-semibold text-muted"
         >
           +500
         </button>
         <button
           type="button"
-          onClick={() => add(-GLASS_ML)}
+          onClick={() => {
+            sound('undo')
+            add(-GLASS_ML)
+          }}
           aria-label="Remove a glass"
           disabled={drunk === 0}
           className="tap rounded-pill bg-raised px-4 py-2 text-tertiary font-semibold text-muted disabled:opacity-40"

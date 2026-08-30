@@ -272,7 +272,7 @@ describe('targetRisk', () => {
   })
 
   it('never proposes a replacement target', () => {
-    const r = targetRisk(profile, 800) as Record<string, unknown>
+    const r = targetRisk(profile, 800) as unknown as Record<string, unknown>
     expect(r.suggestedKcal).toBeUndefined()
     expect(r.note).not.toMatch(/use \d|should eat|set it to/i)
   })

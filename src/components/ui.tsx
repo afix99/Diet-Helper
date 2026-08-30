@@ -255,6 +255,19 @@ export function BudgetRing({
 }) {
   // The headline figure counts rather than snapping, so a change is legible.
   const shown = useCountUp(consumed)
+
+  /*
+   * A pulse when the total moves, keyed so React remounts the node and replays
+   * the animation. Small on purpose: it sits behind the headline figure, and a
+   * big bounce there would fight the count-up rather than support it.
+   */
+  const [pulse, setPulse] = useState(0)
+  const lastTarget = useRef(consumed)
+  useEffect(() => {
+    if (consumed === lastTarget.current) return
+    lastTarget.current = consumed
+    setPulse((n) => n + 1)
+  }, [consumed])
   const remaining = Math.round(target - shown)
   const over = remaining < 0
 
@@ -291,7 +304,11 @@ export function BudgetRing({
   )
 
   return (
-    <div className="relative mx-auto" style={{ width: size, height: size }}>
+    <div
+      key={pulse}
+      className={`relative mx-auto ${pulse > 0 ? 'animate-ring-pulse' : ''}`}
+      style={{ width: size, height: size }}
+    >
       <svg
         width={size}
         height={size}

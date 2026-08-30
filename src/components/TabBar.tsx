@@ -44,7 +44,15 @@ export function TabBar() {
                     className="absolute inset-0 -z-10 rounded-pill bg-primary/12"
                   />
                 )}
-                <Icon name={tab.icon} size={23} strokeWidth={active ? 2 : 1.75} />
+                {/* Keyed on the tab so the pop replays each time it becomes
+                    the active one, rather than only on first mount. */}
+                <Icon
+                  key={active ? 'on' : 'off'}
+                  name={tab.icon}
+                  size={23}
+                  strokeWidth={active ? 2 : 1.75}
+                  className={active ? 'animate-pop-in' : ''}
+                />
                 <span>{tab.label}</span>
               </Link>
             </li>
