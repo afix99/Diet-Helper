@@ -39,12 +39,20 @@ diary. All seven attempts must fail.
 
 ## 3. Set two environment variables on Vercel
 
+**If you created the project through Vercel's Supabase integration**, check
+Vercel → **Settings → Environment Variables** first. The integration sometimes
+adds `SUPABASE_URL` and `SUPABASE_ANON_KEY` for you, and `next.config.mjs`
+accepts either spelling — so if they are already there, skip to step 4 and just
+redeploy. If the list is empty, carry on below.
+
 Supabase → **Settings → API**. Copy:
 
 | Vercel variable | Supabase field |
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `anon` `public` key |
+
+(`SUPABASE_URL` and `SUPABASE_ANON_KEY` work too — the build maps them.)
 
 Vercel → project → **Settings → Environment Variables**. Add both to
 **Production**, **Preview** and **Development**.
