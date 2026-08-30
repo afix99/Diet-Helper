@@ -6,7 +6,21 @@ import type { AppData, DataStore } from './types'
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-export const supabaseConfigured = Boolean(URL && ANON)
+/**
+ * Accounts are opt-in, separately from having credentials.
+ *
+ * Credentials alone used to be enough to raise a sign-in wall, which meant a
+ * half-finished auth setup locked everyone out of a working app. Whether the
+ * database exists and whether people must log in are different questions, and
+ * only the second one should be able to make the app unusable.
+ *
+ * Set NEXT_PUBLIC_ENABLE_ACCOUNTS=1 to turn the wall on. Unset or anything
+ * else, and the app runs on browser storage exactly as it did before Supabase
+ * — the project, its table and its policies all stay where they are.
+ */
+const ACCOUNTS_ENABLED = process.env.NEXT_PUBLIC_ENABLE_ACCOUNTS === '1'
+
+export const supabaseConfigured = ACCOUNTS_ENABLED && Boolean(URL && ANON)
 
 export function supabaseClient(): SupabaseClient | null {
   if (!URL || !ANON) return null

@@ -1,13 +1,20 @@
 # Turning on accounts and sync
 
-Without this, the app stores everything in one browser under a single key. Two
-people on the same phone share one diary; two people on different phones each
-get their own, and neither syncs anywhere. That is fine for one person on one
-device and wrong for anything else.
+**Accounts are currently off.** The Supabase project exists, its table and
+policies are in place and verified, and the credentials are in Vercel — but
+`NEXT_PUBLIC_ENABLE_ACCOUNTS` is unset, so the app runs on browser storage with
+no sign-in wall.
 
-The code for accounts is already written. Switching it on is four steps, and
-three of them need your login, so they are yours to do — I have no way to create
-a Supabase project or set a Vercel environment variable on your behalf.
+To switch accounts on: set `NEXT_PUBLIC_ENABLE_ACCOUNTS=1` in Vercel →
+Settings → Environments → Production, and redeploy. To switch them back off,
+delete that one variable. Nothing else has to change, and no credentials need
+re-entering.
+
+Before turning it on, do this in Supabase or sign-up will fail: Authentication →
+Sign In / Providers → Email → turn **Confirm email** off. Sign-in uses a
+password, and leaving confirmation on makes sign-up send an email through
+Supabase's built-in service, which is capped at roughly two messages an hour for
+the whole project — the "email rate limit exceeded" that stopped us before.
 
 ---
 
