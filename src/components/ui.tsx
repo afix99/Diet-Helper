@@ -306,22 +306,39 @@ export function MacroBar({
   target,
   unit = 'g',
   tone,
+  onExplain,
 }: {
   label: string
   value: number
   target: number
   unit?: string
   tone: 'primary' | 'avocado' | 'amber' | 'ocean'
+  /** Given, and only when over target, the whole row becomes a button. */
+  onExplain?: () => void
 }) {
-  const pct = target > 0 ? Math.min(1, value / target) : 0
+  const over = target > 0 && value > target
+  /*
+   * Under target the bar means "how much of the target is used". Over it, the
+   * track is rescaled to what was actually eaten, so the target becomes a share
+   * of the bar rather than the whole of it. Clamping at 100% was the old
+   * behaviour and it made 180g and 400g look identical.
+   */
+  const targetShare = target > 0 ? Math.min(1, value === 0 ? 0 : over ? target / value : value / target) : 0
   const fills = {
     primary: 'bg-primary',
     avocado: 'bg-avocado',
     amber: 'bg-amber',
     ocean: 'bg-ocean',
   }
-  return (
-    <div>
+  const overflows = {
+    primary: 'bg-primary/40',
+    avocado: 'bg-avocado/40',
+    amber: 'bg-amber/40',
+    ocean: 'bg-ocean/40',
+  }
+
+  const inner = (
+    <>
       <div className="mb-1 flex items-baseline justify-between text-tertiary">
         <span className="font-semibold">{label}</span>
         <span className="tabular-nums text-muted">
@@ -332,14 +349,46 @@ export function MacroBar({
           </span>
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-pill bg-raised">
+      <div className="flex h-2 overflow-hidden rounded-pill bg-raised">
         <div
-          className={`h-full rounded-pill ${fills[tone]} transition-[width] duration-700 ease-out`}
-          style={{ width: `${pct * 100}%` }}
+          className={`h-full ${fills[tone]} transition-[width] duration-700 ease-out`}
+          style={{ width: `${targetShare * 100}%` }}
         />
+        {over && (
+          // The border draws a hairline at the target, so the eye can see where
+          // the line was without needing the numbers.
+          <div
+            className={`h-full border-l-2 border-surface ${overflows[tone]} transition-[width] duration-700 ease-out`}
+            style={{ width: `${(1 - targetShare) * 100}%` }}
+          />
+        )}
       </div>
-    </div>
+      {over && onExplain && (
+        <span className="mt-1 flex items-center gap-1 text-caption font-semibold text-primary-ink">
+          +{Math.round(value - target)}
+          {unit} over
+          <span className="font-normal text-faint">&middot; where does it go?</span>
+          <Icon name="chevron" size={12} strokeWidth={2.5} className="text-faint" />
+        </span>
+      )}
+    </>
   )
+
+  // The row is already taller than the 44px minimum, so making the whole thing
+  // the target costs no layout and beats a tiny link under each bar.
+  if (over && onExplain) {
+    return (
+      <button
+        type="button"
+        onClick={onExplain}
+        aria-label={`${label} is over target. What happens to it?`}
+        className="tap w-full text-left transition active:scale-[0.99]"
+      >
+        {inner}
+      </button>
+    )
+  }
+  return <div>{inner}</div>
 }
 
 export function EmptyState({

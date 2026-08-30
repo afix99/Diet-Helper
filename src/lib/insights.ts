@@ -10,8 +10,13 @@
  *   A "coach" that draws conclusions from two days is noise.
  * - The workbook's non-judgemental voice carries over. Observations, not
  *   scolding, and never a comment on appearance or worth.
+ * - Nothing here repeats what the trend card above it already says. The finish
+ *   -date projection used to live here as well, on weaker evidence than the
+ *   card demands, and two different arrival dates on one screen is worse than
+ *   either alone.
  */
 import { isOnTarget, round1, type DayRecord } from './nutrition'
+import { ratePerWeek } from './trends'
 import { underEating, type UnderEatingProfile } from './underEating'
 import type { Targets, WeightLog } from './types'
 
@@ -47,7 +52,7 @@ const isWeekend = (iso: string) => {
 }
 
 export function insights(input: InsightInput): Insight[] {
-  const { days, targets, weights, startWeightKg, goalWeightKg } = input
+  const { days, targets, weights, startWeightKg } = input
   const logged = days.filter((d) => d.kcal > 0)
   const out: Insight[] = []
 
@@ -191,8 +196,11 @@ export function insights(input: InsightInput): Insight[] {
       (new Date(`${last.date}T00:00:00Z`).getTime() -
         new Date(`${first.date}T00:00:00Z`).getTime()) /
       86_400_000
-    if (dayGap >= 10) {
-      const perWeek = round1(((first.weightKg - last.weightKg) / dayGap) * 7)
+    // One shared rate for the whole app: the Progress screen shows a regression
+    // slope beside these lines, and two pace numbers that disagreed would be
+    // worse than either on its own.
+    const perWeek = ratePerWeek(sorted)
+    if (dayGap >= 10 && perWeek !== null) {
       if (perWeek >= 0.4 && perWeek <= 0.7) {
         out.push({
           id: 'rate_ideal',
@@ -219,18 +227,6 @@ export function insights(input: InsightInput): Insight[] {
           detail:
             `No net change over ${Math.round(dayGap)} days. Before cutting further, check ` +
             `whether the last two weeks were logged as fully as the first.`,
-        })
-      }
-      const toGo = round1(last.weightKg - goalWeightKg)
-      if (perWeek > 0.15 && toGo > 0) {
-        const weeksLeft = Math.ceil(toGo / perWeek)
-        out.push({
-          id: 'eta',
-          tone: 'neutral',
-          title: `About ${weeksLeft} weeks to go`,
-          detail:
-            `${toGo} kg from ${goalWeightKg} kg at your current pace. A projection, not a promise — ` +
-            `rates slow as you get lighter.`,
         })
       }
     }

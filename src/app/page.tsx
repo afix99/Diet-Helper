@@ -8,11 +8,13 @@ import { PressButton } from '@/components/PressButton'
 import { BadgeArt, Emoji } from '@/components/Emoji'
 import { Icon } from '@/components/icons'
 import { QuickAdd } from '@/components/QuickAdd'
+import { MacroFateSheet } from '@/components/MacroFateSheet'
 import { UnderEatingCard } from '@/components/UnderEatingCard'
 import { WaterCard } from '@/components/WaterCard'
 import { BudgetRing, Card, MacroBar, PageHeader, StatusPill } from '@/components/ui'
 import { useLogging } from '@/lib/logging'
 import { statusBand } from '@/lib/nutrition'
+import type { MacroKey } from '@/lib/macroFate'
 import {
   badgesFor,
   dayTotals,
@@ -31,8 +33,10 @@ export default function TodayPage() {
   const { removeEntry, setServings } = useLogging()
   const [picking, setPicking] = useState<MealSlot | null>(null)
   const [quickAdding, setQuickAdding] = useState<MealSlot | null>(null)
+  const [explaining, setExplaining] = useState<MacroKey | null>(null)
   const [heldPicking, pickingLeaving] = usePresence(picking)
   const [heldQuickAdding, quickAddLeaving] = usePresence(quickAdding)
+  const [heldExplaining, explainLeaving] = usePresence(explaining)
   const date = todayIso()
 
   const totals = useMemo(() => dayTotals(data, date), [data, date])
@@ -93,19 +97,28 @@ export default function TodayPage() {
             value={totals.protein}
             target={data.targets.protein}
             tone="primary"
+            onExplain={() => setExplaining('protein')}
           />
           <MacroBar
             label="Carbs"
             value={totals.carbs}
             target={data.targets.carbs}
             tone="amber"
+            onExplain={() => setExplaining('carbs')}
           />
-          <MacroBar label="Fat" value={totals.fat} target={data.targets.fat} tone="ocean" />
+          <MacroBar
+            label="Fat"
+            value={totals.fat}
+            target={data.targets.fat}
+            tone="ocean"
+            onExplain={() => setExplaining('fat')}
+          />
           <MacroBar
             label="Fibre"
             value={totals.fibre}
             target={data.targets.fibre}
             tone="avocado"
+            onExplain={() => setExplaining('fibre')}
           />
         </div>
       </Card>
@@ -222,6 +235,14 @@ export default function TodayPage() {
           slot={heldPicking}
           leaving={pickingLeaving}
           onClose={() => setPicking(null)}
+        />
+      )}
+      {heldExplaining && (
+        <MacroFateSheet
+          date={date}
+          macro={heldExplaining}
+          leaving={explainLeaving}
+          onClose={() => setExplaining(null)}
         />
       )}
       {heldQuickAdding && (

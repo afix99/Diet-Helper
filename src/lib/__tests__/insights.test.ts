@@ -146,12 +146,9 @@ describe('rate of loss', () => {
     expect(ids({ days, weights })).toContain('rate_stalled')
   })
 
-  it('projects a finish date from the current pace', () => {
+  it('leaves the finish-date projection to the trend card', () => {
     const weights = [w('2026-08-10', 62), w('2026-08-24', 61)]
-    const eta = run({ days, weights }).find((i) => i.id === 'eta')
-    expect(eta?.title).toMatch(/weeks to go/)
-    // 6 kg left at 0.5/week = 12 weeks.
-    expect(eta?.title).toContain('12')
+    expect(ids({ days, weights })).not.toContain('eta')
   })
 })
 

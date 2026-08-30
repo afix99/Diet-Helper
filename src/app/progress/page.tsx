@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Card, EmptyState, ListGroup, PageHeader, StatusPill } from '@/components/ui'
 import { insights } from '@/lib/insights'
 import { Icon } from '@/components/icons'
+import { TrendCard } from '@/components/TrendCard'
 import { rollingAverage, round1, statusBand } from '@/lib/nutrition'
 import { dayRecords, latestWeight, weekDates, weekOf } from '@/lib/selectors'
 import { formatDay } from '@/lib/dates'
@@ -143,6 +144,8 @@ export default function ProgressPage() {
           />
         )}
       </Card>
+
+      <TrendCard today={today} />
 
       {/* Silently rendering nothing left people assuming the feature was
           missing. Show the locked state and what opens it. */}
