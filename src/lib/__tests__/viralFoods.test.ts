@@ -3,11 +3,12 @@ import { FOODS, FOOD_CATEGORIES } from '../catalogue'
 import { parseQuickAdd } from '../quickAdd'
 import viral from '../../../seed/viral-foods.json'
 import fruits from '../../../seed/fruits.json'
+import pantry from '../../../seed/pantry.json'
 
 const names = (s: string) => parseQuickAdd(s, FOODS).matches.map((m) => m.food.name)
 
 describe('the food pack', () => {
-  const ADDED = [viral, fruits]
+  const ADDED = [viral, fruits, pantry]
 
   it('adds every pack on top of the workbook, losing nothing', () => {
     expect(viral.length).toBeGreaterThanOrEqual(70)

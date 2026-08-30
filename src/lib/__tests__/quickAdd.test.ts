@@ -71,15 +71,33 @@ describe('parseQuickAdd matches real catalogue foods', () => {
   })
 
   it('reports fragments it could not match instead of guessing', () => {
-    const r = parse('rendang tok')
+    const r = parse('borscht')
     expect(r.matches).toHaveLength(0)
-    expect(r.unmatched).toEqual(['rendang tok'])
+    expect(r.unmatched).toEqual(['borscht'])
   })
 
   it('keeps the matched and unmatched parts of a mixed sentence', () => {
-    const r = parse('banana and rendang tok')
+    const r = parse('banana and borscht')
     expect(r.matches.map((m) => m.food.name)).toEqual(['Banana'])
-    expect(r.unmatched).toEqual(['rendang tok'])
+    expect(r.unmatched).toEqual(['borscht'])
+  })
+
+  it('matches on the food, not on how it was cooked', () => {
+    /*
+     * "grilled" fits half the catalogue; "salmon" fits one thing. Weighted
+     * equally, "grilled salmon" settled for "Bacon, grilled" the moment bacon
+     * was added, because that name is shorter. Preparation words refine a
+     * choice, they do not drive it.
+     */
+    expect(names('grilled salmon')[0]).toMatch(/Salmon/)
+    expect(names('fried chicken')[0]).toMatch(/Chicken/)
+    expect(names('steamed broccoli')[0]).toMatch(/Broccoli/)
+  })
+
+  it('will not guess a food from a preparation word alone', () => {
+    // "something grilled" is not enough to pick a food out of the catalogue.
+    expect(parse('grilled').matches).toHaveLength(0)
+    expect(parse('steamed').matches).toHaveLength(0)
   })
 
   it('splits on "with", since a log entry of X with Y is two foods', () => {

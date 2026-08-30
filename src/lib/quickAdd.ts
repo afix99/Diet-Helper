@@ -124,6 +124,21 @@ const tokens = (s: string) =>
     .filter((t) => t.length > 1 && !NOISE.has(t))
 
 /**
+ * Words describing how a food was cooked rather than what it is.
+ *
+ * These carry far less information about which food is meant: "grilled" fits
+ * salmon, chicken, bacon and half the catalogue, while "salmon" fits one thing.
+ * Weighting them equally let "grilled salmon" match "Bacon, grilled" once bacon
+ * existed, purely because that name is shorter. They should refine a choice,
+ * not drive it.
+ */
+const PREPARATION = new Set([
+  'grilled', 'fried', 'steamed', 'boiled', 'baked', 'roasted', 'raw', 'cooked',
+  'boil', 'roast', 'stir', 'boiling', 'plain', 'standard', 'fresh', 'dried',
+  'canned', 'sliced', 'chopped', 'whole', 'hot', 'cold', 'iced', 'mixed',
+])
+
+/**
  * Score a food against a phrase. Rewards covering the phrase's words, and
  * gently prefers shorter names so "Banana" beats "Banana Bread" for "banana".
  */
@@ -133,7 +148,11 @@ export function scoreFood(phraseTokens: string[], food: Food): number {
   if (nameTokens.length === 0) return 0
 
   let hits = 0
+  let weightTotal = 0
+  let nounHit = false
   for (const pt of phraseTokens) {
+    const weight = PREPARATION.has(pt) ? 0.25 : 1
+    weightTotal += weight
     const exact = nameTokens.some((nt) => nt === pt)
     // Singular/plural and stems: "eggs" vs "egg", "tomatoes" vs "tomato".
     const loose =
@@ -141,12 +160,20 @@ export function scoreFood(phraseTokens: string[], food: Food): number {
       nameTokens.some(
         (nt) => nt.startsWith(pt) || pt.startsWith(nt) || `${nt}s` === pt || `${pt}s` === nt
       )
-    if (exact) hits += 1
-    else if (loose) hits += 0.75
+    if (exact) hits += weight
+    else if (loose) hits += weight * 0.75
+    if ((exact || loose) && weight === 1) nounHit = true
   }
   if (hits === 0) return 0
+  /*
+   * Something must match on the food itself, not only on how it was cooked.
+   * Without this, "grilled salmon" settles for anything grilled when no salmon
+   * is found — and "grilled" on its own picks a food at random, which is the
+   * guessing this parser exists to refuse.
+   */
+  if (!nounHit) return 0
 
-  const coverage = hits / phraseTokens.length
+  const coverage = hits / weightTotal
   // Penalise names carrying many words the phrase never mentioned.
   const extra = Math.max(0, nameTokens.length - phraseTokens.length)
   const brevity = 1 / (1 + extra * 0.18)

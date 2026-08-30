@@ -31,6 +31,12 @@ The 69 foods in seed/foods.json come from Memey_Diet_Planner_v3.xlsx, which
 states they were validated against the Malaysian Food Composition Tables and
 USDA SR Legacy.
 
-The 78 chain and street foods in seed/viral-foods.json are estimates compiled
-from public sources. They are labelled "est." in the app because real portions
-vary between outlets.
+The other 346 entries — seed/viral-foods.json, seed/fruits.json and
+seed/pantry.json — are estimates compiled from public composition tables. They
+are labelled "est." in the app, because portion size is where the real variance
+lies: a "medium" mango is not a fixed object and no two stalls ladle the same
+amount of santan.
+
+Alcohol is deliberately absent. Its calories come from ethanol at 7 kcal per
+gram, which the app's protein/carbohydrate/fat model has no field for, so a beer
+would show calories its own macros could not account for.
