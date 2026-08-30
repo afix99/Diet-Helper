@@ -171,7 +171,7 @@ export default function ShopPage() {
             </div>
           </Card>
 
-          <div className="grid gap-3">
+          <div className="stack gap-3">
             {grouped.map(([category, items]) => (
               <ListGroup key={category} header={category}>
                 <ul>

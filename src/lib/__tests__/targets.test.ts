@@ -230,45 +230,82 @@ describe('targetRisk', () => {
     sex: 'female' as const,
     activityLevel: 'moderate' as const,
   }
+  // Mifflin for this body: BMR 1,430, TDEE 2,217.
+  const RESTING = 1430
+  const MAINTENANCE = 2217
 
-  it('flags exactly below the floor, not at it', () => {
-    expect(targetRisk(profile, 1199).belowFloor).toBe(true)
-    expect(targetRisk(profile, 1200).belowFloor).toBe(false)
-    expect(targetRisk(profile, 1201).belowFloor).toBe(false)
+  it('measures against this body, not a fixed number', () => {
+    expect(targetRisk(profile, 1500).restingKcal).toBe(RESTING)
+    expect(targetRisk(profile, 1500).maintenanceKcal).toBe(MAINTENANCE)
   })
 
-  it('offers the floor as the one-tap fix', () => {
+  it('flags just under the resting burn, not just under 1,200', () => {
+    expect(targetRisk(profile, RESTING - 1).belowResting).toBe(true)
+    expect(targetRisk(profile, RESTING).belowResting).toBe(false)
+    expect(targetRisk(profile, RESTING + 1).belowResting).toBe(false)
+  })
+
+  /*
+   * The whole point of dropping the 1,200 constant: it is simultaneously too
+   * high for one body and too low for another, and it described neither.
+   */
+  it('flags a 1,300 target for a larger body that a 1,200 floor would have passed', () => {
+    const larger = { ...profile, startWeightKg: 95, heightCm: 180, sex: 'male' as const }
+    const r = targetRisk(larger, 1300)
+    expect(r.restingKcal!).toBeGreaterThan(1300)
+    expect(r.belowResting).toBe(true)
+  })
+
+  it('passes an 1,100 target for a smaller body that a 1,200 floor would have flagged', () => {
+    const smaller = { ...profile, startWeightKg: 45, heightCm: 150, age: 60 }
+    const r = targetRisk(smaller, 1100)
+    expect(r.restingKcal!).toBeLessThan(1100)
+    expect(r.belowResting).toBe(false)
+  })
+
+  it('names real figures rather than a constant', () => {
     const r = targetRisk(profile, 800)
-    expect(r.suggestedKcal).toBe(1200)
     expect(r.note).toContain('800')
-    expect(r.note).toContain('1,200')
+    expect(r.note).toContain('1,430')
+    expect(r.note).toContain('2,217')
+    expect(r.note).not.toContain('1,200')
   })
 
-  it('flags a deficit over a kilo a week even at the floor itself', () => {
-    // Maintenance here is about 2,217, so even a legal 1,200 target is a
-    // ~1,017 kcal deficit. The floor is not automatically a safe pace.
-    const r = targetRisk(profile, 1200)
-    expect(r.belowFloor).toBe(false)
+  it('never proposes a replacement target', () => {
+    const r = targetRisk(profile, 800) as Record<string, unknown>
+    expect(r.suggestedKcal).toBeUndefined()
+    expect(r.note).not.toMatch(/use \d|should eat|set it to/i)
+  })
+
+  it('flags a deficit over a kilo a week even above the resting burn', () => {
+    // Needs a wide gap between resting and maintenance, so: same body, active.
+    // BMR 1,430, TDEE 2,467 — a 1,440 target clears resting and is still
+    // 1,027 short of the day.
+    const active = { ...profile, activityLevel: 'active' as const }
+    const r = targetRisk(active, 1440)
+    expect(r.belowResting).toBe(false)
     expect(r.aggressiveDeficit).toBe(true)
-    expect(r.note).toContain('under what you')
+    // 1,027 x 7 / 7,700 = 0.93, reported to one decimal.
+    expect(r.perWeekKg).toBe(0.9)
   })
 
   it('says nothing about an ordinary deficit', () => {
     expect(targetRisk(profile, 1800).note).toBeNull()
   })
 
-  it('cannot judge a deficit without height and age, but still checks the floor', () => {
+  it('cannot judge anything without height and age', () => {
     const blind = { ...profile, heightCm: null }
-    expect(targetRisk(blind, 1800).note).toBeNull()
-    expect(targetRisk(blind, 1800).deficitKcal).toBeNull()
-    expect(targetRisk(blind, 800).belowFloor).toBe(true)
+    const r = targetRisk(blind, 800)
+    expect(r.restingKcal).toBeNull()
+    expect(r.maintenanceKcal).toBeNull()
+    expect(r.belowResting).toBe(false)
+    expect(r.note).toBeNull()
   })
 
   it('judges against the body you have now, not the one you started with', () => {
-    // Same profile, but 15 kg lighter today: maintenance drops, so the same
-    // target is a smaller deficit than the start weight would imply.
     const atStart = targetRisk(profile, 1250)
     const now = targetRisk(profile, 1250, 55)
+    expect(now.restingKcal!).toBeLessThan(atStart.restingKcal!)
     expect(now.deficitKcal!).toBeLessThan(atStart.deficitKcal!)
     expect(now.aggressiveDeficit).toBe(false)
   })

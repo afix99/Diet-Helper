@@ -76,7 +76,7 @@ export function MacroFateSheet({
           </Link>
         )}
 
-        <ul className="mt-5 grid gap-3">
+        <ul className="mt-5 stack gap-3">
           {fate.steps.map((s) => (
             <li key={s.lead} className="border-l-[3px] border-line pl-3">
               <p className="text-secondary font-bold">{s.lead}</p>

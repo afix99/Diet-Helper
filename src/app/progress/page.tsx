@@ -178,7 +178,7 @@ export default function ProgressPage() {
           <h2 className="mb-1.5 px-4 text-tertiary font-semibold uppercase tracking-wide text-faint">
             What your log shows
           </h2>
-          <div className="grid gap-2">
+          <div className="stack gap-2">
             {coaching.map((i) => (
               <div
                 key={i.id}

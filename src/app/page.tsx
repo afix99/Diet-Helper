@@ -13,7 +13,7 @@ import { UnderEatingCard } from '@/components/UnderEatingCard'
 import { WaterCard } from '@/components/WaterCard'
 import { BudgetRing, Card, MacroBar, PageHeader, StatusPill } from '@/components/ui'
 import { useLogging } from '@/lib/logging'
-import { MIN_DAILY_KCAL, statusBand } from '@/lib/nutrition'
+import { statusBand } from '@/lib/nutrition'
 import { targetRisk } from '@/lib/targets'
 import type { MacroKey } from '@/lib/macroFate'
 import {
@@ -45,18 +45,16 @@ export default function TodayPage() {
 
   const nextOpenSlot = useMemo(() => slotForNow(), [])
   /*
-   * A target below the floor must not drive the ring's tone. At 800 kcal the
-   * app was colouring a 990 kcal day amber and calling it "190 kcal over",
-   * which is scolding someone for eating too little. Both numbers stay on
-   * screen — the floor is what the ring measures against, and the note names
-   * the target you actually set.
+   * The ring measures against the target you set, whatever it is. An earlier
+   * version silently swapped in a 1,200 kcal floor, which replaced your number
+   * with someone else's. If the target is worth a second look the reminder
+   * below says so, in your own figures.
    */
   const risk = useMemo(
     () => targetRisk(data.profile, data.targets.kcal, latestWeight(data)),
     [data]
   )
-  const ringTarget = risk.belowFloor ? MIN_DAILY_KCAL : data.targets.kcal
-  const band = statusBand(totals.kcal, ringTarget)
+  const band = statusBand(totals.kcal, data.targets.kcal)
   const run = useMemo(() => streakFor(data, date), [data, date])
   const unlocked = useMemo(() => badgesFor(data, date).filter((b) => b.unlocked), [data, date])
 
@@ -84,12 +82,7 @@ export default function TodayPage() {
       />
 
       <Card className="mb-4">
-        <BudgetRing
-          consumed={totals.kcal}
-          target={ringTarget}
-          band={band}
-          floorNote={risk.belowFloor ? 'floor' : undefined}
-        />
+        <BudgetRing consumed={totals.kcal} target={data.targets.kcal} band={band} />
         <div className="mt-3 flex items-center justify-center gap-2">
           <StatusPill band={band} />
           {/* No background: the 44px tap minimum would otherwise make this
@@ -101,21 +94,20 @@ export default function TodayPage() {
             Edit target
           </Link>
         </div>
-        {risk.belowFloor && (
+        {risk.belowResting && risk.restingKcal !== null && (
           <Link
             href="/more/settings"
             className="tap mt-3 flex items-center gap-2 rounded-inner bg-amber/10 px-3 py-2 text-left text-caption leading-snug text-amber"
           >
             <span className="flex-1">
-              Your target is {data.targets.kcal.toLocaleString('en-GB')} kcal, under the{' '}
-              {MIN_DAILY_KCAL.toLocaleString('en-GB')} floor — so this ring measures against
-              the floor instead. Review it in Settings.
+              A reminder, not a rule: {data.targets.kcal.toLocaleString('en-GB')} kcal is under
+              the {risk.restingKcal.toLocaleString('en-GB')} your body burns at rest.
             </span>
             <Icon name="chevron" size={13} strokeWidth={2.5} className="shrink-0" />
           </Link>
         )}
 
-        <div className="mt-5 grid gap-3">
+        <div className="mt-5 stack gap-3">
           <MacroBar
             label="Protein"
             value={totals.protein}
@@ -180,7 +172,7 @@ export default function TodayPage() {
         Describe a whole meal
       </PressButton>
 
-      <div className="grid gap-3">
+      <div className="stack gap-3">
         {MEAL_SLOTS.map((slot) => {
           const entries = entriesForSlot(data, date, slot)
           const slotKcal = entries.reduce((sum, e) => sum + entryMacros(e).kcal, 0)

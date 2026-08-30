@@ -30,7 +30,7 @@ export function PickRail({ need }: { need: Need }) {
 
   return (
     <div className="mt-2.5 border-t border-line pt-2.5">
-      <ul className="grid gap-1.5">
+      <ul className="stack gap-1.5">
         {picks.map((food) => (
           <li key={food.id} className="flex items-center gap-2">
             <span className="min-w-0 flex-1">

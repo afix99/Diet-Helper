@@ -79,7 +79,7 @@ function Readout({ t, goalWeightKg }: { t: Trend; goalWeightKg: number }) {
       : `Across ${t.loggedDays} logged days you averaged ${kcal(t.avgIntakeKcal ?? 0)} kcal a day and ${direction} about ${kg(rate)} kg a week.`
 
   return (
-    <div className="mt-2 grid gap-3">
+    <div className="mt-2 stack gap-3">
       <div className="grid grid-cols-2 gap-2">
         <Figure
           label="Measured pace"

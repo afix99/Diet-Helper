@@ -15,7 +15,7 @@
  * - Water 35 ml/kg, the mid-point of the usual 30–40 ml/kg guidance.
  */
 import type { ActivityLevel, Sex, Targets } from './types'
-import { MIN_DAILY_KCAL, maintenanceFor } from './nutrition'
+import { bmr, maintenanceFor } from './nutrition'
 
 export const KCAL_PER_G = { protein: 4, carbs: 4, fat: 9 } as const
 
@@ -194,42 +194,46 @@ export function energyBalance(
   return { balance, diff, tdee: maintenance }
 }
 
-// --- Is this target safe to aim at? -----------------------------------------
+// --- Is this target worth a second look? ------------------------------------
 
 /**
- * Below this much of a daily deficit, the pace stops being mostly fat.
+ * A daily deficit past which the pace stops being mostly fat.
  *
- * Roughly 1 kg a week at the usual 7,700 kcal/kg conversion. Above it the
- * literature is consistent that a growing share of what comes off is lean mass
- * and water, and that adherence collapses — so it is worth saying out loud
- * rather than reporting as a plan.
+ * Roughly a kilo a week at the usual 7,700 kcal/kg conversion. Above it a
+ * growing share of what comes off is lean mass and water, and adherence tends
+ * to collapse — so it is worth saying, once, quietly.
  */
 export const AGGRESSIVE_DEFICIT_KCAL = 1000
 
 export interface TargetRisk {
-  /** The calorie target is under the app's own daily floor. */
-  belowFloor: boolean
-  /** The target sits more than AGGRESSIVE_DEFICIT_KCAL under maintenance. */
+  /** BMR — what this body burns doing nothing at all. Null without height/age. */
+  restingKcal: number | null
+  /** TDEE — resting plus the activity level set in the profile. */
+  maintenanceKcal: number | null
+  /** The target is under what the body burns at rest. */
+  belowResting: boolean
+  /** More than AGGRESSIVE_DEFICIT_KCAL under maintenance. */
   aggressiveDeficit: boolean
-  floor: number
-  /** What the one-tap fix would set. */
-  suggestedKcal: number
   /** Signed kcal against maintenance; null when it cannot be computed. */
   deficitKcal: number | null
+  /** What that deficit works out to per week, on the rough 7,700 conversion. */
+  perWeekKg: number | null
   /** Null when there is nothing worth saying. */
   note: string | null
 }
 
 /**
- * Whether the calorie target itself deserves a second look.
+ * Whether the calorie target deserves a second look — measured against this
+ * body, not against a population constant.
  *
- * The app already knew what too little food looked like — MIN_DAILY_KCAL gates
- * the onboarding suggestion and drives the under-eating warning — but nothing
- * checked the number typed into Settings. So an 800 kcal target passed silently
- * and Today then reported a 990 kcal day as an excess.
+ * An earlier version compared to a flat 1,200 kcal and offered to overwrite the
+ * target with it. That was wrong twice over: 1,200 is a rule of thumb for an
+ * average adult and says nothing about any particular person, and nothing here
+ * has any business rewriting a number someone set on purpose.
  *
- * This flags; it never blocks. There are supervised reasons to eat below the
- * floor, and the person using this is an adult who set the number on purpose.
+ * BMR is the honest personal line. It is what you burn before you stand up, it
+ * comes from your own height, weight, age and sex, and it moves as you do. This
+ * reports; it never prescribes, never blocks, and never changes the target.
  */
 export function targetRisk(
   profile: {
@@ -242,28 +246,48 @@ export function targetRisk(
   targetKcal: number,
   latestWeightKg?: number | null
 ): TargetRisk {
-  const maintenance = maintenanceFor(profile, latestWeightKg)
-  const deficitKcal = maintenance === null ? null : maintenance - targetKcal
-  const belowFloor = targetKcal > 0 && targetKcal < MIN_DAILY_KCAL
+  const weight =
+    latestWeightKg && latestWeightKg > 0 ? latestWeightKg : profile.startWeightKg
+  const restingKcal =
+    profile.heightCm && profile.age
+      ? bmr(weight, profile.heightCm, profile.age, profile.sex)
+      : null
+  const maintenanceKcal = maintenanceFor(profile, latestWeightKg)
+
+  const deficitKcal = maintenanceKcal === null ? null : maintenanceKcal - targetKcal
+  const perWeekKg =
+    deficitKcal === null ? null : Math.round(((deficitKcal * 7) / 7700) * 10) / 10
+
+  const belowResting = restingKcal !== null && targetKcal > 0 && targetKcal < restingKcal
   const aggressiveDeficit = deficitKcal !== null && deficitKcal > AGGRESSIVE_DEFICIT_KCAL
 
-  const note = belowFloor
-    ? `${targetKcal.toLocaleString('en-GB')} kcal is below the ` +
-      `${MIN_DAILY_KCAL.toLocaleString('en-GB')} this app treats as a floor. Under it, ` +
-      `hunger, sleep and muscle all give way before the fat does, and most people cannot ` +
-      `hold it long enough to matter.`
-    : aggressiveDeficit
-      ? `That is about ${deficitKcal!.toLocaleString('en-GB')} kcal a day under what you ` +
-        `burn — over a kilo a week. Faster is not better here: past roughly 0.7 kg a week ` +
-        `a growing share of the loss is muscle and water rather than fat.`
-      : null
+  const n = (v: number) => v.toLocaleString('en-GB')
+
+  let note: string | null = null
+  if (belowResting && restingKcal !== null) {
+    note =
+      `${n(targetKcal)} is under the ${n(restingKcal)} your body burns at rest — before you ` +
+      `stand up, walk, or do anything at all.`
+    if (deficitKcal !== null) {
+      note +=
+        ` Against the ${n(maintenanceKcal!)} you burn in a day that is ${n(deficitKcal)} ` +
+        `short, roughly ${perWeekKg} kg a week on paper. Most of what comes off at that ` +
+        `pace is not fat.`
+    }
+  } else if (aggressiveDeficit && deficitKcal !== null) {
+    note =
+      `That is ${n(deficitKcal)} under the ${n(maintenanceKcal!)} you burn in a day — ` +
+      `roughly ${perWeekKg} kg a week. Past about 0.7 kg a week a growing share of the ` +
+      `loss is muscle and water rather than fat.`
+  }
 
   return {
-    belowFloor,
+    restingKcal,
+    maintenanceKcal,
+    belowResting,
     aggressiveDeficit,
-    floor: MIN_DAILY_KCAL,
-    suggestedKcal: MIN_DAILY_KCAL,
     deficitKcal,
+    perWeekKg,
     note,
   }
 }

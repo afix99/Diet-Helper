@@ -167,7 +167,7 @@ export default function SettingsPage() {
           const gap = Math.abs(energy.diff ?? 0)
           const perWeek = ((gap * 7) / 7700).toFixed(1)
           // Reporting 1.2 kg a week without comment read as an endorsement.
-          const caveat = risk.aggressiveDeficit || risk.belowFloor
+          const caveat = risk.aggressiveDeficit || risk.belowResting
             ? ' Most of what comes off at that pace is not fat.'
             : ''
           return `${gap} kcal below your TDEE of ${energy.tdee}. Roughly ${perWeek} kg a week.${caveat}`
@@ -323,7 +323,7 @@ export default function SettingsPage() {
             {PRESETS.find((x) => x.id === data.targetPreset)?.description}
           </p>
 
-          <div className="grid gap-3">
+          <div className="stack gap-3">
             {TARGET_FIELDS.map((f) => (
               <div key={f.key}>
                 <NumField
@@ -334,18 +334,11 @@ export default function SettingsPage() {
                   onToggleLock={f.key === 'kcal' ? undefined : () => toggleLock(f.key)}
                 />
                 <p className="mt-1 text-caption leading-snug text-faint">{noteFor(f.key)}</p>
+                {/* A reminder in your own numbers. Nothing here changes the
+                    target — that stays yours to set. */}
                 {f.key === 'kcal' && risk.note && (
                   <div className="mt-2 rounded-inner bg-amber/10 px-3 py-2.5 text-amber">
                     <p className="text-caption leading-relaxed">{risk.note}</p>
-                    {risk.belowFloor && (
-                      <button
-                        type="button"
-                        onClick={() => setTarget('kcal', risk.suggestedKcal)}
-                        className="tap mt-2 rounded-pill bg-amber px-4 py-1.5 text-caption font-bold text-on-primary"
-                      >
-                        Use {risk.suggestedKcal.toLocaleString('en-GB')}
-                      </button>
-                    )}
                   </div>
                 )}
               </div>

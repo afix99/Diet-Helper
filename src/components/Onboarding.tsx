@@ -285,7 +285,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         {step === 4 && (
           <Quest art="search" title="Logging a meal" id={headingId}>
             <p className="text-secondary text-muted">There are two ways in, both on Today.</p>
-            <ol className="mt-4 grid gap-3">
+            <ol className="mt-4 stack gap-3">
               <Way n="1" title="+ Add food">
                 Search all 147 foods. Your recents and favourites sit at the top, because
                 most logging is repeat logging.

@@ -262,6 +262,28 @@ body::before {
   .card {
     @apply rounded-card border border-line bg-surface shadow-card;
   }
+  /*
+   * A vertical stack of cards or rows.
+   *
+   * Not `grid` on its own. A grid item's default `min-width: auto` makes the
+   * single implicit track grow to the widest item's *min-content*, and
+   * min-content walks all the way down: a `truncate` child is `white-space:
+   * nowrap`, so its min-content is the full untruncated string. Putting
+   * `min-w-0` on the flex item lets it shrink but does not change what it
+   * contributes to track sizing.
+   *
+   * That is how six meal cards on Today ended up 469px wide inside a 390px
+   * phone — 111px past every other card — and why the page's own overflow
+   * checks missed it: the layout viewport expanded to 485px to fit, so
+   * scrollWidth and innerWidth agreed with each other and both were wrong.
+   *
+   * minmax(0,1fr) caps the track at the container, the flex item shrinks, and
+   * truncate does the job it was there to do.
+   */
+  .stack {
+    @apply grid grid-cols-[minmax(0,1fr)];
+  }
+
   /* 44px minimum touch target — Apple HIG, and it matters at a mamak stall. */
   .tap {
     @apply min-h-[44px] min-w-[44px] transition active:scale-[0.97];
