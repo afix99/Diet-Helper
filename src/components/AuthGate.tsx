@@ -17,7 +17,8 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [checked, setChecked] = useState(false)
   const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
+  const [password, setPassword] = useState('')
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -38,17 +39,70 @@ export function AuthGate({ children }: { children: ReactNode }) {
   if (!checked) return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
   if (session) return <>{children}</>
 
-  const sendLink = async (e: React.FormEvent) => {
+  /**
+   * Password rather than a magic link.
+   *
+   * Supabase's built-in email service is a testing facility capped at a couple
+   * of messages an hour for the whole project, so magic links dead-ended on
+   * "email rate limit exceeded" the first time anyone tried to sign in on a
+   * second device. A password needs no email at all, which for an app used by
+   * one or two people is both simpler and more reliable than running an SMTP
+   * provider to deliver one link a month.
+   */
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setBusy(true)
     setError(null)
-    const { error: err } = await client.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
+    const fn = mode === 'signup' ? 'signUp' : 'signInWithPassword'
+
+    /*
+     * Supabase's client has no request timeout, so on a weak connection the
+     * promise simply never settles and the button sits disabled on "Just a
+     * moment…" forever, with nothing to tell you it has given up. Losing signal
+     * is an ordinary event for an app used at a hawker stall.
+     */
+    const TIMEOUT_MS = 15000
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const timeout = new Promise<'timeout'>((resolve) => {
+      timer = setTimeout(() => resolve('timeout'), TIMEOUT_MS)
     })
+    const result = await Promise.race([client.auth[fn]({ email, password }), timeout])
+    clearTimeout(timer)
     setBusy(false)
-    if (err) setError(err.message)
-    else setSent(true)
+
+    if (result === 'timeout') {
+      setError("Couldn't reach the server. Check your connection and try again.")
+      return
+    }
+    const { error: err } = result
+    if (!err) return // onAuthStateChange swaps the wall for the app
+
+    // Supabase's raw messages are accurate but unhelpful to a person.
+    const m = err.message.toLowerCase()
+    if (m.includes('failed to fetch') || m.includes('network') || m.includes('load failed')) {
+      // What a dropped connection actually surfaces as. "Failed to fetch" is
+      // the browser talking to itself; it tells someone on a train nothing.
+      setError("Couldn't reach the server. Check your connection and try again.")
+    } else if (m.includes('rate limit')) {
+      setError('Too many attempts just now. Wait a minute and try again.')
+    } else if (m.includes('invalid login credentials')) {
+      setError(
+        mode === 'signin'
+          ? "That email and password don't match. If you haven't made an account yet, tap Create one."
+          : err.message
+      )
+    } else if (m.includes('already registered') || m.includes('already been registered')) {
+      setError('That email already has an account. Switch to Sign in.')
+    } else if (m.includes('password should be')) {
+      setError('Passwords need at least 6 characters.')
+    } else if (m.includes('confirm')) {
+      setError(
+        'This project still requires email confirmation. Turn it off in Supabase under ' +
+          'Authentication → Sign In / Providers → Email, then try again.'
+      )
+    } else {
+      setError(err.message)
+    }
   }
 
   return (
@@ -59,38 +113,61 @@ export function AuthGate({ children }: { children: ReactNode }) {
         <p className="mt-1 text-secondary text-faint">Sign in to sync across devices</p>
       </div>
 
-      {sent ? (
-        <div className="card p-5 text-center">
-          <p className="flex items-center justify-center gap-1.5 text-secondary font-semibold">
-            Link sent <Emoji name="mail" size={18} />
-          </p>
-          <p className="mt-1 text-tertiary text-muted">
-            Check <strong>{email}</strong> and tap the link to sign in.
-          </p>
-        </div>
-      ) : (
-        <form onSubmit={sendLink} className="card grid gap-3 p-5">
-          <label className="block">
-            <span className="mb-1 block text-tertiary font-semibold">Email</span>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-body outline-none focus:border-primary"
-            />
-          </label>
-          <button
-            type="submit"
-            disabled={busy}
-            className="tap rounded-pill bg-primary py-3 text-secondary font-bold text-on-primary disabled:opacity-50"
-          >
-            {busy ? 'Sending…' : 'Send sign-in link'}
-          </button>
-          {error && <p className="text-tertiary text-clay">{error}</p>}
-        </form>
-      )}
+      <form onSubmit={submit} className="card grid gap-3 p-5">
+        <label className="block">
+          <span className="mb-1 block text-tertiary font-semibold">Email</span>
+          <input
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-body outline-none focus:border-primary"
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-tertiary font-semibold">Password</span>
+          <input
+            type="password"
+            required
+            minLength={6}
+            /* Tells a password manager to offer a new password on sign-up and
+               the saved one on sign-in, rather than guessing wrong at both. */
+            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder={mode === 'signup' ? 'At least 6 characters' : ''}
+            className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-body outline-none focus:border-primary"
+          />
+        </label>
+        <button
+          type="submit"
+          disabled={busy}
+          className="tap rounded-pill bg-primary py-3 text-secondary font-bold text-on-primary disabled:opacity-50"
+        >
+          {busy ? 'Just a moment…' : mode === 'signup' ? 'Create account' : 'Sign in'}
+        </button>
+        {error && <p className="text-tertiary leading-relaxed text-clay">{error}</p>}
+        <button
+          type="button"
+          onClick={() => {
+            setMode(mode === 'signin' ? 'signup' : 'signin')
+            setError(null)
+          }}
+          className="tap text-tertiary font-semibold text-muted"
+        >
+          {mode === 'signin' ? (
+            <>
+              First time here? <span className="text-primary-ink">Create one</span>
+            </>
+          ) : (
+            <>
+              Already have an account? <span className="text-primary-ink">Sign in</span>
+            </>
+          )}
+        </button>
+      </form>
     </div>
   )
 }

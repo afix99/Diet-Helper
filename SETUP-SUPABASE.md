@@ -88,3 +88,13 @@ failed upload cannot leave you with nothing.
 A shared browser is still a shared session until someone signs out. If two
 people use one phone, the second has to sign the first out — the app cannot tell
 them apart on its own.
+
+
+## Sign-in
+
+Password, not magic link. Supabase's built-in email service is capped at roughly
+two messages an hour for the whole project, so magic links fail with "email rate
+limit exceeded" the first time you sign in on a second device.
+
+Turn off Authentication → Sign In / Providers → Email → **Confirm email**, or
+sign-up will try to send a confirmation and hit the same limit.
