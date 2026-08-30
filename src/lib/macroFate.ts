@@ -16,11 +16,14 @@
  *   is normally set *below* maintenance on purpose, so being over target and
  *   being in surplus are different things. When height and age are missing we
  *   cannot compute maintenance, and the copy says so instead of guessing.
- * - **Where the evidence is thin or contested, say that.** De novo lipogenesis
- *   and protein's effect on healthy kidneys are both places where the confident
- *   version of the story is wrong.
  * - **Numbers get their error bars.** The 7700 kcal/kg conversion is never
- *   printed without being called an approximation.
+ *   printed without the word "rough" beside it.
+ *
+ * And one rule about length, which the first version broke badly: **the answer
+ * has to be readable in one glance.** It shipped at about 250 words for a 17g
+ * overage, which is a wall, and a wall is a thing people close rather than
+ * read. Three tiers now — the verdict, two steps, one closing line — and a test
+ * caps the word count so it cannot quietly grow back.
  */
 import { round1 } from './nutrition'
 import { KCAL_PER_G, energyBalance, type EnergyBalance } from './targets'
@@ -41,7 +44,7 @@ export const MACRO_LABELS: Record<MacroKey, string> = {
  * It is an approximation and an over-estimate of real-world gain — it assumes
  * every surplus calorie lands in fat tissue, ignores the lean mass that moves
  * with it, and ignores that expenditure rises as you eat more. Every string in
- * this file that uses it says the word "roughly" or "about" next to it.
+ * this file that uses it says "rough" next to it.
  */
 export const KCAL_PER_KG_FAT = 7700
 
@@ -59,6 +62,12 @@ export interface MacroFateInput {
   profile: FateProfile
   /** Current weight, if there is a weigh-in. Maintenance tracks the body you have. */
   latestWeightKg?: number | null
+}
+
+/** One leg of the route the food takes. Bold lead, one sentence under it. */
+export interface FateStep {
+  lead: string
+  detail: string
 }
 
 export interface MacroFate {
@@ -79,116 +88,107 @@ export interface MacroFate {
   /** The day's total intake, so the sheet can show the comparison it is making. */
   totalKcal: number
   headline: string
-  body: string[]
+  /** The answer, first and in bold. */
+  verdict: { line: string; detail: string }
+  /** Where it goes, in two beats. */
+  steps: FateStep[]
+  /** The one thing worth remembering afterwards. */
+  footer: string
 }
 
 const g = (n: number) => `${Math.round(n)}g`
 const kcal = (n: number) => Math.round(n).toLocaleString('en-GB')
 
-/** Where the excess of this particular macro goes, physiologically. */
-function pathway(key: MacroKey): string[] {
-  switch (key) {
-    case 'carbs':
-      return [
-        'Carbohydrate fills glycogen first — roughly 400 to 500 grams of it across your ' +
-          'muscles and liver, and every gram is stored holding about 3 grams of water with it. ' +
-          'That is why a rice-heavy day reads a kilogram heavier the next morning and is gone ' +
-          'again two days later. It was water, not fat.',
-        'Turning carbohydrate directly into body fat is a real pathway but a small one in ' +
-          'people eating normally; researchers argue about how much it matters, and the honest ' +
-          'answer is “not much, most days”. The route that does matter is indirect: your body ' +
-          'burns the carbs first, so the fat you ate that day is what gets put away instead. ' +
-          'Both routes still need the day to be in surplus overall.',
-      ]
-    case 'protein':
-      return [
-        'There is no protein store. Amino acids you do not need get the nitrogen stripped off, ' +
-          'which leaves in your urine as urea, and the carbon left behind is burned for energy ' +
-          'or turned into glucose. Nothing is set aside for later.',
-        'Digesting protein also costs roughly 20 to 30 percent of its own calories, against ' +
-          '5 to 10 percent for carbs and near nothing for fat. An overshoot on protein is the ' +
-          'cheapest one to make. On healthy kidneys, high protein intakes have not been shown ' +
-          'to cause damage; if you already have kidney disease it genuinely does matter, and ' +
-          'that is a question for your doctor rather than for this app.',
-      ]
-    case 'fat':
-      return [
-        'Dietary fat is the cheapest thing for your body to store — it reaches fat tissue ' +
-          'almost intact, losing only a few percent as heat along the way. That is the fact ' +
-          'behind the reputation.',
-        'Storing is not the same as gaining, though. Below maintenance that fat is what you ' +
-          'burned rather than what you kept. What fat really does to a diary is arithmetic: at ' +
-          '9 kcal a gram it is more than twice as dense as carbs or protein, so a generous hand ' +
-          'with oil or santan moves a day further than any other single ingredient, and it is ' +
-          'the easiest thing in the app to measure wrongly.',
-      ]
-    case 'fibre':
-      return [
-        'Fibre is a floor, not a ceiling. It is mostly not absorbed at all — the bacteria in ' +
-          'your gut ferment part of it and hand back a small amount of energy, and the rest ' +
-          'leaves. None of it is stored, and there is nothing here to undo.',
-        'The only real cost of a large jump is comfort. Going well past what you are used to ' +
-          'in one day — call it 50 to 60 grams if your usual is half that — brings gas, ' +
-          'bloating and cramping, and very high intakes can bind some minerals. Raise it over ' +
-          'weeks rather than in a day, and drink more water while you do.',
-      ]
-  }
+/** The route this particular macro takes. Two beats, no more. */
+const STEPS: Record<MacroKey, FateStep[]> = {
+  carbs: [
+    {
+      lead: 'Tops up your glycogen tank first.',
+      detail:
+        'Muscles and liver hold 400 to 500g, each gram holding 3g of water. That water ' +
+        'is why rice spikes the scale, then drops two days later.',
+    },
+    {
+      lead: 'The rest gets burned before fat does.',
+      detail:
+        'Carbs jump the queue. Turning them straight into body fat barely happens.',
+    },
+  ],
+  protein: [
+    {
+      lead: 'There is nowhere to put it.',
+      detail:
+        'You have no protein store. The spare nitrogen leaves in your pee and the rest gets burned.',
+    },
+    {
+      lead: 'It is the cheapest thing to overshoot.',
+      detail:
+        'Digesting protein costs 20 to 30% of its own calories. Carbs cost 5 to 10%, fat almost nothing.',
+    },
+  ],
+  fat: [
+    {
+      lead: 'It parks the most easily.',
+      detail:
+        'Dietary fat reaches your fat stores almost intact. That part of its reputation is fair.',
+    },
+    {
+      lead: 'Parking is not gaining.',
+      detail: 'Under your burn, that is the fat you used, not the fat you kept.',
+    },
+  ],
+  fibre: [
+    {
+      lead: 'Almost none of it counts.',
+      detail:
+        'Fibre is a floor, not a ceiling. Most passes straight through; your gut bacteria nibble the rest.',
+    },
+    {
+      lead: 'Nothing to undo.',
+      detail: 'A big jump just means gas and bloating. Build it up slowly and drink more water.',
+    },
+  ],
 }
 
-/** The personalised verdict: is any of this actually being stored today. */
-function verdict(f: {
+/** The answer, before any of the biology. */
+function verdictFor(f: {
   energy: EnergyBalance
-  maintenanceKcal: number | null
   balanceKcal: number | null
   fatGainG: number
   totalKcal: number
-  targetKcal: number
-}): string {
-  const eaten = `You are at ${kcal(f.totalKcal)} kcal today`
+}): { line: string; detail: string } {
+  const eaten = kcal(f.totalKcal)
 
   if (f.energy === 'unknown') {
-    const overTarget = f.totalKcal - f.targetKcal
-    const proxy =
-      overTarget > 0
-        ? `${kcal(overTarget)} over your ${kcal(f.targetKcal)} target`
-        : `under your ${kcal(f.targetKcal)} target`
-    return (
-      `${eaten}, ${proxy}. Storing fat depends on how that compares with what you burn, ` +
-      `not with your target — and a target is usually set below what you burn on purpose, ` +
-      `so being over it often still means losing. Add your height and age in Settings and ` +
-      `this can tell you which side of that line you are on instead of guessing.`
-    )
+    return {
+      line: 'Cannot tell yet.',
+      detail:
+        'Your target is not the same thing as what you burn. Add your height and age and ' +
+        'this can answer properly.',
+    }
   }
 
   if (f.energy === 'surplus' && f.balanceKcal !== null) {
-    return (
-      `${eaten}, about ${kcal(f.balanceKcal)} kcal more than you burn. Roughly 7,700 kcal ` +
-      `builds a kilogram of fat, so a surplus that size works out at around ${g(f.fatGainG)} ` +
-      `of body fat — and that conversion is a rule of thumb that flatters the number upwards, ` +
-      `not a measurement. One day over is counted in grams, not kilograms. Whatever the scale ` +
-      `says tomorrow is mostly water, glycogen and what is still in your gut.`
-    )
+    return {
+      line: `About ${g(f.fatGainG)} of it could stick.`,
+      detail:
+        `${eaten} eaten, about ${kcal(f.totalKcal - f.balanceKcal)} burned. Rough ` +
+        `7,700 kcal-per-kilo maths, and tomorrow's scale is mostly water anyway.`,
+    }
   }
 
   if (f.energy === 'maintenance') {
-    return (
-      `${eaten}, which is about what you burn. Nothing is being stored and nothing is being ` +
-      `lost — the split just moved. Whatever the scale says tomorrow is water, glycogen and ` +
-      `gut contents, not this.`
-    )
+    return {
+      line: 'Nothing stored, nothing lost.',
+      detail: `${eaten} eaten, about the same burned.`,
+    }
   }
 
-  return (
-    `${eaten}, about ${kcal(Math.abs(f.balanceKcal ?? 0))} kcal less than you burn. Nothing ` +
-    `you ate today is being stored as fat, whatever the bar looks like. Being over on one ` +
-    `macro while under on energy is the split moving, not the diet failing.`
-  )
+  return {
+    line: 'None of it gets stored.',
+    detail: `${eaten} eaten, about ${kcal(f.totalKcal - (f.balanceKcal ?? 0))} burned.`,
+  }
 }
-
-const SERVING_CAVEAT =
-  'Worth keeping in proportion: serving sizes are the biggest source of error in here. ' +
-  'The gap between the portion you actually ate and the one in the catalogue is usually ' +
-  'larger than the amount you are over by.'
 
 export function macroFate(input: MacroFateInput, key: MacroKey): MacroFate {
   const { totals, targets, profile, latestWeightKg } = input
@@ -199,8 +199,7 @@ export function macroFate(input: MacroFateInput, key: MacroKey): MacroFate {
     key === 'fibre' ? null : Math.round(overBy * KCAL_PER_G[key as 'protein' | 'carbs' | 'fat'])
 
   // Maintenance tracks the body you have, so a real weigh-in beats the start weight.
-  const weight =
-    latestWeightKg && latestWeightKg > 0 ? latestWeightKg : profile.startWeightKg
+  const weight = latestWeightKg && latestWeightKg > 0 ? latestWeightKg : profile.startWeightKg
   const balance = energyBalance({ ...profile, startWeightKg: weight }, totals.kcal)
 
   const fatGainG =
@@ -215,18 +214,6 @@ export function macroFate(input: MacroFateInput, key: MacroKey): MacroFate {
         ? `${g(overBy)} past your fibre target`
         : `${g(overBy)} over on ${MACRO_LABELS[key].toLowerCase()}`
 
-  const opening =
-    overBy <= 0
-      ? [
-          `You are at ${g(totals[key])} against a ${g(target)} target, so there is no overage ` +
-            `to explain. What follows is what would happen if there were.`,
-        ]
-      : overKcal === null
-        ? []
-        : [
-            `That is ${g(overBy)} past ${g(target)}, worth about ${kcal(overKcal)} kcal on its own.`,
-          ]
-
   return {
     key,
     label: MACRO_LABELS[key],
@@ -238,18 +225,16 @@ export function macroFate(input: MacroFateInput, key: MacroKey): MacroFate {
     fatGainG,
     totalKcal: totals.kcal,
     headline,
-    body: [
-      ...opening,
-      ...pathway(key),
-      verdict({
-        energy: balance.balance,
-        maintenanceKcal: balance.tdee,
-        balanceKcal: balance.diff,
-        fatGainG,
-        totalKcal: totals.kcal,
-        targetKcal: targets.kcal,
-      }),
-      SERVING_CAVEAT,
-    ],
+    verdict: verdictFor({
+      energy: balance.balance,
+      balanceKcal: balance.diff,
+      fatGainG,
+      totalKcal: totals.kcal,
+    }),
+    steps: STEPS[key],
+    footer:
+      overBy > 0
+        ? `Your portion guess is probably off by more than ${g(overBy)} anyway.`
+        : 'Portion guesses move a day further than a few grams either way.',
   }
 }

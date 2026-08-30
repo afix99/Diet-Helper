@@ -31,7 +31,19 @@ const totals = (over: Partial<Macros> = {}): Macros => ({
 })
 
 const input = (t: Macros): MacroFateInput => ({ totals: t, targets, profile })
-const text = (key: MacroKey, t: Macros) => macroFate(input(t), key).body.join(' ')
+const ALL: MacroKey[] = ['protein', 'carbs', 'fat', 'fibre']
+
+/** Every word the sheet puts in front of someone, as one string. */
+const said = (key: MacroKey, t: Macros) => {
+  const f = macroFate(input(t), key)
+  return [
+    f.headline,
+    f.verdict.line,
+    f.verdict.detail,
+    ...f.steps.flatMap((s) => [s.lead, s.detail]),
+    f.footer,
+  ].join(' ')
+}
 
 describe('macroFate: the overage itself', () => {
   it('reports nothing over at or below target', () => {
@@ -58,8 +70,8 @@ describe('macroFate: what it is willing to claim', () => {
     const f = macroFate(input(totals({ carbs: 400, kcal: 1600 })), 'carbs')
     expect(f.energy).toBe('deficit')
     expect(f.fatGainG).toBe(0)
-    expect(f.body.join(' ')).toContain('Nothing you ate today is being stored as fat')
-    expect(f.body.join(' ')).not.toMatch(/works out at around/)
+    expect(f.verdict.line).toBe('None of it gets stored.')
+    expect(said('carbs', totals({ carbs: 400, kcal: 1600 }))).not.toMatch(/could stick/)
   })
 
   it('quantifies a real surplus in grams, never kilograms', () => {
@@ -69,16 +81,14 @@ describe('macroFate: what it is willing to claim', () => {
     expect(f.balanceKcal).toBeGreaterThan(400)
     expect(f.fatGainG).toBeCloseTo(Math.round((f.balanceKcal! / KCAL_PER_KG_FAT) * 1000), 0)
     expect(f.fatGainG).toBeLessThan(100)
-    const body = f.body.join(' ')
-    expect(body).toMatch(/\d+g of body fat/)
-    expect(body).not.toMatch(/kilograms? of body fat/)
-    expect(body).toContain('counted in grams, not kilograms')
+    expect(f.verdict.line).toMatch(/^About \d+g of it could stick\.$/)
+    expect(said('fat', totals({ kcal: 2550, fat: 110 }))).not.toMatch(/kilograms? of/)
   })
 
-  it('marks the 7700 figure as an approximation wherever it prints it', () => {
-    const body = text('fat', totals({ kcal: 2550, fat: 110 }))
+  it('never prints the 7700 figure without calling it rough', () => {
+    const body = said('fat', totals({ kcal: 2550, fat: 110 }))
     expect(body).toContain('7,700')
-    expect(body).toContain('rule of thumb')
+    expect(body).toContain('Rough')
   })
 
   it('refuses to guess when maintenance cannot be computed', () => {
@@ -89,21 +99,60 @@ describe('macroFate: what it is willing to claim', () => {
     expect(f.energy).toBe('unknown')
     expect(f.maintenanceKcal).toBeNull()
     expect(f.fatGainG).toBe(0)
-    expect(f.body.join(' ')).toContain('being over it often still means losing')
+    expect(f.verdict.line).toBe('Cannot tell yet.')
+    expect(f.verdict.detail).toContain('not the same thing as what you burn')
+    expect(f.verdict.detail).not.toMatch(/could stick|\d+g of/)
   })
 
   it('says fibre is not stored, in every energy state', () => {
     for (const dayKcal of [1200, 1900, 2600]) {
-      const body = text('fibre', totals({ fibre: 50, kcal: dayKcal }))
-      expect(body).toContain('None of it is stored')
+      const body = said('fibre', totals({ fibre: 50, kcal: dayKcal }))
       expect(body).toContain('floor, not a ceiling')
+      expect(body).toContain('Most passes straight through')
     }
   })
 
-  it('always closes on the serving-size caveat', () => {
-    for (const key of ['protein', 'carbs', 'fat', 'fibre'] as MacroKey[]) {
+  it('always closes on the portion nudge', () => {
+    for (const key of ALL) {
       const f = macroFate(input(totals({ protein: 150, carbs: 300, fat: 90, fibre: 40 })), key)
-      expect(f.body[f.body.length - 1]).toContain('serving sizes are the biggest source of error')
+      expect(f.footer).toMatch(/portion guess is probably off by more than \d+g/)
+    }
+  })
+})
+
+describe('macroFate: what it deliberately does not say', () => {
+  /*
+   * The medical footer was removed at the user's request. The app still carries
+   * the full disclaimer once, in Settings, which is where it belongs. This pins
+   * the removal so it cannot creep back in a later copy edit.
+   */
+  it('sends nobody to a doctor', () => {
+    for (const key of ALL) {
+      for (const dayKcal of [1200, 1900, 2600]) {
+        const body = said(key, totals({ protein: 150, carbs: 300, fat: 90, fibre: 40, kcal: dayKcal }))
+        expect(body).not.toMatch(/doctor|dietitian|clinician|medical advice/i)
+      }
+    }
+  })
+
+  /*
+   * It first shipped at about 250 words, which is a wall — and a wall is a thing
+   * people close rather than read. This is the guard against it growing back.
+   */
+  it('stays short enough to read in one glance', () => {
+    const longest = ALL.flatMap((key) =>
+      [1200, 1900, 2600].map((kcal) => ({
+        key,
+        kcal,
+        words: said(key, totals({ carbs: 300, kcal })).split(/\s+/).length,
+      }))
+    ).sort((a, b) => b.words - a.words)[0]
+    expect(longest.words, `${longest.key} at ${longest.kcal} kcal`).toBeLessThanOrEqual(90)
+  })
+
+  it('gives every macro exactly two steps', () => {
+    for (const key of ALL) {
+      expect(macroFate(input(totals()), key).steps).toHaveLength(2)
     }
   })
 })
@@ -125,5 +174,10 @@ describe('macroFate: agreement with the rest of the screen', () => {
       'carbs'
     )
     expect(heavier.maintenanceKcal!).toBeGreaterThan(base.maintenanceKcal!)
+  })
+
+  it('reports the burn figure the maintenance calculation actually used', () => {
+    const f = macroFate(input(totals({ kcal: 1600 })), 'carbs')
+    expect(f.verdict.detail).toContain(f.maintenanceKcal!.toLocaleString('en-GB'))
   })
 })
