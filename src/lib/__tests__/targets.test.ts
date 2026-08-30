@@ -6,6 +6,7 @@ import {
   energyBalance,
   macroKcal,
   reconciles,
+  targetRisk,
   type PresetId,
   type TargetLocks,
 } from '../targets'
@@ -218,5 +219,57 @@ describe('energyBalance replaces the fixed "moderate deficit" text', () => {
     const v = energyBalance({ ...profile, heightCm: null }, 3000)
     expect(v.balance).toBe('unknown')
     expect(v.tdee).toBeNull()
+  })
+})
+
+describe('targetRisk', () => {
+  const profile = {
+    startWeightKg: 70,
+    heightCm: 165,
+    age: 28,
+    sex: 'female' as const,
+    activityLevel: 'moderate' as const,
+  }
+
+  it('flags exactly below the floor, not at it', () => {
+    expect(targetRisk(profile, 1199).belowFloor).toBe(true)
+    expect(targetRisk(profile, 1200).belowFloor).toBe(false)
+    expect(targetRisk(profile, 1201).belowFloor).toBe(false)
+  })
+
+  it('offers the floor as the one-tap fix', () => {
+    const r = targetRisk(profile, 800)
+    expect(r.suggestedKcal).toBe(1200)
+    expect(r.note).toContain('800')
+    expect(r.note).toContain('1,200')
+  })
+
+  it('flags a deficit over a kilo a week even at the floor itself', () => {
+    // Maintenance here is about 2,217, so even a legal 1,200 target is a
+    // ~1,017 kcal deficit. The floor is not automatically a safe pace.
+    const r = targetRisk(profile, 1200)
+    expect(r.belowFloor).toBe(false)
+    expect(r.aggressiveDeficit).toBe(true)
+    expect(r.note).toContain('under what you')
+  })
+
+  it('says nothing about an ordinary deficit', () => {
+    expect(targetRisk(profile, 1800).note).toBeNull()
+  })
+
+  it('cannot judge a deficit without height and age, but still checks the floor', () => {
+    const blind = { ...profile, heightCm: null }
+    expect(targetRisk(blind, 1800).note).toBeNull()
+    expect(targetRisk(blind, 1800).deficitKcal).toBeNull()
+    expect(targetRisk(blind, 800).belowFloor).toBe(true)
+  })
+
+  it('judges against the body you have now, not the one you started with', () => {
+    // Same profile, but 15 kg lighter today: maintenance drops, so the same
+    // target is a smaller deficit than the start weight would imply.
+    const atStart = targetRisk(profile, 1250)
+    const now = targetRisk(profile, 1250, 55)
+    expect(now.deficitKcal!).toBeLessThan(atStart.deficitKcal!)
+    expect(now.aggressiveDeficit).toBe(false)
   })
 })

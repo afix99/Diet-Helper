@@ -15,7 +15,7 @@
  * - Water 35 ml/kg, the mid-point of the usual 30–40 ml/kg guidance.
  */
 import type { ActivityLevel, Sex, Targets } from './types'
-import { bmr, tdee } from './nutrition'
+import { MIN_DAILY_KCAL, maintenanceFor } from './nutrition'
 
 export const KCAL_PER_G = { protein: 4, carbs: 4, fat: 9 } as const
 
@@ -172,22 +172,98 @@ export interface EnergyVerdict {
  * The workbook's note said "moderate deficit" as fixed text, which kept
  * asserting a deficit at any calorie number the user typed. This computes it.
  */
-export function energyBalance(profile: {
-  startWeightKg: number
-  heightCm: number | null
-  age: number | null
-  sex: Sex
-  activityLevel: ActivityLevel
-}, kcal: number): EnergyVerdict {
-  if (!profile.heightCm || !profile.age) {
+export function energyBalance(
+  profile: {
+    startWeightKg: number
+    heightCm: number | null
+    age: number | null
+    sex: Sex
+    activityLevel: ActivityLevel
+  },
+  kcal: number,
+  /** Latest weigh-in. Callers that have one should pass it; see maintenanceFor. */
+  latestWeightKg?: number | null
+): EnergyVerdict {
+  const maintenance = maintenanceFor(profile, latestWeightKg)
+  if (maintenance === null) {
     return { balance: 'unknown', diff: null, tdee: null }
   }
-  const maintenance = tdee(
-    bmr(profile.startWeightKg, profile.heightCm, profile.age, profile.sex),
-    profile.activityLevel
-  )
   const diff = kcal - maintenance
   const balance: EnergyBalance =
     Math.abs(diff) <= 100 ? 'maintenance' : diff < 0 ? 'deficit' : 'surplus'
   return { balance, diff, tdee: maintenance }
+}
+
+// --- Is this target safe to aim at? -----------------------------------------
+
+/**
+ * Below this much of a daily deficit, the pace stops being mostly fat.
+ *
+ * Roughly 1 kg a week at the usual 7,700 kcal/kg conversion. Above it the
+ * literature is consistent that a growing share of what comes off is lean mass
+ * and water, and that adherence collapses — so it is worth saying out loud
+ * rather than reporting as a plan.
+ */
+export const AGGRESSIVE_DEFICIT_KCAL = 1000
+
+export interface TargetRisk {
+  /** The calorie target is under the app's own daily floor. */
+  belowFloor: boolean
+  /** The target sits more than AGGRESSIVE_DEFICIT_KCAL under maintenance. */
+  aggressiveDeficit: boolean
+  floor: number
+  /** What the one-tap fix would set. */
+  suggestedKcal: number
+  /** Signed kcal against maintenance; null when it cannot be computed. */
+  deficitKcal: number | null
+  /** Null when there is nothing worth saying. */
+  note: string | null
+}
+
+/**
+ * Whether the calorie target itself deserves a second look.
+ *
+ * The app already knew what too little food looked like — MIN_DAILY_KCAL gates
+ * the onboarding suggestion and drives the under-eating warning — but nothing
+ * checked the number typed into Settings. So an 800 kcal target passed silently
+ * and Today then reported a 990 kcal day as an excess.
+ *
+ * This flags; it never blocks. There are supervised reasons to eat below the
+ * floor, and the person using this is an adult who set the number on purpose.
+ */
+export function targetRisk(
+  profile: {
+    startWeightKg: number
+    heightCm: number | null
+    age: number | null
+    sex: Sex
+    activityLevel: ActivityLevel
+  },
+  targetKcal: number,
+  latestWeightKg?: number | null
+): TargetRisk {
+  const maintenance = maintenanceFor(profile, latestWeightKg)
+  const deficitKcal = maintenance === null ? null : maintenance - targetKcal
+  const belowFloor = targetKcal > 0 && targetKcal < MIN_DAILY_KCAL
+  const aggressiveDeficit = deficitKcal !== null && deficitKcal > AGGRESSIVE_DEFICIT_KCAL
+
+  const note = belowFloor
+    ? `${targetKcal.toLocaleString('en-GB')} kcal is below the ` +
+      `${MIN_DAILY_KCAL.toLocaleString('en-GB')} this app treats as a floor. Under it, ` +
+      `hunger, sleep and muscle all give way before the fat does, and most people cannot ` +
+      `hold it long enough to matter.`
+    : aggressiveDeficit
+      ? `That is about ${deficitKcal!.toLocaleString('en-GB')} kcal a day under what you ` +
+        `burn — over a kilo a week. Faster is not better here: past roughly 0.7 kg a week ` +
+        `a growing share of the loss is muscle and water rather than fat.`
+      : null
+
+  return {
+    belowFloor,
+    aggressiveDeficit,
+    floor: MIN_DAILY_KCAL,
+    suggestedKcal: MIN_DAILY_KCAL,
+    deficitKcal,
+    note,
+  }
 }

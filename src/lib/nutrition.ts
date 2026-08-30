@@ -46,6 +46,34 @@ export function tdee(basalRate: number, level: ActivityLevel): number {
   return Math.round(basalRate * ACTIVITY_FACTORS[level])
 }
 
+/**
+ * Maintenance calories for the body you have *now*.
+ *
+ * Four call sites used to compute this independently, and two of them used the
+ * starting weight — so once you had lost a few kilos the app quoted one TDEE on
+ * Settings and a different one on Today. Weight is the only input that moves,
+ * so it is the only one worth being careful about: a real weigh-in wins, and
+ * the start weight is the fallback for someone who has not stepped on a scale.
+ *
+ * Null when height or age is missing, because Mifflin-St Jeor needs both and
+ * guessing them would be worse than saying so.
+ */
+export function maintenanceFor(
+  profile: {
+    startWeightKg: number
+    heightCm: number | null
+    age: number | null
+    sex: Sex
+    activityLevel: ActivityLevel
+  },
+  latestWeightKg?: number | null
+): number | null {
+  if (!profile.heightCm || !profile.age) return null
+  const weight =
+    latestWeightKg && latestWeightKg > 0 ? latestWeightKg : profile.startWeightKg
+  return tdee(bmr(weight, profile.heightCm, profile.age, profile.sex), profile.activityLevel)
+}
+
 /** Dashboard!D10 — LBM = weight × (1 − bodyfat%) */
 export function leanBodyMass(weightKg: number, bodyFatPct: number): number {
   return round1(weightKg * (1 - bodyFatPct / 100))

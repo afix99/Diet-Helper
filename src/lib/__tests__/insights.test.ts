@@ -104,10 +104,10 @@ describe('omega-3', () => {
     expect(ids({ days })).toContain('omega_good')
   })
 
-  it('mentions cheaper oily fish when none is logged', () => {
+  it('tags the omega-3 gap for the catalogue to fill', () => {
     const days = WEEK.map((d) => day(d, 1400))
     const found = run({ days }).find((i) => i.id === 'omega_none')
-    expect(found?.detail).toContain('kembung')
+    expect(found?.suggest).toBe('omega3')
   })
 })
 
@@ -158,5 +158,39 @@ describe('tone', () => {
     for (const i of run({ days })) {
       expect(['good', 'neutral', 'watch']).toContain(i.tone)
     }
+  })
+})
+
+describe('what the catalogue is asked to fill', () => {
+  /*
+   * These three rules used to recite fixed food lists. They now name the need
+   * and let the pick rail read real rows out of the catalogue, so what the
+   * rule owes is a correct tag — and nothing that looks like a shopping list.
+   */
+  const NAMED_FOODS = /oats|ulam|guava|berries|chicken breast|greek yogurt|kembung|sardine/i
+
+  it('tags a short protein day', () => {
+    const days = WEEK.map((d) => day(d, 1400, 20))
+    const found = run({ days }).find((i) => i.id === 'protein_low')
+    expect(found?.suggest).toBe('protein')
+  })
+
+  it('tags a low-fibre week', () => {
+    const days = WEEK.map((d) => day(d, 1400, 90, 3))
+    const found = run({ days }).find((i) => i.id === 'fibre_low')
+    expect(found?.suggest).toBe('fibre')
+  })
+
+  it('names no foods of its own any more', () => {
+    const days = WEEK.map((d) => day(d, 1400, 20, 3))
+    for (const i of run({ days })) {
+      expect(i.detail).not.toMatch(NAMED_FOODS)
+    }
+  })
+
+  it('leaves rules with no catalogue answer untagged', () => {
+    const days = WEEK.map((d) => day(d, 1400, 90, 30))
+    const tagged = run({ days }).filter((i) => i.suggest)
+    for (const i of tagged) expect(['protein_low', 'fibre_low', 'omega_none']).toContain(i.id)
   })
 })

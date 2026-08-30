@@ -5,7 +5,7 @@ import { useMemo } from 'react'
 import { Emoji } from './Emoji'
 import { Card } from './ui'
 import { addDays, formatDay } from '@/lib/dates'
-import { dayRecords } from '@/lib/selectors'
+import { dayRecords, latestWeight } from '@/lib/selectors'
 import { underEating } from '@/lib/underEating'
 import { useData } from '@/lib/store/provider'
 
@@ -23,7 +23,7 @@ export function UnderEatingCard({ date }: { date: string }) {
   const check = useMemo(() => {
     // Fourteen days back, so the seven-day window is always fully populated.
     const dates = Array.from({ length: 14 }, (_, i) => addDays(date, i - 13))
-    return underEating(dayRecords(data, dates), data.profile, date)
+    return underEating(dayRecords(data, dates), data.profile, date, latestWeight(data))
   }, [data, date])
 
   if (!check.triggered) return null

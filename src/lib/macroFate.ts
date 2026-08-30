@@ -198,9 +198,8 @@ export function macroFate(input: MacroFateInput, key: MacroKey): MacroFate {
   const overKcal =
     key === 'fibre' ? null : Math.round(overBy * KCAL_PER_G[key as 'protein' | 'carbs' | 'fat'])
 
-  // Maintenance tracks the body you have, so a real weigh-in beats the start weight.
-  const weight = latestWeightKg && latestWeightKg > 0 ? latestWeightKg : profile.startWeightKg
-  const balance = energyBalance({ ...profile, startWeightKg: weight }, totals.kcal)
+  // Maintenance tracks the body you have; energyBalance handles the fallback.
+  const balance = energyBalance(profile, totals.kcal, latestWeightKg)
 
   const fatGainG =
     balance.balance === 'surplus' && balance.diff !== null

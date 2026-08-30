@@ -245,15 +245,28 @@ export function BudgetRing({
   consumed,
   target,
   band,
+  /** Shown under the ratio when the target itself is below the daily floor. */
+  floorNote,
 }: {
   consumed: number
   target: number
   band: StatusBand
+  floorNote?: string
 }) {
   // The headline figure counts rather than snapping, so a change is legible.
   const shown = useCountUp(consumed)
   const remaining = Math.round(target - shown)
-  const pct = target > 0 ? Math.min(1, shown / target) : 0
+  const over = remaining < 0
+
+  /*
+   * Two laps, not one clamped arc. Clamping at 100% drew 990/800 and 3000/800
+   * identically, which is the same lie the macro bars used to tell before they
+   * grew an overflow segment. The first lap fills the target; the second draws
+   * how far past it you are, as a fraction of the same target.
+   */
+  const lap1 = target > 0 ? Math.min(1, shown / target) : 0
+  const lap2 = target > 0 ? Math.min(1, Math.max(0, shown - target) / target) : 0
+
   const size = 176
   const stroke = 14
   const r = (size - stroke) / 2
@@ -261,9 +274,31 @@ export function BudgetRing({
   const colour =
     band === 'over' ? 'rgb(var(--clay))' : band === 'close' ? 'rgb(var(--amber))' : 'rgb(var(--primary))'
 
+  const arc = (pct: number, opacity: number) => (
+    <circle
+      cx={size / 2}
+      cy={size / 2}
+      r={r}
+      fill="none"
+      stroke={colour}
+      strokeOpacity={opacity}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeDasharray={circumference}
+      strokeDashoffset={circumference * (1 - pct)}
+      style={{ transition: 'stroke-dashoffset 420ms cubic-bezier(0.34,1.2,0.64,1)' }}
+    />
+  )
+
   return (
     <div className="relative mx-auto" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90" role="img" aria-label={`${remaining} kcal remaining`}>
+      <svg
+        width={size}
+        height={size}
+        className="-rotate-90"
+        role="img"
+        aria-label={`${Math.abs(remaining)} kcal ${over ? 'over target' : 'left'}`}
+      >
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -272,28 +307,31 @@ export function BudgetRing({
           stroke="rgb(var(--raised))"
           strokeWidth={stroke}
         />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke={colour}
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={circumference * (1 - pct)}
-          style={{ transition: 'stroke-dashoffset 420ms cubic-bezier(0.34,1.2,0.64,1)' }}
-        />
+        {arc(lap1, over ? 0.35 : 1)}
+        {lap2 > 0 && arc(lap2, 1)}
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-4xl font-extrabold tabular-nums leading-none">
+
+      {/*
+        The numeral sits on the ring's axis, not the centroid of three lines.
+        Centring the stack as a group put it 18.5px high — the group balanced,
+        the number did not, and the number is what the eye locks onto.
+      */}
+      <div className="absolute inset-0 grid place-items-center">
+        <span
+          data-ring-value
+          className="text-4xl font-extrabold tabular-nums leading-none"
+        >
           {Math.abs(remaining)}
         </span>
-        <span className="mt-1 text-tertiary font-semibold text-muted">
-          {remaining >= 0 ? 'kcal left' : 'kcal over'}
+      </div>
+      {/* 22px = half the 36px numeral, plus its 4px gap. Derived, not eyeballed. */}
+      <div className="absolute inset-x-0 top-1/2 mt-[22px] flex flex-col items-center">
+        <span className="text-tertiary font-semibold text-muted">
+          {over ? 'kcal over' : 'kcal left'}
         </span>
         <span className="mt-0.5 text-caption text-faint tabular-nums">
           {Math.round(shown)} / {target}
+          {floorNote ? ` ${floorNote}` : ''}
         </span>
       </div>
     </div>

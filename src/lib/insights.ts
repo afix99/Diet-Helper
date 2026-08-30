@@ -19,6 +19,7 @@ import { isOnTarget, round1, type DayRecord } from './nutrition'
 import { ratePerWeek } from './trends'
 import { underEating, type UnderEatingProfile } from './underEating'
 import type { Targets, WeightLog } from './types'
+import type { Need } from './suggest'
 
 export type InsightTone = 'good' | 'neutral' | 'watch'
 
@@ -27,6 +28,12 @@ export interface Insight {
   tone: InsightTone
   title: string
   detail: string
+  /**
+   * A gap the catalogue can help close. The rule states the need; picking the
+   * foods is the UI's job, so this module stays pure and testable and does not
+   * pull 415 rows of JSON into the coach.
+   */
+  suggest?: Need
 }
 
 export interface InsightInput {
@@ -40,6 +47,8 @@ export interface InsightInput {
   today?: string
   /** Height, age and sex, for the resting-burn line. Optional. */
   profile?: UnderEatingProfile
+  /** Latest weigh-in, so the resting figure matches the rest of the app. */
+  latestWeightKg?: number | null
 }
 
 const mean = (ns: readonly number[]) =>
@@ -63,7 +72,7 @@ export function insights(input: InsightInput): Insight[] {
    * days is already the threshold it was designed around.
    */
   if (input.today && input.profile) {
-    const low = underEating(days, input.profile, input.today)
+    const low = underEating(days, input.profile, input.today, input.latestWeightKg)
     if (low.triggered) {
       out.push({
         id: 'intake_too_low',
@@ -118,10 +127,11 @@ export function insights(input: InsightInput): Insight[] {
     out.push({
       id: 'protein_low',
       tone: 'watch',
+      suggest: 'protein',
       title: 'Protein is running short',
       detail:
-        `Averaging ${avg}g against a ${targets.protein}g target. Chicken breast, ` +
-        `Greek yogurt or a tin of salmon each add 15–30g without much else.`,
+        `Averaging ${avg}g against a ${targets.protein}g target. It is the one macro ` +
+        `worth chasing in a deficit — it is what keeps the weight coming off muscle.`,
     })
   }
 
@@ -155,10 +165,11 @@ export function insights(input: InsightInput): Insight[] {
       out.push({
         id: 'fibre_low',
         tone: 'watch',
+        suggest: 'fibre',
         title: 'Fibre is low most days',
         detail:
           `Under ${Math.round(targets.fibre * 0.7)}g on ${under.length} of ${avgFibreDays} days. ` +
-          `Fibre is what makes a deficit feel survivable — oats, ulam, guava and berries are the cheap wins.`,
+          `Fibre is what makes a deficit feel survivable.`,
       })
     }
   }
@@ -179,10 +190,9 @@ export function insights(input: InsightInput): Insight[] {
       out.push({
         id: 'omega_none',
         tone: 'neutral',
+        suggest: 'omega3',
         title: 'No oily fish logged',
-        detail:
-          `The plan leans on salmon for EPA/DHA. Ikan kembung and sardines are ` +
-          `cheaper and count just as much.`,
+        detail: `The plan leans on oily fish for EPA/DHA, and none has been logged this week.`,
       })
     }
   }

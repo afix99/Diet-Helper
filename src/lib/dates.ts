@@ -11,6 +11,8 @@
  * question about the user's wall clock rather than about a stored key.
  */
 
+import type { MealSlot } from './types'
+
 const MS_PER_DAY = 86_400_000
 
 /** The user's current calendar date, from their wall clock. */
@@ -60,4 +62,20 @@ export function weekDates(end: string, length = 7): string[] {
 /** Human label for a day key, rendered from its UTC parts. */
 export function formatDay(iso: string, opts: Intl.DateTimeFormatOptions): string {
   return parseIso(iso).toLocaleDateString('en-GB', { ...opts, timeZone: 'UTC' })
+}
+
+/**
+ * Best guess at which meal you mean, from the time of day.
+ *
+ * Lived on Today as an inline useMemo. Progress now logs food too — from the
+ * suggestion rail — and a second copy of these boundaries would be a second
+ * thing to keep in step.
+ */
+export function slotForNow(hour = new Date().getHours()): MealSlot {
+  if (hour < 10) return 'breakfast'
+  if (hour < 12) return 'morning_snack'
+  if (hour < 15) return 'lunch'
+  if (hour < 18) return 'afternoon_snack'
+  if (hour < 21) return 'dinner'
+  return 'evening'
 }

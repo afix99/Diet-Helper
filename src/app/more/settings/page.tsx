@@ -4,17 +4,19 @@ import { useId, useState } from 'react'
 import { Card, ListGroup, PageHeader, SegmentedControl } from '@/components/ui'
 import { Icon } from '@/components/icons'
 import { METHODOLOGY, TARGET_NOTES } from '@/lib/catalogue'
-import { bmr, leanBodyMass, tdee } from '@/lib/nutrition'
+import { bmr, leanBodyMass, maintenanceFor } from '@/lib/nutrition'
 import {
   PRESETS,
   distributeTargets,
   energyBalance,
   macroKcal,
   reconciles,
+  targetRisk,
   type PresetId,
 } from '@/lib/targets'
 import { supabaseClient } from '@/lib/store'
 import { defaultData } from '@/lib/store/defaults'
+import { latestWeight } from '@/lib/selectors'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { openStarterGuide } from '@/components/OnboardingGate'
 import { useData } from '@/lib/store/provider'
@@ -43,9 +45,17 @@ export default function SettingsPage() {
   if (!ready) return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
 
   const p = data.profile
-  const basal = p.heightCm && p.age ? bmr(p.startWeightKg, p.heightCm, p.age, p.sex) : null
-  const maintenance = basal ? tdee(basal, p.activityLevel) : null
-  const lbm = p.bodyFatPct ? leanBodyMass(p.startWeightKg, p.bodyFatPct) : null
+  /*
+   * Every figure here tracks the body you have now, not the one you started
+   * with. Settings used to read from startWeightKg while the macro sheet and
+   * the trend card used the latest weigh-in, so the app quoted two different
+   * TDEEs on two screens once any weight came off.
+   */
+  const weighIn = latestWeight(data)
+  const weightNow = weighIn && weighIn > 0 ? weighIn : p.startWeightKg
+  const basal = p.heightCm && p.age ? bmr(weightNow, p.heightCm, p.age, p.sex) : null
+  const maintenance = maintenanceFor(p, weighIn)
+  const lbm = p.bodyFatPct ? leanBodyMass(weightNow, p.bodyFatPct) : null
 
   const setProfile = (patch: Partial<typeof p>) =>
     update((d) => ({ ...d, profile: { ...d.profile, ...patch } }))
@@ -133,7 +143,8 @@ export default function SettingsPage() {
 
   const macroTotal = macroKcal(data.targets)
   const balanced = reconciles(data.targets)
-  const energy = energyBalance(p, data.targets.kcal)
+  const energy = energyBalance(p, data.targets.kcal, weighIn)
+  const risk = targetRisk(p, data.targets.kcal, weighIn)
 
   /**
    * The workbook's notes were fixed strings, so the calorie one kept claiming a
@@ -150,9 +161,17 @@ export default function SettingsPage() {
       case 'kcal':
         if (energy.balance === 'unknown') return 'Add height and age to see how this compares to your TDEE.'
         if (energy.balance === 'maintenance') return `About maintenance — your TDEE is ${energy.tdee} kcal.`
-        return energy.balance === 'deficit'
-          ? `${Math.abs(energy.diff ?? 0)} kcal below your TDEE of ${energy.tdee}. Roughly ${(Math.abs(energy.diff ?? 0) * 7 / 7700).toFixed(1)} kg a week.`
-          : `${energy.diff} kcal above your TDEE of ${energy.tdee} — a surplus, so weight will trend up.`
+        if (energy.balance === 'surplus')
+          return `${energy.diff} kcal above your TDEE of ${energy.tdee} — a surplus, so weight will trend up.`
+        {
+          const gap = Math.abs(energy.diff ?? 0)
+          const perWeek = ((gap * 7) / 7700).toFixed(1)
+          // Reporting 1.2 kg a week without comment read as an endorsement.
+          const caveat = risk.aggressiveDeficit || risk.belowFloor
+            ? ' Most of what comes off at that pace is not fat.'
+            : ''
+          return `${gap} kcal below your TDEE of ${energy.tdee}. Roughly ${perWeek} kg a week.${caveat}`
+        }
       case 'protein':
         return `${perKg(t.protein)} · set by body weight, so it holds steady when calories change.`
       case 'carbs':
@@ -315,6 +334,20 @@ export default function SettingsPage() {
                   onToggleLock={f.key === 'kcal' ? undefined : () => toggleLock(f.key)}
                 />
                 <p className="mt-1 text-caption leading-snug text-faint">{noteFor(f.key)}</p>
+                {f.key === 'kcal' && risk.note && (
+                  <div className="mt-2 rounded-inner bg-amber/10 px-3 py-2.5 text-amber">
+                    <p className="text-caption leading-relaxed">{risk.note}</p>
+                    {risk.belowFloor && (
+                      <button
+                        type="button"
+                        onClick={() => setTarget('kcal', risk.suggestedKcal)}
+                        className="tap mt-2 rounded-pill bg-amber px-4 py-1.5 text-caption font-bold text-on-primary"
+                      >
+                        Use {risk.suggestedKcal.toLocaleString('en-GB')}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>

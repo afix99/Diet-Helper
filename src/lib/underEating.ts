@@ -47,11 +47,15 @@ export interface UnderEatingResult {
 export function underEating(
   days: readonly DayRecord[],
   profile: UnderEatingProfile,
-  today: string
+  today: string,
+  /** Latest weigh-in, so the resting figure tracks the body you have now. */
+  latestWeightKg?: number | null
 ): UnderEatingResult {
+  const weight =
+    latestWeightKg && latestWeightKg > 0 ? latestWeightKg : profile.startWeightKg
   const basal =
     profile.heightCm && profile.age
-      ? bmr(profile.startWeightKg, profile.heightCm, profile.age, profile.sex)
+      ? bmr(weight, profile.heightCm, profile.age, profile.sex)
       : null
 
   const recent = days

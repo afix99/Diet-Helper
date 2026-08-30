@@ -6,6 +6,7 @@ import { Card, EmptyState, ListGroup, PageHeader, StatusPill } from '@/component
 import { insights } from '@/lib/insights'
 import { Icon } from '@/components/icons'
 import { TrendCard } from '@/components/TrendCard'
+import { PickRail } from '@/components/PickRail'
 import { rollingAverage, round1, statusBand } from '@/lib/nutrition'
 import { dayRecords, latestWeight, weekDates, weekOf } from '@/lib/selectors'
 import { formatDay } from '@/lib/dates'
@@ -191,6 +192,7 @@ export default function ProgressPage() {
               >
                 <p className="text-body font-semibold">{i.title}</p>
                 <p className="mt-0.5 text-tertiary leading-relaxed text-muted">{i.detail}</p>
+                {i.suggest && <PickRail need={i.suggest} />}
               </div>
             ))}
           </div>

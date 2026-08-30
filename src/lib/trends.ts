@@ -201,7 +201,7 @@ export function trends(input: TrendInput): Trend {
 
   const avgIntakeKcal = Math.round(mean(logged.map((d) => d.kcal)))
   const latest = sorted[sorted.length - 1].weightKg
-  const balance = energyBalance({ ...profile, startWeightKg: latest }, avgIntakeKcal)
+  const balance = energyBalance(profile, avgIntakeKcal, latest)
   const maintenanceKcal = balance.tdee
 
   const impliedDeficitKcal = Math.round((rate * KCAL_PER_KG_FAT) / 7)
