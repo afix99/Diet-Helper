@@ -19,6 +19,7 @@ import { statusBand } from '@/lib/nutrition'
 import { sound } from '@/lib/sound'
 import { burstAt } from '@/components/BurstLayer'
 import { targetRisk } from '@/lib/targets'
+import { PET_ENABLED } from '@/lib/pet'
 import type { MacroKey } from '@/lib/macroFate'
 import {
   badgesFor,
@@ -145,7 +146,7 @@ export default function TodayPage() {
              * because this pill disappears at a zero streak and the cat must
              * never be strandable.
              */
-            data.pet.out ? (
+            !PET_ENABLED || data.pet.out ? (
               <span className="pill bg-primary/15 text-primary-ink" title="Streak">
                 <Emoji name="flame" size={14} className="animate-breathe" />
                 {run.current}-day streak
@@ -281,7 +282,7 @@ export default function TodayPage() {
         )}
       </Card>
 
-      {data.pet.out && <PetCard date={date} />}
+      {PET_ENABLED && data.pet.out && <PetCard date={date} />}
 
       {unlocked.length > 0 && (
         <Link href="/more/badges" className="mb-4 block">

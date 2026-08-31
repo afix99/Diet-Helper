@@ -26,6 +26,18 @@
  * diary.
  */
 
+/**
+ * Whether the cat appears in the app at all.
+ *
+ * Off while the artwork is being redesigned. The behaviour, the motion rig and
+ * every test around them are finished and stay in the build; this gates only
+ * the three places the cat reaches the UI — the Today card, the streak pill,
+ * and the row in More — so turning it back on is one line rather than a
+ * revert. Flat vector was the wrong call for what this is meant to feel like,
+ * and shipping it while we know that would be shipping it twice.
+ */
+export const PET_ENABLED = false
+
 /** The drawable features. Additive: each stage keeps everything before it. */
 export type PetPart =
   | 'body'

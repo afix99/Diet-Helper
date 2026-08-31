@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Icon, type IconName } from '@/components/icons'
 import { IconTile, ListGroup, ListRow, PageHeader, type TileTone } from '@/components/ui'
 import { PetCat } from '@/components/PetCat'
-import { poseFor, stageFor } from '@/lib/pet'
+import { PET_ENABLED, poseFor, stageFor } from '@/lib/pet'
 import { useLogging } from '@/lib/logging'
 import { badgesFor, entriesFor, streakFor } from '@/lib/selectors'
 import { useData } from '@/lib/store/provider'
@@ -71,6 +71,7 @@ export default function MorePage() {
         only while there is a streak to show — without this row a broken streak
         plus a hidden cat would strand it with no way back.
       */}
+      {PET_ENABLED && (
       <ListGroup className="mb-4">
         <ListRow
           icon={
@@ -88,6 +89,7 @@ export default function MorePage() {
           onClick={() => (data.pet.out ? sendPetHome() : callPetOut())}
         />
       </ListGroup>
+      )}
 
       <ListGroup>
         {LINKS.map((l) => (
