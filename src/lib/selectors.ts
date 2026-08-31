@@ -11,7 +11,14 @@ import {
 } from './nutrition'
 import { daysBetween, todayIso, weekDates, weekOf } from './dates'
 import type { AppData } from './store/types'
-import { MEAL_SLOTS, type Food, type LogEntry, type Macros, type MealSlot } from './types'
+import {
+  MEAL_SLOTS,
+  type ActivityLog,
+  type Food,
+  type LogEntry,
+  type Macros,
+  type MealSlot,
+} from './types'
 
 export { weekDates, weekOf }
 
@@ -72,6 +79,17 @@ export function dayTotals(data: AppData, date: string): Macros {
   return items.length ? sumMacros(items) : { ...EMPTY_MACROS }
 }
 
+export function activitiesFor(data: AppData, date: string): ActivityLog[] {
+  return data.activities.filter((a) => a.date === date)
+}
+
+/** Calories burned above rest on a day, from logged activity. */
+export function burnedOn(data: AppData, date: string): number {
+  let sum = 0
+  for (const a of data.activities) if (a.date === date) sum += a.kcal
+  return sum
+}
+
 export function dayRecords(data: AppData, dates: readonly string[]): DayRecord[] {
   // Bucket once: filtering the full log per day is O(days x entries) and this
   // runs on every render of Today.
@@ -81,6 +99,12 @@ export function dayRecords(data: AppData, dates: readonly string[]): DayRecord[]
     if (list) list.push(entry)
     else byDate.set(entry.date, [entry])
   }
+  // Same one-pass bucketing for activity: the under-eating check reads a
+  // fortnight of it on every render of Today.
+  const burnByDate = new Map<string, number>()
+  for (const a of data.activities) {
+    burnByDate.set(a.date, (burnByDate.get(a.date) ?? 0) + a.kcal)
+  }
   return dates.map((date) => {
     const entries = byDate.get(date) ?? []
     const totals = entries.length ? sumMacros(entries.map(entryMacros)) : { ...EMPTY_MACROS }
@@ -89,6 +113,7 @@ export function dayRecords(data: AppData, dates: readonly string[]): DayRecord[]
       kcal: totals.kcal,
       protein: totals.protein,
       fibre: totals.fibre,
+      burned: burnByDate.get(date) ?? 0,
       salmonMeals: entries.filter((e) => isSalmon(entryName(e, data.customFoods))).length,
     }
   })

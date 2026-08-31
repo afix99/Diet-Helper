@@ -106,6 +106,14 @@ function Readout({ t, goalWeightKg }: { t: Trend; goalWeightKg: number }) {
         </p>
       )}
 
+      {t.avgBurnedKcal > 0 && (
+        <p className="text-caption leading-relaxed text-faint">
+          Logged exercise averaged {kcal(t.avgBurnedKcal)} kcal a day across those days, and
+          is counted as expenditure rather than taken off what you ate — so the diary figure
+          above is what you burned plus training, minus what you logged.
+        </p>
+      )}
+
       <p className="text-caption leading-relaxed text-faint">
         Deficits here are converted at roughly 7,700 kcal per kilogram of fat. That is a rule
         of thumb rather than a measurement, and it flatters the numbers slightly in both

@@ -13,7 +13,8 @@
  * globals.
  */
 import type { AppData } from './store/types'
-import type { Food, LogEntry, Macros, MealSlot, Recipe } from './types'
+import { burnFor, clampMinutes } from './exercise'
+import type { ActivityLog, Exercise, Food, LogEntry, Macros, MealSlot, Recipe } from './types'
 
 /** Smallest loggable portion, and the step every serving is rounded to. */
 export const MIN_SERVINGS = 0.25
@@ -155,4 +156,60 @@ export function deleteCustomFood(d: AppData, id: string): AppData {
   }
 }
 
-export type { LogEntry }
+// --- Activities -------------------------------------------------------------
+
+/**
+ * Log a bout of exercise.
+ *
+ * The kcal figure is computed here and stored, rather than derived at read
+ * time, for the same reason food entries snapshot their macros: a weigh-in next
+ * month should not quietly re-price last week's badminton.
+ */
+export function addActivity(
+  d: AppData,
+  date: string,
+  exercise: Exercise,
+  minutes: number,
+  weightKg: number,
+  mintId: () => string = newId
+): AppData {
+  const mins = clampMinutes(minutes)
+  return {
+    ...d,
+    activities: [
+      ...d.activities,
+      {
+        id: mintId(),
+        date,
+        exerciseId: exercise.id,
+        customName: null,
+        minutes: mins,
+        kcal: burnFor(exercise.met, weightKg, mins),
+      },
+    ],
+  }
+}
+
+export function removeActivity(d: AppData, id: string): AppData {
+  return { ...d, activities: d.activities.filter((a) => a.id !== id) }
+}
+
+/**
+ * Change how long a bout lasted, re-pricing it from the same MET and the same
+ * body weight it was first logged against — so editing a duration cannot
+ * smuggle in a weight change.
+ */
+export function setActivityMinutes(d: AppData, id: string, minutes: number): AppData {
+  const mins = clampMinutes(minutes)
+  return {
+    ...d,
+    activities: d.activities.map((a) => {
+      if (a.id !== id) return a
+      // kcal is linear in minutes, so the original rate is recoverable exactly.
+      const perMinute = a.minutes > 0 ? a.kcal / a.minutes : 0
+      return { ...a, minutes: mins, kcal: Math.round(perMinute * mins) }
+    }),
+  }
+}
+
+export type { ActivityLog, LogEntry }

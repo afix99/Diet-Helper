@@ -154,6 +154,12 @@ export interface DayRecord {
   kcal: number
   protein: number
   fibre: number
+  /**
+   * Calories burned above rest by logged activity. Zero when nothing was
+   * logged, which is also the honest reading: unlogged exercise is not
+   * evidence of exercise.
+   */
+  burned: number
   salmonMeals: number
 }
 

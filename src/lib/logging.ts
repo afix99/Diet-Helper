@@ -3,9 +3,10 @@
 import { useCallback } from 'react'
 import { useData } from './store/provider'
 import { RECIPES } from './catalogue'
-import { findFood } from './selectors'
+import { findFood, latestWeight } from './selectors'
+import { bodyWeightFor } from './exercise'
 import * as edits from './logEdits'
-import type { Food, LogEntry, MealSlot } from './types'
+import type { Exercise, Food, LogEntry, MealSlot } from './types'
 
 /**
  * Mutations for the food log, shared by Today, Week and Recipes.
@@ -72,6 +73,36 @@ export function useLogging() {
     [update]
   )
 
+  /*
+   * Exercise is priced against the same body the rest of the app quotes:
+   * latest weigh-in, falling back to the start weight. Reading it here rather
+   * than inside the reducer keeps the reducer pure and testable.
+   */
+  const logActivity = useCallback(
+    (date: string, exercise: Exercise, minutes: number) => {
+      update((d) =>
+        edits.addActivity(
+          d,
+          date,
+          exercise,
+          minutes,
+          bodyWeightFor(d.profile.startWeightKg, latestWeight(d))
+        )
+      )
+    },
+    [update]
+  )
+
+  const removeActivity = useCallback(
+    (id: string) => update((d) => edits.removeActivity(d, id)),
+    [update]
+  )
+
+  const setActivityMinutes = useCallback(
+    (id: string, minutes: number) => update((d) => edits.setActivityMinutes(d, id, minutes)),
+    [update]
+  )
+
   const resolveFood = useCallback((id: string) => findFood(data, id), [data])
 
   return {
@@ -83,6 +114,9 @@ export function useLogging() {
     copyDay,
     addCustomFood,
     deleteCustomFood,
+    logActivity,
+    removeActivity,
+    setActivityMinutes,
     resolveFood,
   }
 }

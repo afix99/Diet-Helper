@@ -11,7 +11,7 @@
  * numbers stepped by one rAF loop that cancels itself the moment the last
  * particle dies, so the cost when nothing is happening is exactly zero.
  */
-import { styleFor, type BurstShape } from './burstPalette'
+import { exerciseStyleFor, styleFor, type BurstShape } from './burstPalette'
 import type { Food } from './types'
 
 /** Never draw more than this many at once, however fast someone taps. */
@@ -66,6 +66,12 @@ export interface BurstOptions {
   seed?: string
   /** Scales the whole thing. 1 is a food landing; 1.6 is a badge unlocking. */
   scale?: number
+  /**
+   * Which palette the category is looked up in. Exercise categories share names
+   * with nothing in the food catalogue, but keeping the two maps separate means
+   * neither can silently inherit the other's colours.
+   */
+  kind?: 'food' | 'exercise'
 }
 
 /**
@@ -75,9 +81,10 @@ export function particlesFor(
   x: number,
   y: number,
   food: Pick<Food, 'id' | 'category'> | null,
-  { seed, scale = 1 }: BurstOptions = {}
+  { seed, scale = 1, kind = 'food' }: BurstOptions = {}
 ): Particle[] {
-  const style = styleFor(food?.category)
+  const style =
+    kind === 'exercise' ? exerciseStyleFor(food?.category) : styleFor(food?.category)
   const r = rng(seedFrom(seed ?? food?.id ?? 'anon'))
 
   // 8 to 18 pieces: enough to read as a burst, few enough to stay cheap.

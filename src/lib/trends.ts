@@ -20,6 +20,10 @@
  *   missing rather than a confident number built on three data points.
  * - **7700 kcal/kg is an approximation** and is labelled as one wherever the
  *   number derived from it is shown.
+ * - **Logged exercise belongs on the expenditure side, not the intake side.**
+ *   Once activity is logged, the diary's claimed deficit is
+ *   `maintenance + burned − intake`. Leaving the burn out would make the gap
+ *   this reports fiction on exactly the weeks someone trained hardest.
  */
 import { KCAL_PER_KG_FAT } from './macroFate'
 import { round1, type DayRecord } from './nutrition'
@@ -81,6 +85,8 @@ export interface Trend {
   /** Days that actually carry an intake, which is what the average is over. */
   loggedDays: number
   maintenanceKcal: number | null
+  /** Mean kcal burned per logged day by logged activity. Zero when none was. */
+  avgBurnedKcal: number
   /** What the scale says your daily deficit has been. */
   impliedDeficitKcal: number | null
   /** What the diary says it should have been. */
@@ -153,6 +159,7 @@ function bucketWeeks(input: TrendInput): TrendWeek[] {
 const EMPTY: Omit<Trend, 'ready' | 'needs' | 'weeks' | 'loggedDays'> = {
   ratePerWeekKg: null,
   avgIntakeKcal: null,
+  avgBurnedKcal: 0,
   maintenanceKcal: null,
   impliedDeficitKcal: null,
   loggedDeficitKcal: null,
@@ -204,8 +211,16 @@ export function trends(input: TrendInput): Trend {
   const balance = energyBalance(profile, avgIntakeKcal, latest)
   const maintenanceKcal = balance.tdee
 
+  /*
+   * Averaged over the logged days rather than every day in the span, so it sits
+   * on the same denominator as the intake it is compared against. A day with no
+   * diary contributes to neither.
+   */
+  const avgBurnedKcal = Math.round(mean(logged.map((d) => d.burned)))
+
   const impliedDeficitKcal = Math.round((rate * KCAL_PER_KG_FAT) / 7)
-  const loggedDeficitKcal = maintenanceKcal === null ? null : maintenanceKcal - avgIntakeKcal
+  const loggedDeficitKcal =
+    maintenanceKcal === null ? null : maintenanceKcal + avgBurnedKcal - avgIntakeKcal
   const gapKcal = loggedDeficitKcal === null ? null : impliedDeficitKcal - loggedDeficitKcal
 
   let reading: TrendReading | null = null
@@ -230,6 +245,7 @@ export function trends(input: TrendInput): Trend {
     avgIntakeKcal,
     loggedDays: logged.length,
     maintenanceKcal,
+    avgBurnedKcal,
     impliedDeficitKcal,
     loggedDeficitKcal,
     gapKcal,

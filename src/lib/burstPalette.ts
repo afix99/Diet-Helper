@@ -54,6 +54,31 @@ export const BURST_STYLES: Record<string, BurstStyle> = {
   'KOREAN & FAST FOOD': { colours: ['#e8453f', '#ffb03b', '#f5e6d0'], shape: 'ring', weight: 1 },
 }
 
+/**
+ * Movement, not dinner.
+ *
+ * Exercise bursts share the shape vocabulary but not the food palettes: sparks
+ * and rings in the interface's own energetic colours, so a logged workout reads
+ * as effort rather than as something landing on a plate. Mental work throws the
+ * quietest of them, which is also the honest picture of what it costs.
+ */
+export const EXERCISE_STYLES: Record<string, BurstStyle> = {
+  'WALKING & RUNNING': { colours: ['#4fb0d9', '#a8e0f2', '#2f7f9e'], shape: 'spark', weight: 0.7 },
+  CYCLING: { colours: ['#5ac8b0', '#a8ead9', '#2f8f7a'], shape: 'ring', weight: 0.7 },
+  'SWIMMING & WATER': { colours: ['#3f9fd0', '#9fd8f0', '#68c8e0'], shape: 'droplet', weight: 0.6 },
+  'STUDIO & HOME': { colours: ['#f06fa5', '#ffb3d0', '#d9478a'], shape: 'spark', weight: 0.65 },
+  STRENGTH: { colours: ['#8f7fd9', '#c4b8f0', '#5f4faa'], shape: 'ring', weight: 1.1 },
+  SPORTS: { colours: ['#f2a03d', '#ffd08a', '#4fb0d9'], shape: 'dot', weight: 0.8 },
+  EVERYDAY: { colours: ['#7ec98f', '#c2e8cc', '#4f9a63'], shape: 'leaf', weight: 0.75 },
+  'MACHINES & LOW IMPACT': { colours: ['#9aa8c4', '#d0d8e8', '#6b7a9a'], shape: 'ring', weight: 0.85 },
+  // Deliberately faint and slow: three hours of revision is about 150 kcal.
+  'MIND & DESK': { colours: ['#b0a8d0', '#ded8ee', '#8f86b8'], shape: 'dot', weight: 0.45 },
+}
+
+export function exerciseStyleFor(category: string | null | undefined): BurstStyle {
+  return (category && EXERCISE_STYLES[category]) || FALLBACK
+}
+
 export function styleFor(category: string | null | undefined): BurstStyle {
   return (category && BURST_STYLES[category]) || FALLBACK
 }

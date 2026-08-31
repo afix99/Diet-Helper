@@ -11,6 +11,8 @@ interface BurstDetail {
   food: Pick<Food, 'id' | 'category'> | null
   seed?: string
   scale?: number
+  /** Which palette to draw from; see BurstOptions in burst.ts. */
+  kind?: 'food' | 'exercise'
 }
 
 const EVENT = 'memey:burst'
@@ -32,7 +34,7 @@ export function burstAt(detail: BurstDetail): void {
 export function burstFrom(
   el: Element | null,
   food: Pick<Food, 'id' | 'category'> | null,
-  opts: { seed?: string; scale?: number } = {}
+  opts: { seed?: string; scale?: number; kind?: 'food' | 'exercise' } = {}
 ): void {
   if (!el) return
   const r = el.getBoundingClientRect()
@@ -94,8 +96,8 @@ export function BurstLayer() {
     }
 
     const onBurst = (e: Event) => {
-      const { x, y, food, seed, scale } = (e as CustomEvent<BurstDetail>).detail
-      const next = particlesFor(x, y, food, { seed, scale })
+      const { x, y, food, seed, scale, kind } = (e as CustomEvent<BurstDetail>).detail
+      const next = particlesFor(x, y, food, { seed, scale, kind })
       // Oldest go first past the cap, so a fast tapper gets the newest burst
       // whole rather than a thinned version of everything.
       particles.current = [...particles.current, ...next].slice(-MAX_PARTICLES)

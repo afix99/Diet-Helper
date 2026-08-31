@@ -16,7 +16,8 @@ import vendorsJson from '../../seed/vendors.json'
 import prepJson from '../../seed/prep.json'
 import methodologyJson from '../../seed/methodology.json'
 import supplementsJson from '../../seed/supplements.json'
-import type { Food, Recipe, Targets } from './types'
+import exercisesJson from '../../seed/exercises.json'
+import type { Exercise, Food, Recipe, Targets } from './types'
 
 type RawFood = {
   slug: string
@@ -90,6 +91,31 @@ export const RECIPES: Recipe[] = recipesJson.map((r) => ({
   steps: r.steps,
   chefsNote: r.chefsNote,
 }))
+
+/**
+ * The activity catalogue, bundled the same way the foods are.
+ *
+ * MET values come from the Compendium of Physical Activities (Ainsworth et al.,
+ * 2011). They are population means measured mostly on young lean adults, so any
+ * individual is easily 20-30% either side — which is why every screen that
+ * shows a burn calls it an estimate.
+ */
+export const EXERCISES: Exercise[] = (
+  exercisesJson as { slug: string; category: string; name: string; met: number; notes: string | null }[]
+).map((e) => ({
+  id: e.slug,
+  slug: e.slug,
+  category: e.category,
+  name: e.name,
+  met: e.met,
+  notes: e.notes,
+}))
+
+/** Catalogue order, preserved — gentlest groups are not first, movement is. */
+export const EXERCISE_CATEGORIES: string[] = EXERCISES.reduce<string[]>((acc, e) => {
+  if (!acc.includes(e.category)) acc.push(e.category)
+  return acc
+}, [])
 
 /** Workbook category order, preserved — it groups the way a shopper thinks. */
 export const FOOD_CATEGORIES: string[] = FOODS.reduce<string[]>((acc, f) => {

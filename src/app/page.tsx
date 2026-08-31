@@ -10,6 +10,7 @@ import { Icon } from '@/components/icons'
 import { QuickAdd } from '@/components/QuickAdd'
 import { MealSlotCard } from '@/components/MealSlotCard'
 import { MacroFateSheet } from '@/components/MacroFateSheet'
+import { ExerciseCard } from '@/components/ExerciseCard'
 import { UnderEatingCard } from '@/components/UnderEatingCard'
 import { WaterCard } from '@/components/WaterCard'
 import { BudgetRing, Card, MacroBar, PageHeader, StatusPill } from '@/components/ui'
@@ -20,6 +21,7 @@ import { targetRisk } from '@/lib/targets'
 import type { MacroKey } from '@/lib/macroFate'
 import {
   badgesFor,
+  burnedOn,
   dayTotals,
   entriesBySlot,
   latestWeight,
@@ -58,7 +60,18 @@ export default function TodayPage() {
     () => targetRisk(data.profile, data.targets.kcal, latestWeight(data)),
     [data]
   )
-  const band = statusBand(totals.kcal, data.targets.kcal)
+
+  /*
+   * Exercise raises the allowance rather than subtracting from what you ate.
+   * Both directions produce the same remaining number, but only this one says
+   * the true thing: after training you need *more* food, not less credit for
+   * the food you already had. The sub-line under the ratio keeps the two parts
+   * separate so the raise is never mistaken for a moved goalpost — and the band
+   * is computed from the same figure, so the pill cannot contradict the ring.
+   */
+  const burned = useMemo(() => burnedOn(data, date), [data, date])
+  const allowance = data.targets.kcal + burned
+  const band = statusBand(totals.kcal, allowance)
   /*
    * A target being reached is the one moment on this screen worth marking, so
    * it gets a glow and a cue. Once each, per target, per day: the whole value
@@ -138,7 +151,16 @@ export default function TodayPage() {
               className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-44 w-44 -translate-x-1/2 -translate-y-1/2 animate-badge-glow rounded-full bg-avocado/40"
             />
           )}
-          <BudgetRing consumed={totals.kcal} target={data.targets.kcal} band={band} />
+          <BudgetRing
+            consumed={totals.kcal}
+            target={allowance}
+            band={band}
+            note={
+              burned > 0
+                ? `${data.targets.kcal.toLocaleString('en-GB')} target + ${burned.toLocaleString('en-GB')} exercise`
+                : undefined
+            }
+          />
         </div>
         <div className="mt-3 flex items-center justify-center gap-2">
           <StatusPill band={band} />
@@ -242,6 +264,8 @@ export default function TodayPage() {
       <UnderEatingCard date={date} />
 
       <WaterCard date={date} />
+
+      <ExerciseCard date={date} />
 
       {/* Buried inside the picker, nobody found this. It is the fastest way to
           log, so it belongs on the front screen. */}

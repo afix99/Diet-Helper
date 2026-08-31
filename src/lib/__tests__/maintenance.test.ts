@@ -49,6 +49,7 @@ const days: DayRecord[] = Array.from({ length: 56 }, (_, i) => ({
   kcal: 1700,
   protein: 90,
   fibre: 20,
+  burned: 0,
   salmonMeals: 0,
 }))
 

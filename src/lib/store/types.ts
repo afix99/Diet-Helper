@@ -1,5 +1,5 @@
 import type { PresetId } from '../targets'
-import type { Food, LogEntry, Profile, Targets, WeightLog } from '../types'
+import type { ActivityLog, Food, LogEntry, Profile, Targets, WeightLog } from '../types'
 
 export interface ShoppingItem {
   id: string
@@ -17,6 +17,8 @@ export interface AppData {
   profile: Profile
   targets: Targets
   entries: LogEntry[]
+  /** Logged exercise and mental work, which raises the day's allowance. */
+  activities: ActivityLog[]
   weights: WeightLog[]
   customFoods: Food[]
   shopping: ShoppingItem[]

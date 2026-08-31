@@ -41,6 +41,7 @@ export function UnderEatingCard({ date }: { date: string }) {
           <h2 className="text-secondary font-bold">That&rsquo;s very little food</h2>
           <p className="mt-1 text-tertiary leading-relaxed text-muted">
             {when} came in under {check.floor.toLocaleString('en-GB')} kcal
+            {check.exerciseCounted ? ' once training was taken off' : ''}
             {check.restingKcal
               ? ` — below the ${check.restingKcal.toLocaleString('en-GB')} you burn just being alive`
               : ''}

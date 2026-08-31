@@ -11,6 +11,10 @@
  *   opened, not that nothing was eaten.
  * - **The window is recent.** Two bad days last month are history; two in the
  *   last week are a pattern worth mentioning.
+ * - **Exercise is subtracted.** Eating 1,300 and burning 700 leaves 600, and
+ *   that is precisely the case this check exists for. Comparing the gross
+ *   figure against the floor would have stayed quiet through exactly the days
+ *   that matter most.
  *
  * It cannot distinguish under-eating from under-logging, so the copy it drives
  * says so rather than accusing anyone.
@@ -30,6 +34,16 @@ export interface UnderEatingProfile {
   sex: Sex
 }
 
+/**
+ * What a day actually left the body, once logged activity is taken off.
+ *
+ * Can go negative, and is allowed to: a day that nets below zero is a real
+ * thing a diary can contain and rounding it up to zero would hide it.
+ */
+export function netIntake(day: Pick<DayRecord, 'kcal' | 'burned'>): number {
+  return day.kcal - day.burned
+}
+
 export interface UnderEatingResult {
   /** True once enough recent completed days fall below the floor. */
   triggered: boolean
@@ -42,6 +56,8 @@ export interface UnderEatingResult {
    * the floor. Lets the copy say "below even what you burn asleep".
    */
   restingKcal: number | null
+  /** True when exercise is part of why these days came in low. */
+  exerciseCounted: boolean
 }
 
 export function underEating(
@@ -62,12 +78,15 @@ export function underEating(
     .filter((d) => d.date < today) // completed days only
     .slice(-WINDOW_DAYS)
 
-  const lowDays = recent.filter((d) => d.kcal > 0 && d.kcal < MIN_DAILY_KCAL)
+  // `kcal > 0` still gates on something having been logged; the comparison
+  // itself is against what was left after training.
+  const lowDays = recent.filter((d) => d.kcal > 0 && netIntake(d) < MIN_DAILY_KCAL)
 
   return {
     triggered: lowDays.length >= MIN_LOW_DAYS,
     lowDays,
     floor: MIN_DAILY_KCAL,
     restingKcal: basal !== null && basal > MIN_DAILY_KCAL ? basal : null,
+    exerciseCounted: lowDays.some((d) => d.burned > 0),
   }
 }

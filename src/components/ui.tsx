@@ -245,13 +245,19 @@ export function BudgetRing({
   consumed,
   target,
   band,
-  /** Shown under the ratio when the target itself is below the daily floor. */
-  floorNote,
+  /**
+   * Breaks a raised allowance back into the target you set plus what exercise
+   * added, so a bigger ring never arrives unexplained.
+   *
+   * Rendered *below* the ring rather than appended to the ratio: inside the
+   * 176px box it wrapped onto a second line and ran straight through the arc.
+   */
+  note,
 }: {
   consumed: number
   target: number
   band: StatusBand
-  floorNote?: string
+  note?: string
 }) {
   // The headline figure counts rather than snapping, so a change is legible.
   const shown = useCountUp(consumed)
@@ -303,7 +309,7 @@ export function BudgetRing({
     />
   )
 
-  return (
+  const ring = (
     <div
       key={pulse}
       className={`relative mx-auto ${pulse > 0 ? 'animate-ring-pulse' : ''}`}
@@ -347,10 +353,18 @@ export function BudgetRing({
           {over ? 'kcal over' : 'kcal left'}
         </span>
         <span className="mt-0.5 text-caption text-faint tabular-nums">
-          {Math.round(shown)} / {target}
-          {floorNote ? ` ${floorNote}` : ''}
+          {Math.round(shown).toLocaleString('en-GB')} / {target.toLocaleString('en-GB')}
         </span>
       </div>
+    </div>
+  )
+
+  if (!note) return ring
+
+  return (
+    <div>
+      {ring}
+      <p className="mt-2 text-center text-caption text-faint tabular-nums">{note}</p>
     </div>
   )
 }

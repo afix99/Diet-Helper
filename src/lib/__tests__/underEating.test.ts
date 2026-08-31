@@ -2,11 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { MIN_LOW_DAYS, underEating } from '../underEating'
 import type { DayRecord } from '../nutrition'
 
-const day = (date: string, kcal: number): DayRecord => ({
+const day = (date: string, kcal: number, burned = 0): DayRecord => ({
   date,
   kcal,
   protein: 0,
   fibre: 0,
+  burned,
   salmonMeals: 0,
 })
 
@@ -69,5 +70,40 @@ describe('underEating', () => {
     // A small profile whose BMR sits under the floor: the floor is the story.
     const small = { startWeightKg: 44, heightCm: 147, age: 70, sex: 'female' as const }
     expect(underEating([], small, TODAY).restingKcal).toBeNull()
+  })
+})
+
+describe('exercise counts against the floor', () => {
+  const profile = { startWeightKg: 62, heightCm: 165, age: 28, sex: 'female' as const }
+
+  it('catches a day that only goes under once training is subtracted', () => {
+    // 1,300 eaten looks fine and is not: 700 kcal of it went into a workout.
+    const days = [day('2026-08-27', 1300, 700), day('2026-08-28', 1350, 700)]
+    const gross = days.map((d) => ({ ...d, burned: 0 }))
+
+    expect(underEating(gross, profile, '2026-08-29').triggered).toBe(false)
+
+    const net = underEating(days, profile, '2026-08-29')
+    expect(net.triggered).toBe(true)
+    expect(net.lowDays).toHaveLength(2)
+    expect(net.exerciseCounted).toBe(true)
+  })
+
+  it('leaves a well-fed training day alone', () => {
+    const days = [day('2026-08-27', 2200, 600), day('2026-08-28', 2100, 500)]
+    expect(underEating(days, profile, '2026-08-29').triggered).toBe(false)
+  })
+
+  it('does not claim exercise when there was none', () => {
+    const days = [day('2026-08-27', 900), day('2026-08-28', 950)]
+    const result = underEating(days, profile, '2026-08-29')
+    expect(result.triggered).toBe(true)
+    expect(result.exerciseCounted).toBe(false)
+  })
+
+  it('still needs something logged before it says anything', () => {
+    // A blank day with a workout on it is not evidence of not eating.
+    const days = [day('2026-08-27', 0, 700), day('2026-08-28', 0, 700)]
+    expect(underEating(days, profile, '2026-08-29').triggered).toBe(false)
   })
 })

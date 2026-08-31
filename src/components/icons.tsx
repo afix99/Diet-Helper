@@ -28,6 +28,7 @@ export type IconName =
   | 'arrowDown'
   | 'tilde'
   | 'dash'
+  | 'activity'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   // A bowl with steam — the app's own mark, matching the launcher icon.
@@ -117,6 +118,13 @@ const PATHS: Record<IconName, React.ReactNode> = {
   arrowUp: <path d="M12 19V5.5M6 11.5 12 5.5l6 6" />,
   arrowDown: <path d="M12 5v13.5M6 12.5l6 6 6-6" />,
   tilde: <path d="M4 13c2.4-4 4.6-4 7 0s4.6 4 7 0" />,
+  // A dumbbell, drawn end-on: two plates, a bar, and the collars.
+  activity: (
+    <>
+      <path d="M4.75 9.25v5.5M7.75 7.5v9M16.25 7.5v9M19.25 9.25v5.5" />
+      <path d="M7.75 12h8.5" />
+    </>
+  ),
   dash: <path d="M6 12h12" />,
 }
 

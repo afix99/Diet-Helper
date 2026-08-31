@@ -84,6 +84,37 @@ export interface LogEntry {
   macros: Macros
 }
 
+/**
+ * One row of the activity catalogue.
+ *
+ * `met` is the Compendium of Physical Activities figure — *total* energy as a
+ * multiple of rest, which is why nothing here can be multiplied straight into a
+ * calorie budget. See `burnFor` in `exercise.ts`.
+ */
+export interface Exercise {
+  id: string
+  slug: string
+  category: string
+  name: string
+  met: number
+  notes: string | null
+}
+
+/** One logged bout of activity. */
+export interface ActivityLog {
+  id: string
+  date: string
+  exerciseId: string | null
+  customName: string | null
+  minutes: number
+  /**
+   * Snapshotted at the moment it was logged, for the same reason
+   * `LogEntry.macros` is: last month's workout should not silently re-price
+   * itself when you weigh in or when a MET value is corrected.
+   */
+  kcal: number
+}
+
 export interface Targets extends Macros {
   waterMl: number
 }

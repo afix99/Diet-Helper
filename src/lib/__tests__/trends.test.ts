@@ -41,12 +41,13 @@ const weigh = (date: string, weightKg: number): WeightLog => ({
 })
 
 /** `n` completed days ending yesterday, each logged at `kcal`. */
-const daysOf = (n: number, kcal: number): DayRecord[] =>
+const daysOf = (n: number, kcal: number, burned = 0): DayRecord[] =>
   Array.from({ length: n }, (_, i) => ({
     date: addDays(TODAY, -(n - i)),
     kcal,
     protein: 100,
     fibre: 25,
+    burned,
     salmonMeals: 0,
   }))
 
@@ -197,5 +198,38 @@ describe('trends: the weekly buckets', () => {
     for (const w of t.weeks) {
       if (w.avgKcal !== null) expect(w.avgKcal).toBe(1700)
     }
+  })
+})
+
+describe('logged exercise sits on the expenditure side', () => {
+  const weighIns = [
+    weigh('2026-08-01', 62),
+    weigh('2026-08-15', 61.4),
+    weigh('2026-08-29', 60.8),
+  ]
+  const run = (days: DayRecord[]) =>
+    trends({ days, weights: weighIns, targets, profile, goalWeightKg: 55, today: TODAY })
+
+  it('widens the deficit the diary claims, and leaves intake alone', () => {
+    const plain = run(daysOf(20, 1600))
+    const trained = run(daysOf(20, 1600, 300))
+
+    expect(plain.ready && trained.ready).toBe(true)
+    // Intake is what you ate. Exercise does not un-eat it.
+    expect(trained.avgIntakeKcal).toBe(plain.avgIntakeKcal)
+    expect(trained.avgBurnedKcal).toBe(300)
+    expect(trained.loggedDeficitKcal).toBe((plain.loggedDeficitKcal ?? 0) + 300)
+  })
+
+  it('moves the gap by the same amount, and only that', () => {
+    const plain = run(daysOf(20, 1600))
+    const trained = run(daysOf(20, 1600, 300))
+    // The scale has not changed, so the whole difference is the burn.
+    expect(trained.impliedDeficitKcal).toBe(plain.impliedDeficitKcal)
+    expect(trained.gapKcal).toBe((plain.gapKcal ?? 0) - 300)
+  })
+
+  it('reports zero when nothing was logged', () => {
+    expect(run(daysOf(20, 1600)).avgBurnedKcal).toBe(0)
   })
 })

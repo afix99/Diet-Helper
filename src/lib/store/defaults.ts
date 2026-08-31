@@ -45,6 +45,7 @@ export function defaultData(): AppData {
     profile: defaultProfile(),
     targets: { ...DEFAULT_TARGETS },
     entries: [],
+    activities: [],
     weights: [],
     customFoods: [],
     shopping: defaultShopping(),
