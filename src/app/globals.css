@@ -3,6 +3,25 @@
 @tailwind utilities;
 
 /*
+ * Nothing decorative may ever widen the page.
+ *
+ * This is a structural guard, not a style. Twice now an absolutely positioned
+ * flourish has escaped past the right edge, and the consequence is not a stray
+ * pixel: the browser grows the layout viewport to contain it, so `100%` stops
+ * meaning "the screen", every card comes out narrower than the phone, and the
+ * whole app sits off-centre with dead space down one side. The bug is invisible
+ * on the element that causes it and obvious everywhere else.
+ *
+ * `clip` rather than `hidden` on purpose. `hidden` would make the viewport a
+ * scroll container in both axes and break every `position: sticky` header in
+ * the app; `clip` refuses the overflow without creating one. The y axis is left
+ * alone, so the page still scrolls normally.
+ */
+html {
+  overflow-x: clip;
+}
+
+/*
  * iOS 26 surfaces with a warm pink cast. Pink stays the accent; the chrome
  * moves toward system greys so the app reads native without going cold.
  *

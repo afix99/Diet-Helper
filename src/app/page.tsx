@@ -145,11 +145,24 @@ export default function TodayPage() {
       <Card className="mb-4">
         <div className="relative">
           {glow > 0 && (
+            /*
+              Centred by the grid, not by a transform.
+              `-translate-x-1/2 -translate-y-1/2` used to do this job, and
+              `badge-glow` animates `transform` — so the moment the animation
+              started it overwrote the centring, and the glow slid half its own
+              width to the right, off the screen edge and out past the document.
+              A grid parent centres it with no transform of its own, leaving the
+              whole transform channel to the animation.
+            */
             <span
-              key={glow}
               aria-hidden
-              className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-44 w-44 -translate-x-1/2 -translate-y-1/2 animate-badge-glow rounded-full bg-avocado/40"
-            />
+              className="pointer-events-none absolute inset-0 -z-10 grid place-items-center"
+            >
+              <span
+                key={glow}
+                className="h-40 w-40 animate-badge-glow rounded-full bg-avocado/40"
+              />
+            </span>
           )}
           <BudgetRing
             consumed={totals.kcal}

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from './ui'
-import { Icon } from './icons'
+import { Icon, SLOT_ICONS } from './icons'
 import { useLogging } from '@/lib/logging'
 import { allFoods, entryMacros, entryName } from '@/lib/selectors'
 import { sound } from '@/lib/sound'
@@ -106,6 +106,12 @@ export function MealSlotCard({
           data-slot={slot}
           className="tap-row flex w-full items-center gap-2 px-4 py-3 text-left"
         >
+          <Icon
+            name={SLOT_ICONS[slot]}
+            size={17}
+            strokeWidth={1.9}
+            className={`shrink-0 ${slotKcal > 0 ? 'text-primary-ink' : 'text-faint'}`}
+          />
           <span className="shrink-0 text-secondary font-bold">{label.label}</span>
           <span className="min-w-0 flex-1 truncate text-tertiary text-faint">{summary}</span>
           <span className="shrink-0 text-tertiary tabular-nums text-muted">
@@ -124,9 +130,17 @@ export function MealSlotCard({
         onClick={onToggle}
         aria-expanded
         data-slot={slot}
-        className="mb-2 flex w-full items-baseline justify-between text-left"
+        className="mb-2 flex w-full items-center justify-between gap-2 text-left"
       >
-        <h2 className="text-secondary font-bold">{label.label}</h2>
+        <h2 className="flex items-center gap-2 text-secondary font-bold">
+          <Icon
+            name={SLOT_ICONS[slot]}
+            size={18}
+            strokeWidth={1.9}
+            className={slotKcal > 0 ? 'text-primary-ink' : 'text-faint'}
+          />
+          {label.label}
+        </h2>
         <span className="text-tertiary tabular-nums text-faint">
           {slotKcal > 0 ? `${Math.round(slotKcal)} kcal` : label.time}
         </span>

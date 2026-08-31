@@ -46,7 +46,15 @@ export function ExerciseCard({ date }: { date: string }) {
     <>
       <Card className="mb-4">
         <div className="mb-2 flex items-baseline justify-between gap-2">
-          <h2 className="text-secondary font-bold">Exercise</h2>
+          <h2 className="flex items-center gap-2 text-secondary font-bold">
+            <Icon
+              name="activity"
+              size={18}
+              strokeWidth={1.9}
+              className={burned > 0 ? 'text-primary-ink' : 'text-faint'}
+            />
+            Exercise
+          </h2>
           <span className="text-tertiary tabular-nums text-muted">
             {burned > 0 ? (
               <>

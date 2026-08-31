@@ -2,6 +2,7 @@
 
 import { Card } from './ui'
 import { PressButton } from './PressButton'
+import { Icon } from './icons'
 import { sound } from '@/lib/sound'
 import { burstFrom } from './BurstLayer'
 import { useData } from '@/lib/store/provider'
@@ -37,7 +38,16 @@ export function WaterCard({ date }: { date: string }) {
   return (
     <Card className="mb-4">
       <div className="mb-2 flex items-baseline justify-between">
-        <h2 className="text-secondary font-bold">Water</h2>
+        <h2 className="flex items-center gap-2 text-secondary font-bold">
+          <Icon
+            name="droplet"
+            size={18}
+            strokeWidth={1.9}
+            fill={drunk > 0 ? 'currentColor' : 'none'}
+            className="text-ocean"
+          />
+          Water
+        </h2>
         <span className="text-tertiary tabular-nums text-muted">
           {drunk} <span className="text-faint">/ {target} ml</span>
         </span>
@@ -48,13 +58,19 @@ export function WaterCard({ date }: { date: string }) {
         role="img"
         aria-label={`${glasses} of ${targetGlasses} glasses`}
       >
+        {/*
+          One glyph, painted or not. Abstract tiles said "eight of something";
+          a glass says which eight, and the filled ones read as drunk at a
+          glance rather than by counting.
+        */}
         {Array.from({ length: targetGlasses }, (_, i) => (
-          <span
+          <Icon
             key={i}
-            aria-hidden
-            className={`h-6 w-4 rounded-b-md rounded-t-sm border transition ${
-              i < glasses ? 'border-ocean bg-ocean' : 'border-line bg-raised'
-            }`}
+            name="glass"
+            size={22}
+            strokeWidth={1.6}
+            fill={i < glasses ? 'currentColor' : 'none'}
+            className={`transition-colors ${i < glasses ? 'text-ocean' : 'text-faint/45'}`}
           />
         ))}
       </div>

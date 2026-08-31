@@ -7,6 +7,8 @@
  * Apple's artwork, which isn't ours to ship.
  */
 
+import type { MealSlot } from '@/lib/types'
+
 export type IconName =
   | 'today'
   | 'calendar'
@@ -29,6 +31,14 @@ export type IconName =
   | 'tilde'
   | 'dash'
   | 'activity'
+  | 'droplet'
+  | 'sunrise'
+  | 'sun'
+  | 'moon'
+  | 'apple'
+  | 'teacup'
+  | 'glass'
+  | 'star'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   // A bowl with steam — the app's own mark, matching the launcher icon.
@@ -118,12 +128,60 @@ const PATHS: Record<IconName, React.ReactNode> = {
   arrowUp: <path d="M12 19V5.5M6 11.5 12 5.5l6 6" />,
   arrowDown: <path d="M12 5v13.5M6 12.5l6 6 6-6" />,
   tilde: <path d="M4 13c2.4-4 4.6-4 7 0s4.6 4 7 0" />,
-  // A dumbbell, drawn end-on: two plates, a bar, and the collars.
+  /*
+   * A dumbbell. The first attempt drew all four plates as bare vertical
+   * strokes, which at 17px collapsed into a row of tick marks — legible at 24
+   * and meaningless at the size it is actually used. Solid outer plates give it
+   * a silhouette that survives the shrink.
+   */
   activity: (
     <>
-      <path d="M4.75 9.25v5.5M7.75 7.5v9M16.25 7.5v9M19.25 9.25v5.5" />
-      <path d="M7.75 12h8.5" />
+      <rect x="2.6" y="9.4" width="4" height="5.2" rx="1.5" />
+      <rect x="17.4" y="9.4" width="4" height="5.2" rx="1.5" />
+      <path d="M6.6 12h10.8" />
+      <path d="M9.1 9.9v4.2M14.9 9.9v4.2" />
     </>
+  ),
+  droplet: <path d="M12 3.4c3.3 3.7 5.3 6.4 5.3 8.9a5.3 5.3 0 0 1-10.6 0c0-2.5 2-5.2 5.3-8.9z" />,
+  /* Breakfast: a sun still half below the horizon. */
+  /* Three rays, not five: at 17px the side rays closed the gap to the arc and
+     the whole thing read as a smudge. */
+  sunrise: (
+    <>
+      <path d="M4.25 18.75h15.5" />
+      <path d="M8.2 18.75a3.8 3.8 0 0 1 7.6 0" />
+      <path d="M12 4.4v2.6M6.1 7.5l1.8 1.8M17.9 7.5l-1.8 1.8" />
+    </>
+  ),
+  /* Lunch: the sun at its highest. */
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="3.9" />
+      <path d="M12 3.1v1.9M12 19v1.9M3.1 12h1.9M19 12h1.9M5.8 5.8l1.35 1.35M16.85 16.85l1.35 1.35M18.2 5.8l-1.35 1.35M7.15 16.85 5.8 18.2" />
+    </>
+  ),
+  /* Dinner and the evening slot: a crescent, drawn as one closed path. */
+  moon: <path d="M20.1 14.5A8.3 8.3 0 0 1 9.5 3.9a8.3 8.3 0 1 0 10.6 10.6z" />,
+  /* Snacks: an apple with its stem and leaf. */
+  apple: (
+    <>
+      <path d="M12 8.6c-1-.9-2.2-1.3-3.3-1.1C6.6 7.8 5.2 9.6 5.2 12.2c0 3.5 2.5 7.1 4.4 7.1.9 0 1.5-.4 2.4-.4s1.5.4 2.4.4c1.9 0 4.4-3.6 4.4-7.1 0-2.6-1.4-4.4-3.5-4.7-1.1-.2-2.3.2-3.3 1.1z" />
+      <path d="M12 8.6V6.2c0-1.1.9-2 2-2.1" />
+    </>
+  ),
+  /* The morning snack and the evening cup: a mug with a handle. */
+  teacup: (
+    <>
+      <path d="M4.75 8.25h11.5v5a4.5 4.5 0 0 1-4.5 4.5h-2.5a4.5 4.5 0 0 1-4.5-4.5z" />
+      <path d="M16.25 10.25h1.25a2.5 2.5 0 0 1 0 5h-1.25" />
+      <path d="M4.75 20.5h11.5" />
+    </>
+  ),
+  /* A drinking glass, used at small sizes to show one glass of water. */
+  glass: <path d="M6.75 4.25h10.5l-1.2 15.5H7.95z" />,
+  /* Late evening: past the moon, when the lights are off. */
+  star: (
+    <path d="m12 4 2.35 4.76 5.25.76-3.8 3.7.9 5.23L12 15.98l-4.7 2.47.9-5.23-3.8-3.7 5.25-.76z" />
   ),
   dash: <path d="M6 12h12" />,
 }
@@ -133,11 +191,19 @@ export function Icon({
   size = 24,
   className = '',
   strokeWidth = 1.75,
+  /**
+   * Paints the shape as well as outlining it. `currentColor` lets one glyph
+   * serve as both the empty and the filled state of the same thing — a glass
+   * of water, a star — without shipping a second path that could drift from
+   * the first.
+   */
+  fill = 'none',
 }: {
   name: IconName
   size?: number
   className?: string
   strokeWidth?: number
+  fill?: string
 }) {
   return (
     <svg
@@ -146,7 +212,7 @@ export function Icon({
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke="currentColor"
       strokeWidth={strokeWidth}
       strokeLinecap="round"
@@ -156,4 +222,21 @@ export function Icon({
       {PATHS[name]}
     </svg>
   )
+}
+
+/**
+ * A glyph per meal slot, so the six cards can be told apart at a glance rather
+ * than by reading six labels in the same weight.
+ *
+ * They run the day: sunrise, a morning cup, the sun overhead, an afternoon
+ * apple, the moon for dinner, a star for the late slot. Every one is distinct —
+ * two slots sharing a glyph would defeat the point of having them.
+ */
+export const SLOT_ICONS: Record<MealSlot, IconName> = {
+  breakfast: 'sunrise',
+  morning_snack: 'teacup',
+  lunch: 'sun',
+  afternoon_snack: 'apple',
+  dinner: 'moon',
+  evening: 'star',
 }
