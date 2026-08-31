@@ -48,6 +48,14 @@ export type RigPart =
   | 'eyeL'
   | 'eyeR'
   | 'whiskers'
+  /**
+   * The head-slot accessory, hung off the head with its own lag.
+   *
+   * A hat that moved in perfect lockstep with the skull reads as painted on. A
+   * beat of delay and a small overshoot give it weight, which is the whole
+   * point of hanging it on a joint instead of drawing it into the head.
+   */
+  | 'hat'
   | 'tailBase'
   | 'tailTip'
   | 'shadow'
@@ -64,6 +72,7 @@ export const RIG_PARTS: readonly RigPart[] = [
   'eyeL',
   'eyeR',
   'whiskers',
+  'hat',
   'tailBase',
   'tailTip',
   'shadow',
@@ -284,6 +293,19 @@ const wake: Timeline = {
       ],
     },
     {
+      // A beat behind the head, and it keeps rocking after the head has stopped.
+      part: 'hat',
+      delay: 130,
+      duration: 620,
+      easing: OVERSHOOT,
+      frames: [
+        { transform: 'rotate(9deg) translateY(2px)', offset: 0 },
+        { transform: 'rotate(-5deg) translateY(-1px)', offset: 0.48 },
+        { transform: 'rotate(2deg)', offset: 0.76 },
+        REST,
+      ],
+    },
+    {
       part: 'tailBase',
       delay: 180,
       duration: 520,
@@ -428,6 +450,28 @@ const grow: Timeline = {
         { transform: 'rotate(17deg)', offset: 0.16 },
         { transform: 'rotate(-9deg)', offset: 0.46 },
         { transform: 'rotate(4deg)', offset: 0.7 },
+        REST,
+      ],
+    },
+    {
+      /*
+       * The hat rides the leap a beat late in both directions: it lifts off the
+       * skull on the way up, then thumps back down and rocks itself still. The
+       * translate stays tiny — a hat that separated by more than a couple of
+       * pixels would look like it had come off.
+       */
+      part: 'hat',
+      delay: 200,
+      duration: 1220,
+      easing: 'linear',
+      frames: [
+        { transform: 'none', offset: 0 },
+        { transform: 'translateY(2px) rotate(3deg)', offset: 0.14 },
+        { transform: 'translateY(-4px) rotate(-11deg)', offset: 0.28, easing: SETTLE },
+        { transform: 'translateY(3px) rotate(10deg)', offset: 0.42, easing: ACCELERATE },
+        { transform: 'translateY(-1px) rotate(-6deg)', offset: 0.58, easing: SETTLE },
+        { transform: 'rotate(3deg)', offset: 0.74 },
+        { transform: 'rotate(-1deg)', offset: 0.88 },
         REST,
       ],
     },

@@ -6,7 +6,7 @@ import { RECIPES } from './catalogue'
 import { findFood, latestWeight } from './selectors'
 import { bodyWeightFor } from './exercise'
 import * as edits from './logEdits'
-import type { Exercise, Food, LogEntry, MealSlot } from './types'
+import type { AccessorySlot, Exercise, Food, LogEntry, MealSlot } from './types'
 
 /**
  * Mutations for the food log, shared by Today, Week and Recipes.
@@ -114,6 +114,24 @@ export function useLogging() {
     [update]
   )
 
+  const wearItem = useCallback(
+    (slot: AccessorySlot, id: string) => update((d) => edits.wearItem(d, slot, id)),
+    [update]
+  )
+  const removeItem = useCallback(
+    (slot: AccessorySlot) => update((d) => edits.removeItem(d, slot)),
+    [update]
+  )
+  const wearCostume = useCallback(
+    (costumeId: string) => update((d) => edits.wearCostume(d, costumeId)),
+    [update]
+  )
+  const takeOffCostume = useCallback(() => update((d) => edits.takeOffCostume(d)), [update])
+  const markUnlocksSeen = useCallback(
+    (ids: readonly string[]) => update((d) => edits.markUnlocksSeen(d, ids)),
+    [update]
+  )
+
   const resolveFood = useCallback((id: string) => findFood(data, id), [data])
 
   return {
@@ -132,6 +150,11 @@ export function useLogging() {
     sendPetHome,
     callPetOut,
     markPetStageSeen,
+    wearItem,
+    removeItem,
+    wearCostume,
+    takeOffCostume,
+    markUnlocksSeen,
     resolveFood,
   }
 }

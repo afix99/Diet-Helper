@@ -10,9 +10,10 @@ import { usePresence } from '@/hooks/usePresence'
 import { flourishesOn } from '@/lib/motion'
 import { sound } from '@/lib/sound'
 import { nextStage, poseFor, stageFor, statusLine } from '@/lib/pet'
+import { freshUnlocks, unlockedIds, wornPieces } from '@/lib/petWardrobe'
 import { play, stop, type Rig } from '@/lib/petMotion'
 import { useLogging } from '@/lib/logging'
-import { entriesFor, streakFor } from '@/lib/selectors'
+import { badgesFor, entriesFor, streakFor } from '@/lib/selectors'
 import { useData } from '@/lib/store/provider'
 
 /**
@@ -46,6 +47,11 @@ export function PetCard({ date }: { date: string }) {
   const stage = stageFor(run.best)
   const pose = poseFor(loggedToday)
   const upcoming = nextStage(run.best)
+
+  const badges = useMemo(() => badgesFor(data, date, run.best), [data, date, run.best])
+  const unlocked = useMemo(() => unlockedIds(badges, stage.index), [badges, stage.index])
+  const worn = useMemo(() => wornPieces(data.pet, unlocked), [data.pet, unlocked])
+  const fresh = freshUnlocks(data.pet, unlocked).length
 
   /** The rig, plus the two parts that live in the card rather than in the cat. */
   const rigOf = (): Rig => ({ ...(cat.current?.rig() ?? {}), glow: glow.current, count: count.current })
@@ -132,7 +138,11 @@ export function PetCard({ date }: { date: string }) {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            aria-label={`${data.pet.name}, ${stage.name}. Open details`}
+            aria-label={
+              fresh > 0
+                ? `${data.pet.name}, ${stage.name}. Open details — new in the wardrobe`
+                : `${data.pet.name}, ${stage.name}. Open details`
+            }
             data-pet
             className="tap relative shrink-0"
           >
@@ -149,8 +159,16 @@ export function PetCard({ date }: { date: string }) {
               style={{ opacity: 0 }}
             />
             <span ref={shell} className="block">
-              <PetCat ref={cat} stage={stage} pose={pose} size={92} />
+              <PetCat ref={cat} stage={stage} pose={pose} size={92} worn={worn} />
             </span>
+            {/* One dot for "there is something new in the wardrobe". A count
+                would turn a wardrobe into an inbox. */}
+            {fresh > 0 && (
+              <span
+                aria-hidden
+                className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-surface"
+              />
+            )}
           </button>
 
           <div className="min-w-0 flex-1">

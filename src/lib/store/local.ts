@@ -1,4 +1,4 @@
-import { defaultData } from './defaults'
+import { defaultData, hydrate } from './defaults'
 import type { AppData, DataStore } from './types'
 
 export const LOCAL_KEY = 'memey-diet-planner:v1'
@@ -50,7 +50,7 @@ export class LocalStore implements DataStore {
       const raw = window.localStorage.getItem(KEY)
       if (!raw) return defaultData()
       // Merge over defaults so data saved by an older build still loads.
-      return { ...defaultData(), ...(JSON.parse(raw) as Partial<AppData>) } as AppData
+      return hydrate({ ...defaultData(), ...(JSON.parse(raw) as Partial<AppData>) } as AppData)
     } catch {
       return defaultData()
     }

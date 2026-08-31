@@ -1,13 +1,15 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Sheet } from './ui'
 import { Icon } from './icons'
 import { PressButton } from './PressButton'
 import { PetCat } from './PetCat'
+import { PetWardrobe } from './PetWardrobe'
 import { MAX_PET_NAME, PET_STAGES, nextStage, poseFor, stageFor } from '@/lib/pet'
+import { unlockedIds, wornPieces } from '@/lib/petWardrobe'
 import { useLogging } from '@/lib/logging'
-import { entriesFor, streakFor } from '@/lib/selectors'
+import { badgesFor, entriesFor, streakFor } from '@/lib/selectors'
 import { useData } from '@/lib/store/provider'
 
 /**
@@ -28,13 +30,23 @@ export function PetSheet({
   leaving?: boolean
 }) {
   const { data } = useData()
-  const { renamePet } = useLogging()
+  const { renamePet, markUnlocksSeen } = useLogging()
   const run = useMemo(() => streakFor(data, date), [data, date])
   const loggedToday = useMemo(() => entriesFor(data, date).length > 0, [data, date])
   const stage = stageFor(run.best)
   const pose = poseFor(loggedToday)
   const upcoming = nextStage(run.best)
   const [name, setName] = useState(data.pet.name)
+
+  const badges = useMemo(() => badgesFor(data, date, run.best), [data, date, run.best])
+  const unlocked = useMemo(() => unlockedIds(badges, stage.index), [badges, stage.index])
+  const worn = useMemo(() => wornPieces(data.pet, unlocked), [data.pet, unlocked])
+
+  /* Opening the sheet *is* looking at the wardrobe, so the new-item dot clears
+     here rather than on a separate acknowledgement the user has to find. */
+  useEffect(() => {
+    markUnlocksSeen([...unlocked])
+  }, [unlocked, markUnlocksSeen])
 
   return (
     <Sheet onClose={onClose} leaving={leaving} labelledBy="pet-sheet-title">
@@ -53,7 +65,7 @@ export function PetSheet({
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
         <div className="mb-3 grid place-items-center rounded-card bg-raised py-4">
-          <PetCat stage={stage} pose={pose} size={132} />
+          <PetCat stage={stage} pose={pose} size={132} worn={worn} />
           <p className="mt-1 text-secondary font-bold">{stage.name}</p>
           <p className="text-tertiary text-faint">
             Best run: {run.best} {run.best === 1 ? 'day' : 'days'}
@@ -109,6 +121,8 @@ export function PetSheet({
             )
           })}
         </ul>
+
+        <PetWardrobe date={date} />
 
         {/*
           Said plainly, because the whole design rests on it and a user who

@@ -46,8 +46,15 @@ export type PetPart =
   | 'whiskers'
   | 'tail'
   | 'markings'
-  | 'collar'
+  /**
+   * Blush on the cheeks. Took the collar's place at stage 5 when the collar
+   * became a wardrobe accessory — a permanent collar would have occupied the
+   * neck slot forever and made every other neck item undrawable.
+   */
+  | 'cheeks'
   | 'ruff'
+  /** The streak flame above the head, at the last stage. */
+  | 'flame'
 
 /**
  * Curled, or sitting up. Two states and no third, because a third would have to
@@ -100,14 +107,24 @@ export const PET_STAGES: readonly PetStage[] = [
     minStreak: 30,
     name: 'Companion',
     scale: 1,
-    parts: ['body', 'ears', 'eyes', 'whiskers', 'tail', 'markings', 'collar'],
+    parts: ['body', 'ears', 'eyes', 'whiskers', 'tail', 'markings', 'cheeks'],
   },
   {
     index: 6,
     minStreak: 60,
     name: 'Old Friend',
     scale: 1,
-    parts: ['body', 'ears', 'eyes', 'whiskers', 'tail', 'markings', 'collar', 'ruff'],
+    parts: [
+      'body',
+      'ears',
+      'eyes',
+      'whiskers',
+      'tail',
+      'markings',
+      'cheeks',
+      'ruff',
+      'flame',
+    ],
   },
 ]
 

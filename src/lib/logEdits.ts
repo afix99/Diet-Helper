@@ -15,7 +15,16 @@
 import type { AppData } from './store/types'
 import { burnFor, clampMinutes } from './exercise'
 import { normalisePetName } from './pet'
-import type { ActivityLog, Exercise, Food, LogEntry, Macros, MealSlot, Recipe } from './types'
+import type {
+  AccessorySlot,
+  ActivityLog,
+  Exercise,
+  Food,
+  LogEntry,
+  Macros,
+  MealSlot,
+  Recipe,
+} from './types'
 
 /** Smallest loggable portion, and the step every serving is rounded to. */
 export const MIN_SERVINGS = 0.25
@@ -237,6 +246,50 @@ export function callPetOut(d: AppData): AppData {
 export function markPetStageSeen(d: AppData, stageIndex: number): AppData {
   if (stageIndex <= d.pet.seenStage) return d
   return { ...d, pet: { ...d.pet, seenStage: Math.max(d.pet.seenStage, stageIndex) } }
+}
+
+// --- The wardrobe -------------------------------------------------------------
+
+/**
+ * Wear one item in its slot.
+ *
+ * Takes any costume off, because a costume is a whole look — leaving it on
+ * while one of its slots was overridden would draw a chef with a snorkel and
+ * no way to explain where the apron went. What was worn underneath is left in
+ * `worn` untouched, so `takeOffCostume` can restore it.
+ */
+export function wearItem(d: AppData, slot: AccessorySlot, id: string): AppData {
+  return {
+    ...d,
+    pet: { ...d.pet, costume: null, worn: { ...d.pet.worn, [slot]: id } },
+  }
+}
+
+export function removeItem(d: AppData, slot: AccessorySlot): AppData {
+  return { ...d, pet: { ...d.pet, costume: null, worn: { ...d.pet.worn, [slot]: null } } }
+}
+
+/** Put a costume on. `worn` is deliberately not cleared — see `wearItem`. */
+export function wearCostume(d: AppData, costumeId: string): AppData {
+  return { ...d, pet: { ...d.pet, costume: costumeId } }
+}
+
+export function takeOffCostume(d: AppData): AppData {
+  return { ...d, pet: { ...d.pet, costume: null } }
+}
+
+/**
+ * Mark unlock ids as seen, so the "new" dot clears.
+ *
+ * Idempotent, and a union rather than a replacement: two wardrobe screens open
+ * at once must not be able to un-see something.
+ */
+export function markUnlocksSeen(d: AppData, ids: readonly string[]): AppData {
+  const seen = new Set(d.pet.seenUnlocks)
+  const before = seen.size
+  for (const id of ids) seen.add(id)
+  if (seen.size === before) return d
+  return { ...d, pet: { ...d.pet, seenUnlocks: [...seen] } }
 }
 
 export type { ActivityLog, LogEntry }

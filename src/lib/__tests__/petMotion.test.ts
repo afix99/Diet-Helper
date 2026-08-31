@@ -153,6 +153,30 @@ describe('the secondary parts lag the primary — this is the whole trick', () =
     expect(delay('earR')).toBeGreaterThan(delay('earL'))
   })
 
+  it('settles the hat after the head', () => {
+    // The one detail that sells a worn item as worn rather than painted on.
+    expect(delay('hat')).toBeGreaterThan(delay('head'))
+    const hat = trackFor(grow, 'hat')!
+    const head = trackFor(grow, 'head')!
+    // It also keeps moving after the head has stopped.
+    expect(hat.delay + hat.duration).toBeGreaterThan(head.delay + head.duration)
+  })
+
+  it('never lets the hat leave the skull by more than a couple of pixels', () => {
+    // More separation than this and it reads as the hat coming off.
+    for (const id of ['grow', 'wake'] as const) {
+      const hat = trackFor(TIMELINES[id], 'hat')
+      if (!hat) continue
+      const travel = Math.max(
+        ...hat.frames.map((f) => {
+          const m = /translateY\((-?[\d.]+)px\)/.exec(String(f.transform ?? ''))
+          return m ? Math.abs(Number(m[1])) : 0
+        })
+      )
+      expect(travel).toBeLessThanOrEqual(4)
+    }
+  })
+
   it('leaves the whiskers last of the body parts', () => {
     for (const part of ['body', 'head', 'earL', 'earR', 'tailBase', 'tailTip']) {
       expect(delay('whiskers')).toBeGreaterThan(delay(part))

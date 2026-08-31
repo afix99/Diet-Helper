@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { defaultData } from './defaults'
+import { defaultData, hydrate } from './defaults'
 import { hasRealContent, readLocalData } from './local'
 import type { AppData, DataStore } from './types'
 
@@ -66,12 +66,14 @@ export class SupabaseStore implements DataStore {
        * halfway, the only surviving record should not be the one we deleted.
        */
       const local = readLocalData()
-      const base = hasRealContent(local) ? { ...defaultData(), ...local } : defaultData()
+      const base = hydrate(
+        hasRealContent(local) ? ({ ...defaultData(), ...local } as AppData) : defaultData()
+      )
       const fresh = { ...base, profile: { ...base.profile, id: user.id } } as AppData
       await this.save(fresh)
       return fresh
     }
-    return { ...defaultData(), ...(data.data as Partial<AppData>) } as AppData
+    return hydrate({ ...defaultData(), ...(data.data as Partial<AppData>) } as AppData)
   }
 
   async save(data: AppData): Promise<void> {

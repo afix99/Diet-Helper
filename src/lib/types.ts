@@ -120,6 +120,13 @@ export interface ActivityLog {
  * what pose it holds — is derived from the diary, so this is only the part the
  * diary cannot know.
  */
+/**
+ * Where a wardrobe piece sits on the cat. Lives here rather than in
+ * petWardrobe.ts so that PetState can name it without the two files importing
+ * each other.
+ */
+export type AccessorySlot = 'head' | 'face' | 'neck' | 'body' | 'back'
+
 export interface PetState {
   name: string
   /** False while the cat is in its house and off the Today screen. */
@@ -130,6 +137,16 @@ export interface PetState {
    * celebrations in a row.
    */
   seenStage: number
+  /**
+   * One accessory per slot. Partial because an old diary has none, and because
+   * a slot the user has never touched is meaningfully different from one they
+   * emptied on purpose.
+   */
+  worn: Partial<Record<AccessorySlot, string | null>>
+  /** A costume overrides `worn` while it is on, without overwriting it. */
+  costume: string | null
+  /** Unlock ids already looked at, so a new item is marked once, not forever. */
+  seenUnlocks: string[]
 }
 
 export interface Targets extends Macros {

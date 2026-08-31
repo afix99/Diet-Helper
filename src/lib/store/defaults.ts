@@ -34,7 +34,27 @@ export function defaultProfile(): Profile {
  * once, at whatever stage the diary has already earned.
  */
 export function defaultPet(): PetState {
-  return { name: DEFAULT_PET_NAME, out: true, seenStage: -1 }
+  return {
+    name: DEFAULT_PET_NAME,
+    out: true,
+    seenStage: -1,
+    worn: {},
+    costume: null,
+    seenUnlocks: [],
+  }
+}
+
+/**
+ * Fill in pet fields an older save predates.
+ *
+ * The stored data is merged over the defaults one level deep, so a `pet`
+ * object written before the wardrobe existed replaces `defaultPet()` whole and
+ * arrives with no `worn`, `costume` or `seenUnlocks`. This is the backfill, and
+ * it is why the wardrobe needs no migration: it runs on every load, and is a
+ * no-op once the fields are there.
+ */
+export function hydrate(data: AppData): AppData {
+  return { ...data, pet: { ...defaultPet(), ...data.pet } }
 }
 
 export function defaultShopping(): ShoppingItem[] {
