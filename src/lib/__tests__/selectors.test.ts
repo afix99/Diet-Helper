@@ -1,5 +1,7 @@
+import { existsSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { badgesFor, dayRecords, entryName, streakFor } from '../selectors'
+import { FOODS, RECIPES } from '../catalogue'
 import { addDays, todayIso, weekOf } from '../dates'
 import { defaultData } from '../store/defaults'
 import type { AppData } from '../store/types'
@@ -153,5 +155,167 @@ describe('dayRecords', () => {
     const [record] = dayRecords(data, [today])
     expect(record.salmonMeals).toBe(1)
     expect(record.kcal).toBe(560)
+  })
+})
+
+describe('the whole-diary badges', () => {
+  const food = FOODS[0]
+  const other = FOODS[1]
+
+  const withEntries = (entries: LogEntry[], over: Partial<AppData> = {}): AppData => ({
+    ...defaultData(),
+    entries,
+    ...over,
+  })
+
+  const meal = (date: string, foodId: string | null, recipeId: string | null = null): LogEntry => ({
+    id: `${date}-${foodId ?? recipeId}`,
+    date,
+    slot: 'lunch',
+    foodId,
+    recipeId,
+    customName: null,
+    servings: 1,
+    notes: null,
+    macros: { kcal: 300, protein: 20, carbs: 30, fat: 10, fibre: 5 },
+  })
+
+  const badge = (data: AppData, id: string, today = '2026-08-30') =>
+    badgesFor(data, today).find((b) => b.id === id)!
+
+  it('offers eighteen badges, every one with artwork', () => {
+    const list = badgesFor(defaultData(), '2026-08-30')
+    expect(list).toHaveLength(18)
+    expect(new Set(list.map((b) => b.id)).size).toBe(18)
+    for (const b of list) {
+      expect(existsSync(`public/badges/${b.id}.png`)).toBe(true)
+      expect(existsSync(`public/badges/${b.id}-locked.png`)).toBe(true)
+    }
+  })
+
+  it('starts every badge locked on a fresh diary', () => {
+    expect(badgesFor(defaultData(), '2026-08-30').filter((b) => b.unlocked)).toHaveLength(0)
+  })
+
+  it('counts distinct logged days, not entries', () => {
+    // Three entries across two dates should read as two days, not three.
+    const entries = [
+      meal('2026-08-01', food.id),
+      { ...meal('2026-08-01', other.id), id: 'second' },
+      meal('2026-08-02', food.id),
+    ]
+    expect(badge(withEntries(entries), 'thirty_days').progress).toBeCloseTo(2 / 30, 5)
+  })
+
+  it('ignores days logged in the future', () => {
+    const entries = [meal('2026-08-29', food.id), meal('2026-09-20', other.id)]
+    expect(badge(withEntries(entries), 'thirty_days').progress).toBeCloseTo(1 / 30, 5)
+  })
+
+  /*
+   * The one badge for something that looks like failure. All-or-nothing
+   * collapse after a missed week is how a food diary usually dies.
+   */
+  it('unlocks Comeback only after a real gap', () => {
+    const steady = ['2026-08-20', '2026-08-21', '2026-08-22'].map((d) => meal(d, food.id))
+    expect(badge(withEntries(steady), 'comeback').unlocked).toBe(false)
+
+    const lapsed = [meal('2026-08-10', food.id), meal('2026-08-20', other.id)]
+    expect(badge(withEntries(lapsed), 'comeback').unlocked).toBe(true)
+  })
+
+  it('does not call a three-day gap a comeback', () => {
+    const entries = [meal('2026-08-20', food.id), meal('2026-08-23', other.id)]
+    expect(badge(withEntries(entries), 'comeback').unlocked).toBe(false)
+  })
+
+  it('counts distinct foods and food groups, not helpings', () => {
+    const twice = [meal('2026-08-20', food.id), meal('2026-08-21', food.id)]
+    expect(badge(withEntries(twice), 'explorer').progress).toBeCloseTo(1 / 25, 5)
+    expect(badge(withEntries(twice), 'well_rounded').progress).toBeGreaterThan(0)
+  })
+
+  it('counts recipes for Home Cook and not for Explorer', () => {
+    const entries = [meal('2026-08-20', null, RECIPES[0].id)]
+    expect(badge(withEntries(entries), 'home_cook').progress).toBeCloseTo(1 / 5, 5)
+    expect(badge(withEntries(entries), 'explorer').progress).toBe(0)
+  })
+
+  it('counts a hydrated day only when the target is actually met', () => {
+    const target = defaultData().targets.waterMl
+    const data = withEntries([], {
+      water: { '2026-08-20': target, '2026-08-21': target - 1, '2026-08-22': target + 500 },
+    })
+    // Two of the three days cleared it.
+    expect(badge(data, 'hydrated').progress).toBeCloseTo(2 / 5, 5)
+  })
+
+  it('extends the weight ladder without disturbing the earlier rungs', () => {
+    const data: AppData = {
+      ...defaultData(),
+      weights: [{ id: 'w', date: '2026-08-20', weightKg: defaultData().profile.startWeightKg - 5 }]
+        .map((w) => ({ ...w, waistCm: null, hipCm: null })),
+    }
+    expect(badge(data, 'down_1kg').unlocked).toBe(true)
+    expect(badge(data, 'down_3kg').unlocked).toBe(true)
+    expect(badge(data, 'down_5kg').unlocked).toBe(true)
+  })
+
+  /*
+   * The rule the whole set is held to: a badge may reward logging, consistency,
+   * variety, adequacy or coming back — never eating less.
+   */
+  /*
+   * The bug this pins: badgesFor used to scope the week badges to the current
+   * calendar week, so on a Monday morning with nothing logged yet the week held
+   * exactly one empty day — and First Step read as locked to someone on a
+   * nineteen-day streak. Badges are achievements; they do not expire.
+   */
+  it('keeps earned badges earned on a Monday morning', () => {
+    // 2026-08-31 is a Monday. Log the fortnight before it, and nothing today.
+    const monday = '2026-08-31'
+    const entries = Array.from({ length: 14 }, (_, i) => ({
+      ...meal(addDays(monday, -(i + 1)), food.id),
+      id: `d${i}`,
+      macros: { kcal: 1500, protein: 120, carbs: 150, fat: 50, fibre: 40 },
+    }))
+    const data = withEntries(entries)
+
+    for (const id of ['first_step', 'full_week', 'protein_power', 'fibre_friend', 'disiplin']) {
+      expect(badge(data, id, monday).unlocked, `${id} on a Monday`).toBe(true)
+    }
+  })
+
+  it('measures the week badges over the best week, not the latest one', () => {
+    // A strong week, then a fortnight of nothing but a token entry a day.
+    const today = '2026-08-31'
+    const strong = Array.from({ length: 7 }, (_, i) => ({
+      ...meal(addDays(today, -(21 + i)), food.id),
+      id: `s${i}`,
+      macros: { kcal: 1500, protein: 120, carbs: 150, fat: 50, fibre: 40 },
+    }))
+    const thin = Array.from({ length: 14 }, (_, i) => ({
+      ...meal(addDays(today, -(i + 1)), other.id),
+      id: `t${i}`,
+      macros: { kcal: 200, protein: 2, carbs: 40, fat: 1, fibre: 1 },
+    }))
+    const data = withEntries([...strong, ...thin])
+    expect(badge(data, 'full_week', today).unlocked).toBe(true)
+    expect(badge(data, 'protein_power', today).unlocked).toBe(true)
+  })
+
+  it('never rewards eating less', () => {
+    for (const b of badgesFor(defaultData(), '2026-08-30')) {
+      expect(`${b.name} ${b.requirement}`).not.toMatch(
+        /fast|skip|under|less|lowest|smallest|deficit|restrict|empty/i
+      )
+    }
+  })
+
+  it('keeps every requirement short enough to read on a card', () => {
+    for (const b of badgesFor(defaultData(), '2026-08-30')) {
+      expect(b.requirement.length).toBeLessThanOrEqual(42)
+      expect(b.name.length).toBeLessThanOrEqual(16)
+    }
   })
 })

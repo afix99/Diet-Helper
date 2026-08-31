@@ -121,19 +121,82 @@ export function streakFor(data: AppData, today: string = todayIso()) {
  * it out here as well meant a year of logging was traversed twice on every
  * render. Callers that do not already have it can leave it out.
  */
+/** Every date from the first entry to today, so a rolling window has no holes. */
+function loggedSpan(data: AppData, today: string): string[] {
+  const past = data.entries.filter((e) => e.date <= today).map((e) => e.date)
+  if (past.length === 0) return []
+  const first = past.reduce((min, d) => (d < min ? d : min), past[0])
+  return weekDates(today, Math.max(1, daysBetween(first, today) + 1))
+}
+
+/** Longest gap, in days, that still counts as "carried on" rather than a lapse. */
+const LAPSE_DAYS = 3
+
+/**
+ * Everything the whole-diary badges need, in one pass over the entries.
+ *
+ * Six separate scans would be tidier to read and six times the work on a screen
+ * that already re-renders on every keystroke.
+ */
+function history(data: AppData, today: string) {
+  const catalogue = new Map(allFoods(data).map((f) => [f.id, f.category]))
+  const dates = new Set<string>()
+  const foods = new Set<string>()
+  const categories = new Set<string>()
+  let recipesCooked = 0
+
+  for (const e of data.entries) {
+    if (e.date > today) continue // planned meals are not eaten meals
+    dates.add(e.date)
+    if (e.recipeId) recipesCooked += 1
+    if (!e.foodId) continue
+    foods.add(e.foodId)
+    const category = catalogue.get(e.foodId)
+    if (category) categories.add(category)
+  }
+
+  // A gap longer than a lapse, followed by anything at all, is a comeback.
+  const sorted = [...dates].sort()
+  let returned = false
+  for (let i = 1; i < sorted.length; i += 1) {
+    if (daysBetween(sorted[i - 1], sorted[i]) > LAPSE_DAYS) {
+      returned = true
+      break
+    }
+  }
+
+  const hydratedDays = Object.entries(data.water).filter(
+    ([date, ml]) => date <= today && ml >= data.targets.waterMl
+  ).length
+
+  return {
+    foodsTried: foods.size,
+    categoriesTried: categories.size,
+    recipesCooked,
+    hydratedDays,
+    returned,
+  }
+}
+
 export function badgesFor(
   data: AppData,
   today: string = todayIso(),
   bestStreak: number = streakFor(data, today).best
 ) {
   return badges({
-    // Same reasoning as streakFor: future days in this week are plans, not meals.
-    days: dayRecords(data, weekOf(today).filter((d) => d <= today)),
+    /*
+     * The whole diary, not this calendar week. The week badges look for your
+     * best week inside it — see bestWindow in nutrition.ts — because scoping
+     * them to the current week meant they un-earned themselves every Monday.
+     * Future dates are excluded: a planned meal is not an eaten one.
+     */
+    days: dayRecords(data, loggedSpan(data, today)),
     targets: data.targets,
     startWeightKg: data.profile.startWeightKg,
     goalWeightKg: data.profile.goalWeightKg,
     latestWeightKg: latestWeight(data),
     bestStreak,
+    ...history(data, today),
   })
 }
 

@@ -10,8 +10,8 @@ import { todayIso } from '@/lib/store/defaults'
 export default function BadgesPage() {
   const { data, ready } = useData()
   const today = todayIso()
-  const list = useMemo(() => badgesFor(data, today), [data, today])
   const run = useMemo(() => streakFor(data, today), [data, today])
+  const list = useMemo(() => badgesFor(data, today, run.best), [data, today, run.best])
 
   if (!ready) return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
 
@@ -46,10 +46,13 @@ export default function BadgesPage() {
       </Card>
 
       <div className="grid grid-cols-2 gap-2">
+        {/* The stagger caps out: with 18 badges an uncapped delay left the
+            last one waiting almost a second, which is a loading screen, not a
+            flourish. */}
         {list.map((b, i) => (
           <Card
             key={b.id}
-            style={{ animationDelay: `${i * 55}ms` }}
+            style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
             className={`animate-rise-in text-center ${
               b.unlocked ? 'border-primary/40 bg-primary/5' : ''
             }`}

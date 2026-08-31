@@ -40,7 +40,7 @@ const LINKS: {
     icon: 'medal',
     tone: 'amber',
     label: 'Badges',
-    hint: 'Streak & achievements',
+    hint: '18 to collect',
   },
   {
     href: '/more/settings',

@@ -33,6 +33,18 @@ BADGES = {
     "down_1kg": ("scales", (106, 156, 120), (223, 243, 229)),
     "down_3kg": ("medal", (198, 150, 70), (252, 240, 216)),
     "goal_reached": ("trophy", (212, 168, 70), (253, 243, 214)),
+    # Added after the workbook's original nine. Colours follow the same rule:
+    # rim saturated enough to read at 32px, fill pale enough that the glyph
+    # stays the darkest thing on the plate.
+    "two_weeks": ("seedling", (108, 158, 96), (227, 244, 222)),
+    "thirty_days": ("clock", (128, 132, 168), (232, 233, 246)),
+    "comeback": ("sparkles", (176, 122, 194), (243, 230, 249)),
+    "fibre_friend": ("salad", (108, 162, 96), (228, 244, 221)),
+    "hydrated": ("droplet", (86, 146, 194), (218, 236, 250)),
+    "explorer": ("search", (94, 150, 154), (220, 240, 241)),
+    "well_rounded": ("star", (204, 158, 66), (252, 241, 213)),
+    "home_cook": ("bowl", (192, 124, 84), (251, 233, 220)),
+    "down_5kg": ("gem", (92, 150, 178), (221, 238, 247)),
 }
 
 

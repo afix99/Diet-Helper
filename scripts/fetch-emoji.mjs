@@ -31,11 +31,17 @@ const MANIFEST = {
   target: '1f3af',
   medal: '1f3c5',
   trophy: '1f3c6',
-  weight: '2696',
   sparkles: '2728',
   droplet: '1f4a7',
   pill: '1f48a',
-  fire2: '1f9e1',
+  /*
+   * `weight` and `fire2` used to live here and were both wrong: `weight` was
+   * 2696, the same balance scales as `scales`, so two badges shared one picture;
+   * and `fire2` was 1f9e1, an orange heart filed under a name that reads as a
+   * flame. Neither was referenced from src. Replaced rather than kept.
+   */
+  seedling: '1f331',
+  gem: '1f48e',
 }
 
 const out = new URL('../public/emoji/', import.meta.url)

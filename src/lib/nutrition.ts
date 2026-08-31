@@ -218,6 +218,27 @@ export interface BadgeContext {
   goalWeightKg: number
   latestWeightKg: number | null
   bestStreak: number
+  /*
+   * The fields below look at the whole diary rather than the current week, and
+   * are optional so a caller that only has this week's records still compiles.
+   * `badgesFor` works them all out in one pass over the entries.
+   */
+  /** Distinct catalogue foods logged, ever. */
+  foodsTried?: number
+  /** Distinct food categories logged, ever. */
+  categoriesTried?: number
+  /** Recipes logged, ever. */
+  recipesCooked?: number
+  /** Days the water target was met. */
+  hydratedDays?: number
+  /**
+   * Whether a gap of several days was ever followed by logging again.
+   *
+   * The one badge here for something that looks like failure. All-or-nothing
+   * collapse after a missed week is the single most common way a food diary
+   * dies, so coming back is worth marking more than a perfect run is.
+   */
+  returned?: boolean
 }
 
 export interface Badge {
@@ -233,13 +254,65 @@ export interface Badge {
 const ratio = (value: number, goal: number) =>
   goal <= 0 ? 0 : Math.min(1, Math.max(0, value / goal))
 
-/** All nine badges from Streak & Badges!F20:F28, conditions unchanged. */
+/**
+ * The most days matching `hit` inside any `window`-day span of the diary.
+ *
+ * The week badges used to count the *current calendar week*, which meant they
+ * un-earned themselves every Monday: on a Monday morning with nothing logged
+ * yet, `weekOf(today)` yields a single day, so First Step read as locked to
+ * someone on a nineteen-day streak. A trophy case that empties weekly is worse
+ * than no trophy case. These look for the best week you have ever had, so a
+ * badge once earned stays earned.
+ *
+ * `days` must be contiguous dates, which is what `dayRecords` over a date range
+ * produces.
+ */
+function bestWindow(
+  days: readonly DayRecord[],
+  hit: (d: DayRecord) => number,
+  window = 7
+): number {
+  let best = 0
+  let sum = 0
+  for (let i = 0; i < days.length; i += 1) {
+    sum += hit(days[i])
+    if (i >= window) sum -= hit(days[i - window])
+    if (sum > best) best = sum
+  }
+  return best
+}
+
+/**
+ * The trophy case.
+ *
+ * The nine from Streak & Badges!F20:F28 keep their original conditions; the
+ * rest were added later and follow one rule — a badge may reward logging,
+ * consistency, variety, adequacy or coming back, and never eating less. There
+ * is deliberately nothing here for the smallest day or the longest gap between
+ * meals.
+ */
 export function badges(ctx: BadgeContext): Badge[] {
-  const { days, targets, startWeightKg, goalWeightKg, latestWeightKg, bestStreak } = ctx
+  const {
+    days,
+    targets,
+    startWeightKg,
+    goalWeightKg,
+    latestWeightKg,
+    bestStreak,
+    foodsTried = 0,
+    categoriesTried = 0,
+    recipesCooked = 0,
+    hydratedDays = 0,
+    returned = false,
+  } = ctx
+  // Ever, for the milestones.
   const logged = days.filter((d) => d.kcal > 0).length
-  const onTarget = days.filter((d) => isOnTarget(d.kcal, targets.kcal)).length
-  const salmon = days.reduce((sum, d) => sum + d.salmonMeals, 0)
-  const proteinDays = days.filter((d) => d.protein >= targets.protein).length
+  // Best week ever, for the ones that describe a week.
+  const loggedWeek = bestWindow(days, (d) => (d.kcal > 0 ? 1 : 0))
+  const onTarget = bestWindow(days, (d) => (isOnTarget(d.kcal, targets.kcal) ? 1 : 0))
+  const salmon = bestWindow(days, (d) => d.salmonMeals)
+  const proteinDays = bestWindow(days, (d) => (d.protein >= targets.protein ? 1 : 0))
+  const fibreDays = bestWindow(days, (d) => (d.kcal > 0 && d.fibre >= targets.fibre ? 1 : 0))
   const lost = latestWeightKg === null ? 0 : startWeightKg - latestWeightKg
 
   return [
@@ -260,9 +333,30 @@ export function badges(ctx: BadgeContext): Badge[] {
     {
       id: 'full_week',
       name: 'Full Week',
-      requirement: 'Log all 7 days',
-      unlocked: logged >= 7,
-      progress: ratio(logged, 7),
+      requirement: 'Log 7 days in one week',
+      unlocked: loggedWeek >= 7,
+      progress: ratio(loggedWeek, 7),
+    },
+    {
+      id: 'two_weeks',
+      name: 'Two Weeks',
+      requirement: 'Hit a 14-day streak',
+      unlocked: bestStreak >= 14,
+      progress: ratio(bestStreak, 14),
+    },
+    {
+      id: 'thirty_days',
+      name: 'Thirty Days',
+      requirement: 'Log 30 days in total',
+      unlocked: logged >= 30,
+      progress: ratio(logged, 30),
+    },
+    {
+      id: 'comeback',
+      name: 'Comeback',
+      requirement: 'Log again after a few days off',
+      unlocked: returned,
+      progress: returned ? 1 : 0,
     },
     {
       id: 'omega_squad',
@@ -279,11 +373,46 @@ export function badges(ctx: BadgeContext): Badge[] {
       progress: ratio(proteinDays, 4),
     },
     {
+      id: 'fibre_friend',
+      name: 'Fibre Friend',
+      requirement: '4 days hitting your fibre target',
+      unlocked: fibreDays >= 4,
+      progress: ratio(fibreDays, 4),
+    },
+    {
+      id: 'hydrated',
+      name: 'Hydrated',
+      requirement: 'Hit your water target 5 times',
+      unlocked: hydratedDays >= 5,
+      progress: ratio(hydratedDays, 5),
+    },
+    {
       id: 'disiplin',
       name: 'Discipline',
       requirement: '5 days on your calorie target',
       unlocked: onTarget >= 5,
       progress: ratio(onTarget, 5),
+    },
+    {
+      id: 'explorer',
+      name: 'Explorer',
+      requirement: 'Try 25 different foods',
+      unlocked: foodsTried >= 25,
+      progress: ratio(foodsTried, 25),
+    },
+    {
+      id: 'well_rounded',
+      name: 'Well Rounded',
+      requirement: 'Eat from 10 food groups',
+      unlocked: categoriesTried >= 10,
+      progress: ratio(categoriesTried, 10),
+    },
+    {
+      id: 'home_cook',
+      name: 'Home Cook',
+      requirement: 'Cook 5 recipes',
+      unlocked: recipesCooked >= 5,
+      progress: ratio(recipesCooked, 5),
     },
     {
       id: 'down_1kg',
@@ -298,6 +427,13 @@ export function badges(ctx: BadgeContext): Badge[] {
       requirement: '3 kg below your starting weight',
       unlocked: lost >= 3,
       progress: ratio(lost, 3),
+    },
+    {
+      id: 'down_5kg',
+      name: 'Down 5 kg',
+      requirement: '5 kg below your starting weight',
+      unlocked: lost >= 5,
+      progress: ratio(lost, 5),
     },
     {
       id: 'goal_reached',

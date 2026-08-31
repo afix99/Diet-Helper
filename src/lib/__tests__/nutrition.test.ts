@@ -209,10 +209,32 @@ describe('badges — all nine from Streak & Badges!F20:F28', () => {
       ...over,
     })
 
-  it('returns all nine, all locked, for a fresh account', () => {
+  /*
+   * The workbook's nine still exist and still start locked; the set has since
+   * grown past them. This pins the originals rather than a total, so adding a
+   * badge does not break the test that guards the ones that came from the sheet.
+   */
+  const WORKBOOK_NINE = [
+    'first_step', 'three_in_a_row', 'full_week', 'omega_squad', 'protein_power',
+    'disiplin', 'down_1kg', 'down_3kg', 'goal_reached',
+  ]
+
+  it('keeps the workbook nine, and starts every badge locked', () => {
     const b = ctx()
-    expect(b).toHaveLength(9)
+    for (const id of WORKBOOK_NINE) expect(b.map((x) => x.id)).toContain(id)
+    expect(b.length).toBeGreaterThanOrEqual(WORKBOOK_NINE.length)
     expect(b.every((x) => !x.unlocked)).toBe(true)
+  })
+
+  it('gives every badge a unique id, a name and a requirement', () => {
+    const b = ctx()
+    expect(new Set(b.map((x) => x.id)).size).toBe(b.length)
+    for (const x of b) {
+      expect(x.name.trim().length).toBeGreaterThan(0)
+      expect(x.requirement.trim().length).toBeGreaterThan(0)
+      expect(x.progress).toBeGreaterThanOrEqual(0)
+      expect(x.progress).toBeLessThanOrEqual(1)
+    }
   })
 
   it('unlocks First Step on any single logged day', () => {
