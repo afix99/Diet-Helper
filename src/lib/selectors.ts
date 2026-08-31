@@ -11,7 +11,7 @@ import {
 } from './nutrition'
 import { daysBetween, todayIso, weekDates, weekOf } from './dates'
 import type { AppData } from './store/types'
-import type { Food, LogEntry, Macros, MealSlot } from './types'
+import { MEAL_SLOTS, type Food, type LogEntry, type Macros, type MealSlot } from './types'
 
 export { weekDates, weekOf }
 
@@ -43,6 +43,24 @@ export function entriesFor(data: AppData, date: string): LogEntry[] {
 
 export function entriesForSlot(data: AppData, date: string, slot: MealSlot): LogEntry[] {
   return data.entries.filter((e) => e.date === date && e.slot === slot)
+}
+
+/**
+ * A day's entries, bucketed by meal slot in one pass.
+ *
+ * Today renders six meal cards, and each one calling `entriesForSlot` meant six
+ * full scans of the whole diary on every render. Same reasoning as `dayRecords`
+ * below: bucket once, hand out the lists.
+ */
+export function entriesBySlot(data: AppData, date: string): Record<MealSlot, LogEntry[]> {
+  const out = Object.fromEntries(MEAL_SLOTS.map((s) => [s, [] as LogEntry[]])) as Record<
+    MealSlot,
+    LogEntry[]
+  >
+  for (const e of data.entries) {
+    if (e.date === date) out[e.slot]?.push(e)
+  }
+  return out
 }
 
 export function entryMacros(entry: LogEntry): Macros {
@@ -97,7 +115,17 @@ export function streakFor(data: AppData, today: string = todayIso()) {
   return streak(dayRecords(data, weekDates(today, Math.max(1, span))))
 }
 
-export function badgesFor(data: AppData, today: string = todayIso()) {
+/**
+ * `bestStreak` is a parameter because `streakFor` walks the diary from the first
+ * entry to today, and Today needs the streak for its own header anyway. Working
+ * it out here as well meant a year of logging was traversed twice on every
+ * render. Callers that do not already have it can leave it out.
+ */
+export function badgesFor(
+  data: AppData,
+  today: string = todayIso(),
+  bestStreak: number = streakFor(data, today).best
+) {
   return badges({
     // Same reasoning as streakFor: future days in this week are plans, not meals.
     days: dayRecords(data, weekOf(today).filter((d) => d <= today)),
@@ -105,7 +133,7 @@ export function badgesFor(data: AppData, today: string = todayIso()) {
     startWeightKg: data.profile.startWeightKg,
     goalWeightKg: data.profile.goalWeightKg,
     latestWeightKg: latestWeight(data),
-    bestStreak: streakFor(data, today).best,
+    bestStreak,
   })
 }
 

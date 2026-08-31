@@ -20,6 +20,7 @@ import type { MacroKey } from '@/lib/macroFate'
 import {
   badgesFor,
   dayTotals,
+  entriesBySlot,
   latestWeight,
   streakFor,
 } from '@/lib/selectors'
@@ -43,8 +44,9 @@ export default function TodayPage() {
   const date = todayIso()
 
   const totals = useMemo(() => dayTotals(data, date), [data, date])
+  // One pass over the diary for all six cards, rather than one pass each.
+  const bySlot = useMemo(() => entriesBySlot(data, date), [data, date])
 
-  const nextOpenSlot = useMemo(() => slotForNow(), [])
   /*
    * The ring measures against the target you set, whatever it is. An earlier
    * version silently swapped in a 1,200 kcal floor, which replaced your number
@@ -85,7 +87,10 @@ export default function TodayPage() {
   }, [hit])
 
   const run = useMemo(() => streakFor(data, date), [data, date])
-  const unlocked = useMemo(() => badgesFor(data, date).filter((b) => b.unlocked), [data, date])
+  const unlocked = useMemo(
+    () => badgesFor(data, date, run.best).filter((b) => b.unlocked),
+    [data, date, run.best]
+  )
 
   if (!ready) {
     return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
@@ -229,7 +234,7 @@ export default function TodayPage() {
       <PressButton
         full
         hapticWeight="medium"
-        onClick={() => setQuickAdding(nextOpenSlot)}
+        onClick={() => setQuickAdding(openSlot)}
         className="mb-3 !rounded-card"
       >
         <Icon name="pencil" size={18} strokeWidth={2} />
@@ -242,6 +247,7 @@ export default function TodayPage() {
             key={slot}
             date={date}
             slot={slot}
+            entries={bySlot[slot]}
             open={openSlot === slot}
             onToggle={() => setOpenSlot(slot)}
             onOpenPicker={() => setPicking(slot)}

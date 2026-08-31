@@ -4,12 +4,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from './ui'
 import { Icon } from './icons'
 import { useLogging } from '@/lib/logging'
-import { allFoods, entriesForSlot, entryMacros, entryName } from '@/lib/selectors'
+import { allFoods, entryMacros, entryName } from '@/lib/selectors'
 import { sound } from '@/lib/sound'
 import { haptic } from '@/lib/haptics'
 import { usualFor } from '@/lib/usual'
 import { useData } from '@/lib/store/provider'
-import { SLOT_LABELS, type MealSlot } from '@/lib/types'
+import { SLOT_LABELS, type LogEntry, type MealSlot } from '@/lib/types'
 
 /**
  * One meal, open or folded.
@@ -26,12 +26,15 @@ import { SLOT_LABELS, type MealSlot } from '@/lib/types'
 export function MealSlotCard({
   date,
   slot,
+  entries,
   open,
   onToggle,
   onOpenPicker,
 }: {
   date: string
   slot: MealSlot
+  /** This slot's entries, bucketed once by the parent. */
+  entries: LogEntry[]
   open: boolean
   onToggle: () => void
   onOpenPicker: () => void
@@ -39,7 +42,6 @@ export function MealSlotCard({
   const { data } = useData()
   const { logFood, removeEntry, setServings } = useLogging()
 
-  const entries = entriesForSlot(data, date, slot)
   const label = SLOT_LABELS[slot]
   const slotKcal = entries.reduce((sum, e) => sum + entryMacros(e).kcal, 0)
 
@@ -50,16 +52,23 @@ export function MealSlotCard({
    */
   const [landed, setLanded] = useState<string | null>(null)
   const count = useRef(entries.length)
+  const newest = entries.length > 0 ? entries[entries.length - 1].id : null
+
+  /*
+   * Depends on the *length*, not the array: entriesForSlot builds a new array
+   * every render, so an array dependency re-ran this on every render — and any
+   * re-render inside the 900ms window fired the cleanup, killed the timer, then
+   * took the else branch and scheduled no replacement. The flash class stayed on
+   * that row for the rest of the session.
+   */
   useEffect(() => {
-    if (entries.length > count.current) {
-      const newest = entries[entries.length - 1]?.id ?? null
-      setLanded(newest)
-      const t = setTimeout(() => setLanded(null), 900)
-      count.current = entries.length
-      return () => clearTimeout(t)
-    }
+    const grew = entries.length > count.current
     count.current = entries.length
-  }, [entries])
+    if (!grew || !newest) return
+    setLanded(newest)
+    const t = setTimeout(() => setLanded((id) => (id === newest ? null : id)), 900)
+    return () => clearTimeout(t)
+  }, [entries.length, newest])
 
   /*
    * A tapped chip is gone from `usuals` on the very next render, because a food
