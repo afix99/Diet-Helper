@@ -11,7 +11,17 @@ import { flourishesOn } from '@/lib/motion'
 import { sound } from '@/lib/sound'
 import { nextStage, poseFor, stageFor, statusLine } from '@/lib/pet'
 import { freshUnlocks, unlockedIds, wornPieces } from '@/lib/petWardrobe'
-import { play, stop, type Rig } from '@/lib/petMotion'
+import {
+  LOUD_REACTIONS,
+  nextAmbientDelay,
+  pickAmbient,
+  pickReaction,
+  play,
+  stop,
+  type AmbientId,
+  type ReactionId,
+  type Rig,
+} from '@/lib/petMotion'
 import { useLogging } from '@/lib/logging'
 import { badgesFor, entriesFor, streakFor } from '@/lib/selectors'
 import { useData } from '@/lib/store/provider'
@@ -31,6 +41,18 @@ import { useData } from '@/lib/store/provider'
  *
  * Underneath all three, `idle` runs forever with `composite: 'add'`, so the cat
  * keeps breathing and blinking *through* a leap instead of freezing for it.
+ *
+ * Two more layers make it an animal rather than a diagram:
+ *
+ * - **ambients** fire on a random 2.6–7.2s gap — a blink, a yawn, a look
+ *   across the room, a wash. Unrequested and unpredictable, which is the
+ *   difference between something alive and something looping.
+ * - **reactions** fire when you touch it, picked at random from fifteen with
+ *   no immediate repeat.
+ *
+ * Because the cat is now the toy, it no longer opens the sheet: the name and
+ * streak beside it do that instead. A tap that both played an animation and
+ * covered it with a sheet would have shown you neither.
  */
 export function PetCard({ date }: { date: string }) {
   const { data } = useData()
@@ -115,6 +137,57 @@ export function PetCard({ date }: { date: string }) {
     }, 440)
   }, [stage.index, data.pet.seenStage, markPetStageSeen])
 
+  /*
+   * Ambients: the layer that makes it read as awake.
+   *
+   * A self-rescheduling timeout rather than an interval, so each gap is its own
+   * random length — an interval would put the cat on a metronome, and anything
+   * you can predict stops looking alive.
+   *
+   * It stands down whenever the cat is not actually being watched: with the tab
+   * hidden, with the sheet covering it, or while a reaction is mid-flight.
+   * A timer firing animations into a background tab is battery spent on
+   * something nobody can see.
+   */
+  const lastAmbient = useRef<AmbientId | null>(null)
+  const reactingUntil = useRef(0)
+  useEffect(() => {
+    if (!flourishesOn()) return
+    let timer = 0
+    const tick = () => {
+      const idleEnough = Date.now() >= reactingUntil.current
+      if (idleEnough && !open && document.visibilityState === 'visible') {
+        const next = pickAmbient(lastAmbient.current)
+        lastAmbient.current = next
+        play(rigOf(), next)
+      }
+      timer = window.setTimeout(tick, nextAmbientDelay())
+    }
+    timer = window.setTimeout(tick, nextAmbientDelay())
+    return () => window.clearTimeout(timer)
+  }, [open, pose, stage.index])
+
+  /*
+   * Reactions: one random animation per touch.
+   *
+   * The previous reaction is cancelled first. Tapping quickly used to stack
+   * animations on the same parts, and the sum of three overlapping pounces is
+   * not three pounces — it is a cat that flies off the card.
+   */
+  const lastReaction = useRef<ReactionId | null>(null)
+  const reaction = useRef<Animation[]>([])
+  const poke = () => {
+    if (!flourishesOn()) return
+    stop(reaction.current)
+    const next = pickReaction(lastReaction.current)
+    lastReaction.current = next
+    reaction.current = play(rigOf(), next)
+    // Long enough that an ambient cannot interrupt the reaction it overlaps.
+    reactingUntil.current = Date.now() + 1300
+    if (LOUD_REACTIONS.includes(next)) sound('pet')
+  }
+  useEffect(() => () => stop(reaction.current), [])
+
   /* Greet: arriving from the house. `out` flipping true is the trigger. */
   const wasOut = useRef(data.pet.out)
   useEffect(() => {
@@ -135,15 +208,13 @@ export function PetCard({ date }: { date: string }) {
     <>
       <Card className="mb-4">
         <div className="flex items-center gap-3">
+          {/* The cat is the toy: tapping it plays, it does not navigate. */}
           <button
             type="button"
-            onClick={() => setOpen(true)}
-            aria-label={
-              fresh > 0
-                ? `${data.pet.name}, ${stage.name}. Open details — new in the wardrobe`
-                : `${data.pet.name}, ${stage.name}. Open details`
-            }
+            onClick={poke}
+            aria-label={`Play with ${data.pet.name}`}
             data-pet
+            data-poke
             className="tap relative shrink-0"
           >
             {/*
@@ -171,7 +242,18 @@ export function PetCard({ date }: { date: string }) {
             )}
           </button>
 
-          <div className="min-w-0 flex-1">
+          {/* ...and the name beside it is the way in. */}
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            data-pet-open
+            aria-label={
+              fresh > 0
+                ? `${data.pet.name}, ${stage.name}. Open details — new in the wardrobe`
+                : `${data.pet.name}, ${stage.name}. Open details`
+            }
+            className="tap min-w-0 flex-1 text-left"
+          >
             <p className="truncate text-secondary font-bold">
               {data.pet.name}
               <span className="ml-1.5 font-normal text-faint">{stage.name}</span>
@@ -190,7 +272,7 @@ export function PetCard({ date }: { date: string }) {
                 {upcoming.stage.name}
               </p>
             )}
-          </div>
+          </button>
 
           <button
             type="button"

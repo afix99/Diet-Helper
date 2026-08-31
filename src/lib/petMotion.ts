@@ -58,6 +58,13 @@ export type RigPart =
   | 'hat'
   | 'tailBase'
   | 'tailTip'
+  /**
+   * The front paws. Cheap to add and they carry most of what reads as
+   * cat-ness up close — a paw lifted to the face is grooming, a paw held out
+   * is a wave, and neither is expressible by moving the body around.
+   */
+  | 'pawL'
+  | 'pawR'
   | 'shadow'
   | 'glow'
   | 'count'
@@ -75,12 +82,30 @@ export const RIG_PARTS: readonly RigPart[] = [
   'hat',
   'tailBase',
   'tailTip',
+  'pawL',
+  'pawR',
   'shadow',
   'glow',
   'count',
 ]
 
-export type TimelineId = 'idle' | 'wake' | 'grow' | 'greet' | 'tuck'
+export type AmbientId = (typeof AMBIENT_IDS)[number]
+export type ReactionId = (typeof REACTION_IDS)[number]
+
+/**
+ * Every timeline the rig can play.
+ *
+ * Five staged moments, plus the two pools that make it feel alive: ambients it
+ * does on its own, and reactions it does when touched.
+ */
+export type TimelineId =
+  | 'idle'
+  | 'wake'
+  | 'grow'
+  | 'greet'
+  | 'tuck'
+  | AmbientId
+  | ReactionId
 
 export interface Track {
   part: RigPart
@@ -123,7 +148,13 @@ const BREATH = 'cubic-bezier(0.45, 0, 0.55, 1)'
  */
 const idle: Timeline = {
   id: 'idle',
-  duration: 9700,
+  /*
+   * The longest loop, not the sum — these all run at once. Hand-written because
+   * `idle` predates the `scene()` builder below and is the one timeline whose
+   * tracks never end; keep it equal to the longest `delay + duration` here, and
+   * the "never runs a track past its timeline" test will say so if it drifts.
+   */
+  duration: 11300,
   tracks: [
     {
       part: 'body',
@@ -206,6 +237,71 @@ const idle: Timeline = {
         { transform: 'rotate(-11deg)', offset: 0.9 },
         { transform: 'rotate(4deg)', offset: 0.94 },
         { transform: 'none', offset: 0.98 },
+        REST,
+      ],
+    },
+    {
+      // The other ear on its own clock, so the two never twitch together.
+      part: 'earL',
+      delay: 0,
+      duration: 11300,
+      easing: OVERSHOOT,
+      iterations: Infinity,
+      frames: [
+        { transform: 'none', offset: 0 },
+        { transform: 'none', offset: 0.72 },
+        { transform: 'rotate(9deg)', offset: 0.76 },
+        { transform: 'rotate(-3deg)', offset: 0.8 },
+        { transform: 'none', offset: 0.85 },
+        REST,
+      ],
+    },
+    {
+      /*
+       * A slow head drift. This is the loop that does the most work for "it is
+       * always moving": a cat at rest is never perfectly square to you, and a
+       * head that is very slightly, continuously wandering is the difference
+       * between an animal sitting still and a drawing that has stopped.
+       */
+      part: 'head',
+      delay: 0,
+      duration: 7300,
+      easing: BREATH,
+      iterations: Infinity,
+      frames: [
+        { transform: 'none', offset: 0 },
+        { transform: 'rotate(1.4deg) translateY(-0.6px)', offset: 0.28 },
+        { transform: 'rotate(0.2deg)', offset: 0.5 },
+        { transform: 'rotate(-1.6deg) translateY(0.5px)', offset: 0.76 },
+        REST,
+      ],
+    },
+    {
+      // Weight shifting from one hip to the other. Sub-pixel on purpose: felt
+      // rather than seen, and it keeps the whole silhouette from looking pinned.
+      part: 'hop',
+      delay: 0,
+      duration: 5900,
+      easing: BREATH,
+      iterations: Infinity,
+      frames: [
+        { transform: 'none', offset: 0 },
+        { transform: 'translateX(0.9px) rotate(0.5deg)', offset: 0.3 },
+        { transform: 'translateX(-0.8px) rotate(-0.4deg)', offset: 0.72 },
+        REST,
+      ],
+    },
+    {
+      // Whiskers drift last and least — they are hair, not muscle.
+      part: 'whiskers',
+      delay: 0,
+      duration: 8300,
+      easing: BREATH,
+      iterations: Infinity,
+      frames: [
+        { transform: 'none', offset: 0 },
+        { transform: 'rotate(0.8deg) translateY(0.4px)', offset: 0.33 },
+        { transform: 'rotate(-0.7deg) translateY(-0.3px)', offset: 0.71 },
         REST,
       ],
     },
@@ -640,12 +736,902 @@ const tuck: Timeline = {
   ],
 }
 
+/* --- the living layer ------------------------------------------------------
+ *
+ * The loops above keep the cat breathing, but a loop is a loop: watch it for
+ * thirty seconds and you can feel the period. What makes an animal read as
+ * *awake* is that it does unrequested things at unpredictable times — it looks
+ * at something, it grooms, it yawns, and you cannot tell when the next one is
+ * coming.
+ *
+ * So there are two pools below.
+ *
+ * **Ambients** fire on their own, on a random interval, over the top of the
+ * idle loops. They are small on purpose: the cat is not performing, it is just
+ * alive in the corner of your eye.
+ *
+ * **Reactions** fire when you touch it, and are the opposite — big, varied,
+ * and picked at random so that tapping twice never gives you the same thing.
+ *
+ * Both compose additively onto the idle loops, so the cat keeps breathing and
+ * blinking *through* a pounce rather than freezing for it.
+ */
+
+const beat = (
+  part: RigPart,
+  delay: number,
+  duration: number,
+  easing: string,
+  frames: Keyframe[]
+): Track => ({ part, delay, duration, easing, frames })
+
+/**
+ * A track on `root`.
+ *
+ * `root` owns its transform outright rather than adding to it — it is the one
+ * node with no idle loop underneath, and a whole-body spin must not be
+ * arithmetic on top of something else.
+ */
+const rootBeat = (
+  delay: number,
+  duration: number,
+  easing: string,
+  frames: Keyframe[]
+): Track => ({ part: 'root', delay, duration, easing, frames, composite: 'replace' })
+
+/**
+ * Assemble a timeline, deriving its length from its own tracks.
+ *
+ * The alternative is a hand-written `duration` that silently truncates a track
+ * the moment someone extends one — which is exactly the bug the "never runs a
+ * track past its timeline" test exists to catch. Computing it makes that class
+ * of mistake unrepresentable rather than merely tested.
+ */
+const scene = (id: TimelineId, tracks: Track[]): Timeline => ({
+  id,
+  duration: Math.max(...tracks.map((t) => t.delay + t.duration)),
+  tracks,
+})
+
+/* --- ambients: what it does when you are not looking ----------------------- */
+
+const blinkTwice = scene('blinkTwice', [
+  beat('eyeL', 0, 640, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleY(0.05)', offset: 0.18 },
+    { transform: 'none', offset: 0.34 },
+    { transform: 'scaleY(0.05)', offset: 0.52 },
+    { transform: 'none', offset: 0.7 },
+    REST,
+  ]),
+  beat('eyeR', 30, 640, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleY(0.05)', offset: 0.18 },
+    { transform: 'none', offset: 0.34 },
+    { transform: 'scaleY(0.05)', offset: 0.52 },
+    { transform: 'none', offset: 0.7 },
+    REST,
+  ]),
+])
+
+const yawn = scene('yawn', [
+  // The head goes back before the mouth would open, which is the order a real
+  // yawn happens in and the reason it reads as a yawn rather than a nod.
+  beat('head', 0, 1150, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-4deg) translateY(-2px)', offset: 0.34 },
+    { transform: 'rotate(-3deg) translateY(-1.5px)', offset: 0.52 },
+    REST,
+  ]),
+  beat('eyeL', 60, 900, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleY(0.08)', offset: 0.3 },
+    { transform: 'scaleY(0.12)', offset: 0.55 },
+    REST,
+  ]),
+  beat('eyeR', 90, 900, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleY(0.08)', offset: 0.3 },
+    { transform: 'scaleY(0.12)', offset: 0.55 },
+    REST,
+  ]),
+  beat('body', 40, 1100, BREATH, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(1.025, 1.045)', offset: 0.38 },
+    REST,
+  ]),
+  beat('earL', 160, 940, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-9deg)', offset: 0.36 },
+    REST,
+  ]),
+  beat('earR', 200, 940, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(9deg)', offset: 0.36 },
+    REST,
+  ]),
+])
+
+const stretch = scene('stretch', [
+  beat('body', 0, 1250, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(1.1, 0.92)', offset: 0.36 },
+    { transform: 'scale(0.98, 1.03)', offset: 0.66 },
+    REST,
+  ]),
+  beat('hop', 0, 1250, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(3px)', offset: 0.36 },
+    REST,
+  ]),
+  beat('head', 70, 1180, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(3px) rotate(2deg)', offset: 0.36 },
+    REST,
+  ]),
+  // The tail is the last thing to come down out of a stretch.
+  beat('tailBase', 130, 1120, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-15deg)', offset: 0.4 },
+    { transform: 'rotate(4deg)', offset: 0.74 },
+    REST,
+  ]),
+  beat('tailTip', 210, 1040, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-20deg)', offset: 0.4 },
+    { transform: 'rotate(7deg)', offset: 0.76 },
+    REST,
+  ]),
+])
+
+/** Looking at something. The hold in the middle is what stops it being a sway. */
+const look = (id: TimelineId, dir: 1 | -1) =>
+  scene(id, [
+    beat('head', 0, 1400, SETTLE, [
+      { transform: 'none', offset: 0 },
+      { transform: `rotate(${8 * dir}deg) translateX(${1.5 * dir}px)`, offset: 0.26 },
+      { transform: `rotate(${8 * dir}deg) translateX(${1.5 * dir}px)`, offset: 0.6 },
+      REST,
+    ]),
+    beat('eyeL', 60, 1300, SETTLE, [
+      { transform: 'none', offset: 0 },
+      { transform: `translateX(${2 * dir}px)`, offset: 0.22 },
+      { transform: `translateX(${2 * dir}px)`, offset: 0.62 },
+      REST,
+    ]),
+    beat('eyeR', 60, 1300, SETTLE, [
+      { transform: 'none', offset: 0 },
+      { transform: `translateX(${2 * dir}px)`, offset: 0.22 },
+      { transform: `translateX(${2 * dir}px)`, offset: 0.62 },
+      REST,
+    ]),
+    beat('earL', 140, 1200, OVERSHOOT, [
+      { transform: 'none', offset: 0 },
+      { transform: `rotate(${5 * dir}deg)`, offset: 0.3 },
+      REST,
+    ]),
+    beat('earR', 170, 1200, OVERSHOOT, [
+      { transform: 'none', offset: 0 },
+      { transform: `rotate(${5 * dir}deg)`, offset: 0.3 },
+      REST,
+    ]),
+  ])
+
+const lookLeft = look('lookLeft', -1)
+const lookRight = look('lookRight', 1)
+
+const earFlick = scene('earFlick', [
+  beat('earL', 0, 620, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(15deg)', offset: 0.2 },
+    { transform: 'rotate(-6deg)', offset: 0.48 },
+    { transform: 'rotate(2deg)', offset: 0.74 },
+    REST,
+  ]),
+  beat('head', 60, 540, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-1.5deg)', offset: 0.3 },
+    REST,
+  ]),
+])
+
+const tailFlick = scene('tailFlick', [
+  beat('tailBase', 0, 820, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-13deg)', offset: 0.22 },
+    { transform: 'rotate(7deg)', offset: 0.55 },
+    REST,
+  ]),
+  beat('tailTip', 110, 760, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-22deg)', offset: 0.24 },
+    { transform: 'rotate(12deg)', offset: 0.58 },
+    REST,
+  ]),
+])
+
+const headTilt = scene('headTilt', [
+  beat('head', 0, 1300, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(11deg)', offset: 0.24 },
+    { transform: 'rotate(11deg)', offset: 0.62 },
+    REST,
+  ]),
+  beat('earL', 120, 1180, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(6deg)', offset: 0.26 },
+    { transform: 'rotate(6deg)', offset: 0.6 },
+    REST,
+  ]),
+  beat('earR', 150, 1150, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(4deg)', offset: 0.26 },
+    { transform: 'rotate(4deg)', offset: 0.6 },
+    REST,
+  ]),
+  beat('whiskers', 220, 1080, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(5deg)', offset: 0.28 },
+    { transform: 'rotate(5deg)', offset: 0.6 },
+    REST,
+  ]),
+])
+
+const groom = scene('groom', [
+  // The paw goes up and the head comes down to meet it. Neither alone reads as
+  // washing; the two closing on each other does.
+  beat('pawR', 0, 1450, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translate(3px, -13px) rotate(-16deg)', offset: 0.26 },
+    { transform: 'translate(4px, -15px) rotate(-11deg)', offset: 0.44 },
+    { transform: 'translate(3px, -13px) rotate(-16deg)', offset: 0.6 },
+    REST,
+  ]),
+  beat('head', 60, 1360, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(4px) rotate(7deg)', offset: 0.28 },
+    { transform: 'translateY(5px) rotate(5deg)', offset: 0.46 },
+    { transform: 'translateY(4px) rotate(7deg)', offset: 0.62 },
+    REST,
+  ]),
+  beat('eyeL', 100, 1200, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleY(0.3)', offset: 0.3 },
+    { transform: 'scaleY(0.3)', offset: 0.64 },
+    REST,
+  ]),
+  beat('eyeR', 100, 1200, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleY(0.3)', offset: 0.3 },
+    { transform: 'scaleY(0.3)', offset: 0.64 },
+    REST,
+  ]),
+])
+
+const perk = scene('perk', [
+  beat('earL', 0, 760, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-7deg) scaleY(1.1)', offset: 0.24 },
+    REST,
+  ]),
+  beat('earR', 20, 760, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(7deg) scaleY(1.1)', offset: 0.24 },
+    REST,
+  ]),
+  beat('head', 0, 720, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(-2.5px)', offset: 0.26 },
+    REST,
+  ]),
+])
+
+const shiver = scene('shiver', [
+  beat('body', 0, 640, 'linear', [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(1.6deg)', offset: 0.12 },
+    { transform: 'rotate(-1.6deg)', offset: 0.28 },
+    { transform: 'rotate(1.2deg)', offset: 0.44 },
+    { transform: 'rotate(-0.8deg)', offset: 0.62 },
+    REST,
+  ]),
+  beat('head', 40, 600, 'linear', [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-2.2deg)', offset: 0.14 },
+    { transform: 'rotate(2deg)', offset: 0.3 },
+    { transform: 'rotate(-1.2deg)', offset: 0.5 },
+    REST,
+  ]),
+])
+
+/* --- reactions: what it does when you touch it ----------------------------- */
+
+const pounce = scene('pounce', [
+  beat('body', 0, 900, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(1.14, 0.84)', offset: 0.16 },
+    { transform: 'scale(0.88, 1.18)', offset: 0.34 },
+    { transform: 'scale(1.16, 0.82)', offset: 0.56 },
+    { transform: 'scale(0.98, 1.02)', offset: 0.76 },
+    REST,
+  ]),
+  beat('hop', 0, 900, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(4px)', offset: 0.16 },
+    { transform: 'translateY(-26px)', offset: 0.36 },
+    { transform: 'translateY(0px)', offset: 0.56 },
+    { transform: 'translateY(-6px)', offset: 0.72 },
+    REST,
+  ]),
+  // The shadow is the same impact seen from below, so it moves with the body
+  // and never after it.
+  beat('shadow', 0, 900, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleX(1.1)', offset: 0.16 },
+    { transform: 'scaleX(0.6)', offset: 0.36 },
+    { transform: 'scaleX(1.28)', offset: 0.56 },
+    REST,
+  ]),
+  beat('head', 70, 820, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(-3px) rotate(-6deg)', offset: 0.3 },
+    { transform: 'translateY(3px) rotate(5deg)', offset: 0.52 },
+    REST,
+  ]),
+  beat('tailBase', 130, 760, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-18deg)', offset: 0.3 },
+    { transform: 'rotate(10deg)', offset: 0.62 },
+    REST,
+  ]),
+  beat('tailTip', 200, 700, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-28deg)', offset: 0.32 },
+    { transform: 'rotate(16deg)', offset: 0.64 },
+    REST,
+  ]),
+])
+
+const spin = scene('spin', [
+  rootBeat(0, 850, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-20deg)', offset: 0.12 },
+    { transform: 'rotate(360deg)', offset: 0.82 },
+    REST,
+  ]),
+  beat('hop', 40, 780, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(-9px)', offset: 0.34 },
+    REST,
+  ]),
+  beat('tailTip', 160, 660, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(24deg)', offset: 0.4 },
+    REST,
+  ]),
+])
+
+const wiggle = scene('wiggle', [
+  // The pre-pounce shuffle. Hips lead, everything else is dragged along late.
+  beat('hop', 0, 900, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateX(4px) rotate(3deg)', offset: 0.16 },
+    { transform: 'translateX(-4px) rotate(-3deg)', offset: 0.36 },
+    { transform: 'translateX(3.4px) rotate(2.4deg)', offset: 0.56 },
+    { transform: 'translateX(-2.6px) rotate(-2deg)', offset: 0.76 },
+    REST,
+  ]),
+  beat('head', 90, 830, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateX(-2px) rotate(-2deg)', offset: 0.2 },
+    { transform: 'translateX(2px) rotate(2deg)', offset: 0.42 },
+    { transform: 'translateX(-1.4px)', offset: 0.64 },
+    REST,
+  ]),
+  beat('tailBase', 150, 760, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(11deg)', offset: 0.22 },
+    { transform: 'rotate(-11deg)', offset: 0.46 },
+    { transform: 'rotate(7deg)', offset: 0.7 },
+    REST,
+  ]),
+])
+
+const bounce = scene('bounce', [
+  beat('hop', 0, 1000, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(-18px)', offset: 0.2 },
+    { transform: 'translateY(0px)', offset: 0.4 },
+    { transform: 'translateY(-11px)', offset: 0.58 },
+    { transform: 'translateY(0px)', offset: 0.74 },
+    { transform: 'translateY(-5px)', offset: 0.86 },
+    REST,
+  ]),
+  beat('body', 0, 1000, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(0.92, 1.1)', offset: 0.2 },
+    { transform: 'scale(1.12, 0.88)', offset: 0.4 },
+    { transform: 'scale(0.96, 1.05)', offset: 0.58 },
+    { transform: 'scale(1.06, 0.95)', offset: 0.74 },
+    REST,
+  ]),
+  beat('shadow', 0, 1000, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleX(0.7)', offset: 0.2 },
+    { transform: 'scaleX(1.2)', offset: 0.4 },
+    { transform: 'scaleX(0.82)', offset: 0.58 },
+    REST,
+  ]),
+  beat('earL', 120, 860, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-13deg)', offset: 0.22 },
+    { transform: 'rotate(6deg)', offset: 0.5 },
+    REST,
+  ]),
+  beat('earR', 150, 840, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(13deg)', offset: 0.22 },
+    { transform: 'rotate(-6deg)', offset: 0.5 },
+    REST,
+  ]),
+])
+
+const squish = scene('squish', [
+  // Being petted: it flattens happily rather than recoiling.
+  beat('body', 0, 800, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(1.15, 0.85)', offset: 0.26 },
+    { transform: 'scale(1.1, 0.9)', offset: 0.5 },
+    REST,
+  ]),
+  beat('head', 30, 770, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(6px) scale(1.03)', offset: 0.26 },
+    { transform: 'translateY(4px)', offset: 0.52 },
+    REST,
+  ]),
+  beat('eyeL', 60, 700, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleY(0.22)', offset: 0.28 },
+    { transform: 'scaleY(0.22)', offset: 0.6 },
+    REST,
+  ]),
+  beat('eyeR', 60, 700, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleY(0.22)', offset: 0.28 },
+    { transform: 'scaleY(0.22)', offset: 0.6 },
+    REST,
+  ]),
+  beat('tailBase', 140, 650, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(9deg)', offset: 0.34 },
+    REST,
+  ]),
+])
+
+const surprise = scene('surprise', [
+  beat('hop', 0, 900, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(-14px)', offset: 0.18 },
+    { transform: 'translateY(2px)', offset: 0.44 },
+    REST,
+  ]),
+  beat('body', 0, 900, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(0.9, 1.16)', offset: 0.18 },
+    { transform: 'scale(1.08, 0.94)', offset: 0.44 },
+    REST,
+  ]),
+  // Eyes go wide, which is the whole read. Ears go back, which sells it.
+  beat('eyeL', 40, 820, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(1.24)', offset: 0.2 },
+    { transform: 'scale(1.1)', offset: 0.5 },
+    REST,
+  ]),
+  beat('eyeR', 40, 820, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(1.24)', offset: 0.2 },
+    { transform: 'scale(1.1)', offset: 0.5 },
+    REST,
+  ]),
+  beat('earL', 70, 800, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(19deg)', offset: 0.2 },
+    REST,
+  ]),
+  beat('earR', 100, 780, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-19deg)', offset: 0.2 },
+    REST,
+  ]),
+])
+
+const headbutt = scene('headbutt', [
+  // Coming at you: the head scales up as it thrusts, which is the only depth
+  // cue a flat rig has.
+  beat('head', 0, 750, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(-2px) rotate(-6deg)', offset: 0.16 },
+    { transform: 'translateY(5px) scale(1.12)', offset: 0.42 },
+    { transform: 'translateY(2px) scale(1.04)', offset: 0.66 },
+    REST,
+  ]),
+  beat('body', 40, 700, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(1.05, 0.96)', offset: 0.4 },
+    REST,
+  ]),
+  beat('hop', 40, 700, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(3px)', offset: 0.4 },
+    REST,
+  ]),
+  beat('tailBase', 160, 580, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-12deg)', offset: 0.4 },
+    REST,
+  ]),
+])
+
+const roll = scene('roll', [
+  // Tips onto its side and rights itself. Deliberately not a full rotation, so
+  // it cannot be mistaken for `spin`.
+  rootBeat(0, 1100, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-14deg)', offset: 0.12 },
+    { transform: 'rotate(-72deg)', offset: 0.38 },
+    { transform: 'rotate(-72deg)', offset: 0.56 },
+    { transform: 'rotate(6deg)', offset: 0.84 },
+    REST,
+  ]),
+  beat('body', 60, 1000, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(1.08, 0.93)', offset: 0.34 },
+    REST,
+  ]),
+  beat('pawL', 120, 900, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(-6px) rotate(-20deg)', offset: 0.36 },
+    { transform: 'translateY(-4px) rotate(-12deg)', offset: 0.6 },
+    REST,
+  ]),
+  beat('pawR', 160, 880, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(-5px) rotate(-16deg)', offset: 0.36 },
+    REST,
+  ]),
+])
+
+const flop = scene('flop', [
+  beat('hop', 0, 950, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(-5px)', offset: 0.14 },
+    { transform: 'translateY(5px) rotate(9deg)', offset: 0.42 },
+    { transform: 'translateY(4px) rotate(7deg)', offset: 0.66 },
+    REST,
+  ]),
+  beat('body', 0, 950, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(1.2, 0.8)', offset: 0.42 },
+    { transform: 'scale(1.12, 0.88)', offset: 0.66 },
+    REST,
+  ]),
+  beat('head', 80, 870, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(6px) rotate(14deg)', offset: 0.44 },
+    { transform: 'translateY(5px) rotate(11deg)', offset: 0.68 },
+    REST,
+  ]),
+  beat('shadow', 0, 950, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleX(1.24)', offset: 0.44 },
+    REST,
+  ]),
+])
+
+const wave = scene('wave', [
+  beat('pawR', 0, 1000, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(-15px) rotate(-14deg)', offset: 0.2 },
+    { transform: 'translateY(-15px) rotate(12deg)', offset: 0.38 },
+    { transform: 'translateY(-15px) rotate(-12deg)', offset: 0.56 },
+    { transform: 'translateY(-15px) rotate(8deg)', offset: 0.72 },
+    REST,
+  ]),
+  beat('head', 60, 900, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-7deg)', offset: 0.26 },
+    { transform: 'rotate(-7deg)', offset: 0.66 },
+    REST,
+  ]),
+  beat('body', 40, 920, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-2deg)', offset: 0.3 },
+    REST,
+  ]),
+])
+
+const nod = scene('nod', [
+  beat('head', 0, 700, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(5px) rotate(4deg)', offset: 0.2 },
+    { transform: 'translateY(-2px)', offset: 0.42 },
+    { transform: 'translateY(4px) rotate(3deg)', offset: 0.64 },
+    REST,
+  ]),
+  beat('earL', 80, 620, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-8deg)', offset: 0.24 },
+    { transform: 'rotate(5deg)', offset: 0.56 },
+    REST,
+  ]),
+  beat('earR', 110, 590, OVERSHOOT, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(8deg)', offset: 0.24 },
+    { transform: 'rotate(-5deg)', offset: 0.56 },
+    REST,
+  ]),
+])
+
+const shake = scene('shake', [
+  // Shaking off water: it travels head to tail, which is why every part has a
+  // different delay rather than one shared wobble.
+  beat('head', 0, 700, 'linear', [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(9deg)', offset: 0.14 },
+    { transform: 'rotate(-9deg)', offset: 0.3 },
+    { transform: 'rotate(7deg)', offset: 0.46 },
+    { transform: 'rotate(-4deg)', offset: 0.64 },
+    REST,
+  ]),
+  beat('earL', 40, 700, 'linear', [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-17deg)', offset: 0.16 },
+    { transform: 'rotate(14deg)', offset: 0.34 },
+    { transform: 'rotate(-8deg)', offset: 0.54 },
+    REST,
+  ]),
+  beat('earR', 40, 700, 'linear', [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(17deg)', offset: 0.16 },
+    { transform: 'rotate(-14deg)', offset: 0.34 },
+    { transform: 'rotate(8deg)', offset: 0.54 },
+    REST,
+  ]),
+  beat('body', 90, 690, 'linear', [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(-4deg)', offset: 0.18 },
+    { transform: 'rotate(4deg)', offset: 0.36 },
+    { transform: 'rotate(-2.4deg)', offset: 0.56 },
+    REST,
+  ]),
+  beat('tailBase', 170, 630, 'linear', [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(16deg)', offset: 0.2 },
+    { transform: 'rotate(-14deg)', offset: 0.42 },
+    { transform: 'rotate(8deg)', offset: 0.64 },
+    REST,
+  ]),
+])
+
+const purr = scene('purr', [
+  // A vibration, not a movement: fast, tiny, and the eyes close over it.
+  beat('body', 0, 900, 'linear', [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateX(0.7px) scale(1.012)', offset: 0.1 },
+    { transform: 'translateX(-0.7px)', offset: 0.2 },
+    { transform: 'translateX(0.6px) scale(1.01)', offset: 0.3 },
+    { transform: 'translateX(-0.6px)', offset: 0.4 },
+    { transform: 'translateX(0.5px)', offset: 0.5 },
+    { transform: 'translateX(-0.4px)', offset: 0.62 },
+    { transform: 'translateX(0.3px)', offset: 0.76 },
+    REST,
+  ]),
+  beat('eyeL', 40, 820, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleY(0.18)', offset: 0.22 },
+    { transform: 'scaleY(0.18)', offset: 0.7 },
+    REST,
+  ]),
+  beat('eyeR', 40, 820, 'ease-in-out', [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleY(0.18)', offset: 0.22 },
+    { transform: 'scaleY(0.18)', offset: 0.7 },
+    REST,
+  ]),
+  beat('head', 60, 800, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(2px) rotate(3deg)', offset: 0.3 },
+    { transform: 'translateY(2px) rotate(3deg)', offset: 0.66 },
+    REST,
+  ]),
+])
+
+const backflip = scene('backflip', [
+  rootBeat(0, 1200, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(14deg)', offset: 0.12 },
+    { transform: 'rotate(-360deg)', offset: 0.8 },
+    REST,
+  ]),
+  beat('hop', 0, 1200, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateY(5px)', offset: 0.12 },
+    { transform: 'translateY(-24px)', offset: 0.42 },
+    { transform: 'translateY(0px)', offset: 0.72 },
+    { transform: 'translateY(-6px)', offset: 0.86 },
+    REST,
+  ]),
+  beat('body', 0, 1200, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(1.12, 0.88)', offset: 0.12 },
+    { transform: 'scale(0.9, 1.14)', offset: 0.42 },
+    { transform: 'scale(1.14, 0.86)', offset: 0.72 },
+    REST,
+  ]),
+  beat('shadow', 0, 1200, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scaleX(0.58)', offset: 0.42 },
+    { transform: 'scaleX(1.26)', offset: 0.72 },
+    REST,
+  ]),
+])
+
+const zoom = scene('zoom', [
+  // Across and back. The travel is capped well inside the card, because a
+  // decoration that escaped its container cost this app two sessions.
+  beat('hop', 0, 1100, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateX(-10px) rotate(-7deg)', offset: 0.22 },
+    { transform: 'translateX(10px) rotate(7deg)', offset: 0.54 },
+    { transform: 'translateX(-5px) rotate(-4deg)', offset: 0.78 },
+    REST,
+  ]),
+  beat('body', 0, 1100, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'scale(1.1, 0.92)', offset: 0.22 },
+    { transform: 'scale(1.1, 0.92)', offset: 0.54 },
+    REST,
+  ]),
+  beat('head', 90, 1000, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'translateX(-3px) rotate(-5deg)', offset: 0.22 },
+    { transform: 'translateX(3px) rotate(5deg)', offset: 0.56 },
+    REST,
+  ]),
+  beat('tailBase', 170, 920, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(22deg)', offset: 0.24 },
+    { transform: 'rotate(-22deg)', offset: 0.58 },
+    REST,
+  ]),
+  beat('tailTip', 250, 840, SETTLE, [
+    { transform: 'none', offset: 0 },
+    { transform: 'rotate(30deg)', offset: 0.26 },
+    { transform: 'rotate(-30deg)', offset: 0.6 },
+    REST,
+  ]),
+])
+
+/**
+ * The ambient pool, fired on a random interval while the cat is just sitting
+ * there. Ordered roughly least to most conspicuous; the picker does not care,
+ * but a human reading this file does.
+ */
+export const AMBIENT_IDS = [
+  'blinkTwice',
+  'earFlick',
+  'tailFlick',
+  'perk',
+  'shiver',
+  'lookLeft',
+  'lookRight',
+  'headTilt',
+  'groom',
+  'yawn',
+  'stretch',
+] as const
+
+/** The tap pool. Fifteen, so that tapping repeatedly keeps finding new ones. */
+export const REACTION_IDS = [
+  'pounce',
+  'spin',
+  'wiggle',
+  'bounce',
+  'squish',
+  'surprise',
+  'headbutt',
+  'roll',
+  'flop',
+  'wave',
+  'nod',
+  'shake',
+  'purr',
+  'backflip',
+  'zoom',
+] as const
+
+/**
+ * The four that get a sound.
+ *
+ * Reactions fire on every tap, and a cue on every one of them turns a toy into
+ * a noise machine the tenth time you poke it. Only the showy ones speak.
+ */
+export const LOUD_REACTIONS: readonly ReactionId[] = ['pounce', 'spin', 'backflip', 'zoom']
+
 export const TIMELINES: Record<TimelineId, Timeline> = {
   idle,
   wake,
   grow,
   greet,
   tuck,
+  // Ambients
+  blinkTwice,
+  earFlick,
+  tailFlick,
+  perk,
+  shiver,
+  lookLeft,
+  lookRight,
+  headTilt,
+  groom,
+  yawn,
+  stretch,
+  // Reactions
+  pounce,
+  spin,
+  wiggle,
+  bounce,
+  squish,
+  surprise,
+  headbutt,
+  roll,
+  flop,
+  wave,
+  nod,
+  shake,
+  purr,
+  backflip,
+  zoom,
+}
+
+/**
+ * Pick from a pool, never repeating what just played.
+ *
+ * The no-repeat rule is the whole reason this is a function rather than a bare
+ * `Math.random()` at the call site. With fifteen reactions, a plain random pick
+ * still shows you the same one twice in a row about seven percent of the time,
+ * and two identical taps in a row is exactly the moment a toy stops feeling
+ * responsive and starts feeling broken.
+ *
+ * `rng` is injectable so the tests can assert the behaviour rather than sample
+ * it and hope.
+ */
+function pickFrom<T>(pool: readonly T[], last: T | null, rng: () => number): T {
+  const choices = pool.length > 1 && last !== null ? pool.filter((x) => x !== last) : pool
+  return choices[Math.min(choices.length - 1, Math.floor(rng() * choices.length))]
+}
+
+export function pickReaction(last: ReactionId | null = null, rng = Math.random): ReactionId {
+  return pickFrom(REACTION_IDS, last, rng)
+}
+
+export function pickAmbient(last: AmbientId | null = null, rng = Math.random): AmbientId {
+  return pickFrom(AMBIENT_IDS, last, rng)
+}
+
+/**
+ * How long to wait before the next ambient.
+ *
+ * Randomised rather than fixed, because a behaviour on a metronome is a
+ * behaviour you can predict, and a cat you can predict is a clock.
+ */
+export const AMBIENT_MIN_GAP = 1900
+export const AMBIENT_MAX_GAP = 5400
+
+export function nextAmbientDelay(rng = Math.random): number {
+  return Math.round(AMBIENT_MIN_GAP + rng() * (AMBIENT_MAX_GAP - AMBIENT_MIN_GAP))
 }
 
 /** Timelines whose last frame is intentionally not identity. */

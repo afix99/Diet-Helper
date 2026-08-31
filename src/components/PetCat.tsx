@@ -92,6 +92,8 @@ export const PetCat = forwardRef<
   const eyeR = useRef<SVGGElement>(null)
   const whiskers = useRef<SVGGElement>(null)
   const hat = useRef<SVGGElement>(null)
+  const pawL = useRef<SVGGElement>(null)
+  const pawR = useRef<SVGGElement>(null)
   const tailBase = useRef<SVGGElement>(null)
   const tailTip = useRef<SVGGElement>(null)
   const shadow = useRef<SVGGElement>(null)
@@ -108,6 +110,8 @@ export const PetCat = forwardRef<
       eyeR: eyeR.current,
       whiskers: whiskers.current,
       hat: hat.current,
+      pawL: pawL.current,
+      pawR: pawR.current,
       tailBase: tailBase.current,
       tailTip: tailTip.current,
       shadow: shadow.current,
@@ -201,6 +205,7 @@ export const PetCat = forwardRef<
         .pj-${uid} { transform-box: fill-box; }
         .pjc-${uid} { transform-origin: 50% 50%; }
         .pjb-${uid} { transform-origin: 50% 100%; }
+        .pjt-${uid} { transform-origin: 50% 0%; }
       `}</style>
 
       <g ref={root} className={`pj-${uid} pjc-${uid}`}>
@@ -325,16 +330,29 @@ export const PetCat = forwardRef<
                 />
               )}
 
-              {/* Front paws, cream like the reference. */}
-              <ellipse cx={45} cy={110} rx={10} ry={6} fill={CREAM} />
-              <ellipse cx={75} cy={110} rx={10} ry={6} fill={CREAM} />
-              <path
-                d="M42 110.5 h 6 M72 110.5 h 6"
-                stroke={coat.mid}
-                strokeWidth={1.4}
-                strokeLinecap="round"
-                opacity={0.5}
-              />
+              {/* Front paws, cream like the reference. Each is its own joint,
+                  pivoting at the top where it would hang from a shoulder, so it
+                  can lift to the face to groom or be held out to wave. */}
+              <g ref={pawL} className={`pj-${uid} pjt-${uid}`}>
+                <ellipse cx={45} cy={110} rx={10} ry={6} fill={CREAM} />
+                <path
+                  d="M42 110.5 h 6"
+                  stroke={coat.mid}
+                  strokeWidth={1.4}
+                  strokeLinecap="round"
+                  opacity={0.5}
+                />
+              </g>
+              <g ref={pawR} className={`pj-${uid} pjt-${uid}`}>
+                <ellipse cx={75} cy={110} rx={10} ry={6} fill={CREAM} />
+                <path
+                  d="M72 110.5 h 6"
+                  stroke={coat.mid}
+                  strokeWidth={1.4}
+                  strokeLinecap="round"
+                  opacity={0.5}
+                />
+              </g>
 
               {/* Rim light along the lit edge. */}
               <path
