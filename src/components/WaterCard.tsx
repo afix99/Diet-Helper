@@ -3,6 +3,7 @@
 import { Card } from './ui'
 import { PressButton } from './PressButton'
 import { sound } from '@/lib/sound'
+import { burstFrom } from './BurstLayer'
 import { useData } from '@/lib/store/provider'
 
 const GLASS_ML = 250
@@ -20,11 +21,18 @@ export function WaterCard({ date }: { date: string }) {
   const targetGlasses = Math.max(1, Math.round(target / GLASS_ML))
   const pct = target > 0 ? Math.min(1, drunk / target) : 0
 
-  const add = (ml: number) =>
+  const add = (ml: number, from?: Element | null) => {
+    const next = Math.max(0, drunk + ml)
     update((d) => ({
       ...d,
       water: { ...d.water, [date]: Math.max(0, (d.water[date] ?? 0) + ml) },
     }))
+    // Only the glass that finishes the target gets a burst. Every glass would
+    // make the eighth one mean nothing.
+    if (ml > 0 && target > 0 && drunk < target && next >= target) {
+      burstFrom(from ?? null, null, { seed: 'water-target', scale: 1.4 })
+    }
+  }
 
   return (
     <Card className="mb-4">
@@ -59,14 +67,19 @@ export function WaterCard({ date }: { date: string }) {
       </div>
 
       <div className="flex gap-1.5">
-        <PressButton full cue="water" onClick={() => add(GLASS_ML)} className="flex-1 !bg-ocean !py-2">
+        <PressButton
+          full
+          cue="water"
+          onClick={(e) => add(GLASS_ML, e.currentTarget)}
+          className="flex-1 !bg-ocean !py-2"
+        >
           + a glass (250ml)
         </PressButton>
         <button
           type="button"
-          onClick={() => {
+          onClick={(e) => {
             sound('water')
-            add(500)
+            add(500, e.currentTarget)
           }}
           className="tap rounded-pill bg-raised px-4 py-2 text-tertiary font-semibold text-muted"
         >

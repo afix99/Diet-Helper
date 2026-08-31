@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { usePresence } from '@/hooks/usePresence'
 import { CustomFoodDialog } from './CustomFoodDialog'
+import { burstFrom } from './BurstLayer'
 import { QuickAdd } from './QuickAdd'
 import { Sheet } from './ui'
 import { Icon } from './icons'
@@ -55,8 +56,11 @@ export function FoodPicker({
     return RECIPES.filter((r) => r.name.toLowerCase().includes(q))
   }, [query])
 
-  const pick = (food: Food) => {
+  const pick = (food: Food, from?: Element | null) => {
     logFood(date, slot, food)
+    // The sheet is already closing, so the burst is thrown from where the row
+    // was rather than from where nothing will be a moment later.
+    burstFrom(from ?? null, food)
     onClose()
   }
 
@@ -201,7 +205,7 @@ function Rail({
 }: {
   title: string
   foods: Food[]
-  onPick: (f: Food) => void
+  onPick: (f: Food, from?: Element | null) => void
 }) {
   return (
     <div className="mb-4">
@@ -211,7 +215,7 @@ function Rail({
           <button
             key={f.id}
             type="button"
-            onClick={() => onPick(f)}
+            onClick={(e) => onPick(f, e.currentTarget)}
             className="tap w-36 shrink-0 rounded-card border border-line bg-surface p-3 text-left"
           >
             <span className="block text-tertiary font-semibold leading-tight line-clamp-2">{f.name}</span>
@@ -257,7 +261,7 @@ function CategoryBlock({
 }: {
   title: string
   foods: Food[]
-  onPick: (f: Food) => void
+  onPick: (f: Food, from?: Element | null) => void
 }) {
   const [open, setOpen] = useState(false)
   return (
@@ -284,11 +288,11 @@ function CategoryBlock({
   )
 }
 
-function FoodRow({ food, onPick }: { food: Food; onPick: (f: Food) => void }) {
+function FoodRow({ food, onPick }: { food: Food; onPick: (f: Food, from?: Element | null) => void }) {
   return (
     <button
       type="button"
-      onClick={() => onPick(food)}
+      onClick={(e) => onPick(food, e.currentTarget)}
       className="tap flex w-full items-center justify-between gap-3 border-b border-line py-3 text-left last:border-0"
     >
       <span className="min-w-0">

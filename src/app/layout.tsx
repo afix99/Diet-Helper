@@ -3,6 +3,7 @@ import { AuthGate } from '@/components/AuthGate'
 import { DataProvider } from '@/lib/store/provider'
 import { OnboardingGate } from '@/components/OnboardingGate'
 import { TabBar } from '@/components/TabBar'
+import { BurstLayer } from '@/components/BurstLayer'
 import { InstallHint } from '@/components/InstallHint'
 import { ServiceWorker } from '@/components/ServiceWorker'
 import { DEFAULT_THEME, THEME_COLORS, THEME_KEY } from '@/lib/theme'
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <InstallHint />
             <ServiceWorker />
             <TabBar />
+            <BurstLayer />
           </div>
         </DataProvider>
       </body>

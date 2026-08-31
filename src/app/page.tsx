@@ -15,6 +15,7 @@ import { WaterCard } from '@/components/WaterCard'
 import { BudgetRing, Card, MacroBar, PageHeader, StatusPill } from '@/components/ui'
 import { statusBand } from '@/lib/nutrition'
 import { sound } from '@/lib/sound'
+import { burstAt } from '@/components/BurstLayer'
 import { targetRisk } from '@/lib/targets'
 import type { MacroKey } from '@/lib/macroFate'
 import {
@@ -82,6 +83,19 @@ export default function TodayPage() {
     if (hit > lastHit.current) {
       setGlow((n) => n + 1)
       sound('goal')
+      // From the ring, and bigger than a food landing: a target is the one
+      // thing on this screen worth a real flourish.
+      const ring = document.querySelector('[data-ring-value]')
+      if (ring) {
+        const r = ring.getBoundingClientRect()
+        burstAt({
+          x: r.left + r.width / 2,
+          y: r.top + r.height / 2,
+          food: null,
+          seed: `target-${hit}`,
+          scale: 1.5,
+        })
+      }
     }
     lastHit.current = hit
   }, [hit])

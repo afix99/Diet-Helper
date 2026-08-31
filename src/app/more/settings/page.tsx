@@ -19,6 +19,7 @@ import { defaultData } from '@/lib/store/defaults'
 import { latestWeight } from '@/lib/selectors'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { SoundToggle } from '@/components/SoundToggle'
+import { MotionToggle } from '@/components/MotionToggle'
 import { openStarterGuide } from '@/components/OnboardingGate'
 import { useData } from '@/lib/store/provider'
 import type { ActivityLevel, Sex, Targets } from '@/lib/types'
@@ -201,13 +202,14 @@ export default function SettingsPage() {
       />
 
       <ListGroup
-        header="Appearance & sound"
+        header="Appearance, sound & motion"
         footer="Dark is not automatically kinder on the eyes. A dark screen widens the pupil, which lets in more optical blur, so bright text on it can look like it is glowing. If reading feels like hard work, try Light."
         className="mb-5"
       >
         <div className="stack gap-4 p-4">
           <ThemeToggle />
           <SoundToggle />
+          <MotionToggle />
         </div>
       </ListGroup>
 

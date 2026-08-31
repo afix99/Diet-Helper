@@ -74,6 +74,28 @@ for (const id of ids) {
   }
 }
 
+// 5. Every badge has its own arrival, and no two share one. A missing entry
+//    silently falls back to the generic pop, which is the sort of thing nobody
+//    notices until all eighteen look identical again.
+const page = readFileSync(root + 'src/app/more/badges/page.tsx', 'utf8')
+const arrivals = new Map(
+  [...page.matchAll(/^  ([a-z0-9_]+): '(animate-won-[a-z0-9-]+)',$/gm)].map((m) => [m[1], m[2]])
+)
+const config = readFileSync(root + 'tailwind.config.ts', 'utf8')
+const seenArrival = new Map()
+for (const id of ids) {
+  const cls = arrivals.get(id)
+  if (!cls) {
+    fail(`${id}: no arrival animation, so it falls back to the generic pop`)
+    continue
+  }
+  const name = cls.replace('animate-', '')
+  if (!config.includes(`'${name}':`)) fail(`${id}: ${name} is not defined in tailwind.config.ts`)
+  if (seenArrival.has(cls)) fail(`${id} and ${seenArrival.get(cls)} share an arrival`)
+  else seenArrival.set(cls, id)
+}
+console.log(`  ${arrivals.size} badge arrivals, all distinct`)
+
 if (failures > 0) {
   console.error(`\n${failures} badge artwork problem(s).`)
   process.exit(1)

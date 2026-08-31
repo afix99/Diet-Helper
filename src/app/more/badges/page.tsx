@@ -4,8 +4,36 @@ import { useMemo } from 'react'
 import { BadgeArt } from '@/components/Emoji'
 import { Card, PageHeader } from '@/components/ui'
 import { badgesFor, streakFor } from '@/lib/selectors'
+import { flourishesOn } from '@/lib/motion'
 import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
+
+/*
+ * Tailwind needs these class names to exist as literal strings somewhere it can
+ * see them, so a template built at runtime would be purged out of the CSS. The
+ * map is that literal, and the check in scripts/check-badges.mjs asserts every
+ * badge has an entry.
+ */
+const ARRIVAL: Record<string, string> = {
+  first_step: 'animate-won-first-step',
+  three_in_a_row: 'animate-won-three-in-a-row',
+  full_week: 'animate-won-full-week',
+  two_weeks: 'animate-won-two-weeks',
+  thirty_days: 'animate-won-thirty-days',
+  comeback: 'animate-won-comeback',
+  omega_squad: 'animate-won-omega-squad',
+  protein_power: 'animate-won-protein-power',
+  fibre_friend: 'animate-won-fibre-friend',
+  hydrated: 'animate-won-hydrated',
+  disiplin: 'animate-won-disiplin',
+  explorer: 'animate-won-explorer',
+  well_rounded: 'animate-won-well-rounded',
+  home_cook: 'animate-won-home-cook',
+  down_1kg: 'animate-won-down-1kg',
+  down_3kg: 'animate-won-down-3kg',
+  down_5kg: 'animate-won-down-5kg',
+  goal_reached: 'animate-won-goal-reached',
+}
 
 export default function BadgesPage() {
   const { data, ready } = useData()
@@ -14,6 +42,9 @@ export default function BadgesPage() {
   const list = useMemo(() => badgesFor(data, today, run.best), [data, today, run.best])
 
   if (!ready) return <p className="py-20 text-center text-secondary text-faint">Loading…</p>
+
+  // Calm keeps the case readable and drops the choreography.
+  const full = flourishesOn()
 
   const unlocked = list.filter((b) => b.unlocked)
 
@@ -68,7 +99,9 @@ export default function BadgesPage() {
                 id={b.id}
                 unlocked={b.unlocked}
                 size={64}
-                className={`relative ${b.unlocked ? 'animate-badge-pop' : ''}`}
+                className={`relative ${
+                  b.unlocked ? (full && ARRIVAL[b.id]) || 'animate-badge-pop' : ''
+                }`}
               />
             </span>
             <p className="mt-1 text-tertiary font-bold leading-tight">{b.name}</p>

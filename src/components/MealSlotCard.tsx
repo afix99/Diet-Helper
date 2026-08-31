@@ -6,6 +6,7 @@ import { Icon } from './icons'
 import { useLogging } from '@/lib/logging'
 import { allFoods, entryMacros, entryName } from '@/lib/selectors'
 import { sound } from '@/lib/sound'
+import { burstFrom } from './BurstLayer'
 import { haptic } from '@/lib/haptics'
 import { usualFor } from '@/lib/usual'
 import { useData } from '@/lib/store/provider'
@@ -201,9 +202,11 @@ export function MealSlotCard({
               <button
                 type="button"
                 aria-label={`Log ${food.name} to ${label.label}`}
-                onClick={() => {
+                onClick={(e) => {
                   haptic('medium')
                   sound('log')
+                  // The food's own burst, thrown from the chip it came from.
+                  burstFrom(e.currentTarget, food)
                   setCommitting(food.id)
                   logFood(date, slot, food)
                 }}

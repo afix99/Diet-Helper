@@ -48,7 +48,8 @@ export function PressButton({
   'aria-label': ariaLabel,
 }: {
   children: ReactNode
-  onClick?: () => void
+  /** Receives the event, so a caller can burst from the button it pressed. */
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
   variant?: Variant
   full?: boolean
   loading?: boolean
@@ -89,13 +90,13 @@ export function PressButton({
       onClick={
         busy
           ? undefined
-          : () => {
+          : (e) => {
               // One moment, three channels: the surface dips, the phone ticks,
               // and something small happens in the ear. Any of them can be off
               // or unsupported without the others noticing.
               haptic(success ? 'success' : hapticWeight)
               sound(cue)
-              onClick?.()
+              onClick?.(e)
             }
       }
       className={`tap relative isolate overflow-hidden rounded-pill px-5 py-3 text-secondary font-bold transition
