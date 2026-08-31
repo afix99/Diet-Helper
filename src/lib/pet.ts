@@ -29,14 +29,20 @@
 /**
  * Whether the cat appears in the app at all.
  *
- * Off while the artwork is being redesigned. The behaviour, the motion rig and
- * every test around them are finished and stay in the build; this gates only
- * the three places the cat reaches the UI — the Today card, the streak pill,
- * and the row in More — so turning it back on is one line rather than a
- * revert. Flat vector was the wrong call for what this is meant to feel like,
- * and shipping it while we know that would be shipping it twice.
+ * On. It was off through two commits while the art was redrawn — flat vector
+ * was the wrong call for what this is meant to feel like — and this is the
+ * line that turned it back on.
+ *
+ * It stays because it is worth keeping, not because it is still needed. It
+ * gates exactly three places: the Today card, the streak pill, and the row in
+ * More. A pet lives on the screen you open every day, which is the one kind of
+ * feature that can turn out to be irritating only after a week of actually
+ * using it. If that happens, this goes back to `false` and the cat is gone,
+ * with the behaviour, the motion rig, the wardrobe and every test around them
+ * still in the build and still passing — no revert, nothing lost, and it can
+ * come back the same way.
  */
-export const PET_ENABLED = false
+export const PET_ENABLED = true
 
 /** The drawable features. Additive: each stage keeps everything before it. */
 export type PetPart =
