@@ -12,7 +12,7 @@ interface BurstDetail {
   seed?: string
   scale?: number
   /** Which palette to draw from; see BurstOptions in burst.ts. */
-  kind?: 'food' | 'exercise'
+  kind?: 'food' | 'exercise' | 'pet'
 }
 
 const EVENT = 'memey:burst'
@@ -34,7 +34,7 @@ export function burstAt(detail: BurstDetail): void {
 export function burstFrom(
   el: Element | null,
   food: Pick<Food, 'id' | 'category'> | null,
-  opts: { seed?: string; scale?: number; kind?: 'food' | 'exercise' } = {}
+  opts: { seed?: string; scale?: number; kind?: 'food' | 'exercise' | 'pet' } = {}
 ): void {
   if (!el) return
   const r = el.getBoundingClientRect()

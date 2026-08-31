@@ -15,7 +15,7 @@
  * close the loop on the action — "yes, that landed" — not to congratulate
  * anyone. Nothing here plays unless a finger caused it.
  */
-export type Cue = 'tap' | 'log' | 'undo' | 'water' | 'goal'
+export type Cue = 'tap' | 'log' | 'undo' | 'water' | 'goal' | 'pet'
 
 export const SOUND_KEY = 'memey-sound'
 
@@ -47,6 +47,15 @@ const CUES: Record<Cue, Note[]> = {
     { hz: D5, at: 0.055, len: 0.13, gain: 0.08 },
   ],
   water: [{ hz: 392, at: 0, len: 0.11, gain: 0.08 }],
+  /*
+   * The cat waking or arriving. Deliberately the quietest thing here and a
+   * major sixth rather than the fifth `log` uses, so it reads as a different
+   * kind of event and never competes with the sound of logging food.
+   */
+  pet: [
+    { hz: A5, at: 0, len: 0.06, gain: 0.05 },
+    { hz: D6, at: 0.05, len: 0.11, gain: 0.045 },
+  ],
   goal: [
     { hz: D5, at: 0, len: 0.1, gain: 0.1 },
     { hz: A5, at: 0.075, len: 0.1, gain: 0.09 },

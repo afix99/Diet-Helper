@@ -1,9 +1,10 @@
 import { DEFAULT_TARGETS, DEFAULTS, SHOPPING_SEED } from '../catalogue'
 import { todayIso } from '../dates'
 import { DEFAULT_PRESET } from '../targets'
+import { DEFAULT_PET_NAME } from '../pet'
 
 export { todayIso }
-import type { Profile } from '../types'
+import type { PetState, Profile } from '../types'
 import type { AppData, ShoppingItem } from './types'
 
 
@@ -25,6 +26,15 @@ export function defaultProfile(): Profile {
     startDate: todayIso(),
     activityLevel: 'sedentary',
   }
+}
+
+/**
+ * The cat starts out rather than in its house, because a feature nobody can see
+ * is a feature nobody finds. `seenStage: -1` means the first open celebrates
+ * once, at whatever stage the diary has already earned.
+ */
+export function defaultPet(): PetState {
+  return { name: DEFAULT_PET_NAME, out: true, seenStage: -1 }
 }
 
 export function defaultShopping(): ShoppingItem[] {
@@ -56,5 +66,6 @@ export function defaultData(): AppData {
     supplements: {},
     targetLocks: {},
     targetPreset: DEFAULT_PRESET,
+    pet: defaultPet(),
   }
 }

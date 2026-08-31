@@ -14,6 +14,7 @@
  */
 import type { AppData } from './store/types'
 import { burnFor, clampMinutes } from './exercise'
+import { normalisePetName } from './pet'
 import type { ActivityLog, Exercise, Food, LogEntry, Macros, MealSlot, Recipe } from './types'
 
 /** Smallest loggable portion, and the step every serving is rounded to. */
@@ -210,6 +211,32 @@ export function setActivityMinutes(d: AppData, id: string, minutes: number): App
       return { ...a, minutes: mins, kcal: Math.round(perMinute * mins) }
     }),
   }
+}
+
+// --- The streak cat -----------------------------------------------------------
+
+export function renamePet(d: AppData, name: string): AppData {
+  return { ...d, pet: { ...d.pet, name: normalisePetName(name) } }
+}
+
+export function sendPetHome(d: AppData): AppData {
+  return { ...d, pet: { ...d.pet, out: false } }
+}
+
+export function callPetOut(d: AppData): AppData {
+  return { ...d, pet: { ...d.pet, out: true } }
+}
+
+/**
+ * Record that a stage has been celebrated.
+ *
+ * Monotonic on purpose: a celebration cannot re-fire, and a diary edit that
+ * lowered the best streak must not re-arm one either. `Math.max` is what makes
+ * "once, ever" true rather than "once, usually".
+ */
+export function markPetStageSeen(d: AppData, stageIndex: number): AppData {
+  if (stageIndex <= d.pet.seenStage) return d
+  return { ...d, pet: { ...d.pet, seenStage: Math.max(d.pet.seenStage, stageIndex) } }
 }
 
 export type { ActivityLog, LogEntry }

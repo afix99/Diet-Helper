@@ -11,6 +11,7 @@ import { QuickAdd } from '@/components/QuickAdd'
 import { MealSlotCard } from '@/components/MealSlotCard'
 import { MacroFateSheet } from '@/components/MacroFateSheet'
 import { ExerciseCard } from '@/components/ExerciseCard'
+import { PetCard } from '@/components/PetCard'
 import { UnderEatingCard } from '@/components/UnderEatingCard'
 import { WaterCard } from '@/components/WaterCard'
 import { BudgetRing, Card, MacroBar, PageHeader, StatusPill } from '@/components/ui'
@@ -28,12 +29,14 @@ import {
   streakFor,
 } from '@/lib/selectors'
 import { formatDay, slotForNow } from '@/lib/dates'
+import { useLogging } from '@/lib/logging'
 import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
 import { MEAL_SLOTS, SLOT_LABELS, type MealSlot } from '@/lib/types'
 
 export default function TodayPage() {
   const { data, ready } = useData()
+  const { callPetOut } = useLogging()
   const [picking, setPicking] = useState<MealSlot | null>(null)
   const [quickAdding, setQuickAdding] = useState<MealSlot | null>(null)
   const [explaining, setExplaining] = useState<MacroKey | null>(null)
@@ -134,10 +137,31 @@ export default function TodayPage() {
         })}
         action={
           run.current > 0 ? (
-            <span className="pill bg-primary/15 text-primary-ink" title="Streak">
-              <Emoji name="flame" size={14} className="animate-breathe" />
-              {run.current}-day streak
-            </span>
+            /*
+             * When the cat is at home the pill is how you call it back: the
+             * glyph becomes a curled cat and the whole thing becomes a button.
+             * It costs no vertical space and puts the cat where the streak
+             * already lives. `/more` carries the same action permanently,
+             * because this pill disappears at a zero streak and the cat must
+             * never be strandable.
+             */
+            data.pet.out ? (
+              <span className="pill bg-primary/15 text-primary-ink" title="Streak">
+                <Emoji name="flame" size={14} className="animate-breathe" />
+                {run.current}-day streak
+              </span>
+            ) : (
+              <button
+                type="button"
+                data-call-pet
+                onClick={() => callPetOut()}
+                aria-label={`Call ${data.pet.name} back out`}
+                className="pill bg-primary/15 text-primary-ink"
+              >
+                <Icon name="cat" size={14} strokeWidth={1.9} />
+                {run.current}-day streak
+              </button>
+            )
           ) : null
         }
       />
@@ -256,6 +280,8 @@ export default function TodayPage() {
         </div>
         )}
       </Card>
+
+      {data.pet.out && <PetCard date={date} />}
 
       {unlocked.length > 0 && (
         <Link href="/more/badges" className="mb-4 block">

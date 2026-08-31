@@ -1,0 +1,201 @@
+'use client'
+
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Card } from './ui'
+import { Icon } from './icons'
+import { PetCat, type PetCatHandle } from './PetCat'
+import { PetSheet } from './PetSheet'
+import { burstAt } from './BurstLayer'
+import { usePresence } from '@/hooks/usePresence'
+import { flourishesOn } from '@/lib/motion'
+import { sound } from '@/lib/sound'
+import { nextStage, poseFor, stageFor, statusLine } from '@/lib/pet'
+import { play, stop, type Rig } from '@/lib/petMotion'
+import { useLogging } from '@/lib/logging'
+import { entriesFor, streakFor } from '@/lib/selectors'
+import { useData } from '@/lib/store/provider'
+
+/**
+ * The streak, with a body.
+ *
+ * Three moments are animated, and each is driven by a change in the data rather
+ * than by a tap, because the point of a pet is that it reacts to your day:
+ *
+ * - **wake** — the first thing logged today. The cat was curled; now it is not.
+ * - **grow** — a new stage reached. Fires once ever, guarded by `seenStage` in
+ *   the store, because a celebration that replays on every visit is a
+ *   notification rather than a reward. (The badges screen still has that bug;
+ *   this deliberately does not copy it.)
+ * - **greet** — called back out of its house.
+ *
+ * Underneath all three, `idle` runs forever with `composite: 'add'`, so the cat
+ * keeps breathing and blinking *through* a leap instead of freezing for it.
+ */
+export function PetCard({ date }: { date: string }) {
+  const { data } = useData()
+  const { markPetStageSeen, sendPetHome } = useLogging()
+  const cat = useRef<PetCatHandle>(null)
+  const glow = useRef<HTMLSpanElement>(null)
+  const count = useRef<HTMLSpanElement>(null)
+  const shell = useRef<HTMLDivElement>(null)
+  const [open, setOpen] = useState(false)
+  const [heldOpen, openLeaving] = usePresence(open || null)
+
+  const run = useMemo(() => streakFor(data, date), [data, date])
+  const loggedToday = useMemo(() => entriesFor(data, date).length > 0, [data, date])
+  const stage = stageFor(run.best)
+  const pose = poseFor(loggedToday)
+  const upcoming = nextStage(run.best)
+
+  /** The rig, plus the two parts that live in the card rather than in the cat. */
+  const rigOf = (): Rig => ({ ...(cat.current?.rig() ?? {}), glow: glow.current, count: count.current })
+
+  /* Idle runs for the life of the card. Restarted when the pose changes,
+     because the curled and sitting rigs are different shapes. */
+  useEffect(() => {
+    if (!flourishesOn()) return
+    const anims = play(rigOf(), 'idle')
+    return () => stop(anims)
+  }, [pose, stage.index])
+
+  /* Wake: the first food of the day. Skipped on the initial mount, since a
+     page load is not an event. */
+  const wokeFor = useRef<string | null>(null)
+  useEffect(() => {
+    if (wokeFor.current === null) {
+      wokeFor.current = loggedToday ? date : ''
+      return
+    }
+    if (loggedToday && wokeFor.current !== date) {
+      wokeFor.current = date
+      play(rigOf(), 'wake')
+      /*
+       * No cue here on purpose. Waking is *caused* by logging, and the log tap
+       * already sounds; adding a second tone to the same action made one tap
+       * play three overlapping cues. The `pet` cue is kept for greet, which is
+       * an action of its own with nothing else attached to it.
+       */
+    }
+    if (!loggedToday) wokeFor.current = ''
+  }, [loggedToday, date])
+
+  /* Grow: once per stage, ever. */
+  const celebrated = useRef(false)
+  useEffect(() => {
+    if (celebrated.current) return
+    if (stage.index <= data.pet.seenStage) return
+    celebrated.current = true
+    markPetStageSeen(stage.index)
+    if (!flourishesOn()) return
+    play(rigOf(), 'grow')
+    sound('goal')
+    /*
+     * Confetti at the moment of landing — thrown from just above the cat's
+     * head rather than from its centre. `burstFrom` uses the element's middle,
+     * which put every particle across the face; the eyes and whiskers are the
+     * thing you are meant to be looking at.
+     */
+    window.setTimeout(() => {
+      const r = shell.current?.getBoundingClientRect()
+      if (!r) return
+      burstAt({
+        x: r.left + r.width / 2,
+        y: r.top + 6,
+        food: null,
+        seed: `pet-${stage.index}`,
+        scale: 0.85,
+        kind: 'pet',
+      })
+    }, 440)
+  }, [stage.index, data.pet.seenStage, markPetStageSeen])
+
+  /* Greet: arriving from the house. `out` flipping true is the trigger. */
+  const wasOut = useRef(data.pet.out)
+  useEffect(() => {
+    if (data.pet.out && !wasOut.current) {
+      play(rigOf(), 'greet')
+      sound('pet')
+    }
+    wasOut.current = data.pet.out
+  }, [data.pet.out])
+
+  const goHome = () => {
+    const anims = play(rigOf(), 'tuck', { onDone: () => sendPetHome() })
+    if (anims.length === 0) sendPetHome()
+    sound('undo')
+  }
+
+  return (
+    <>
+      <Card className="mb-4">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label={`${data.pet.name}, ${stage.name}. Open details`}
+            data-pet
+            className="tap relative shrink-0"
+          >
+            {/*
+              The celebration glow. Base art is 96px and the timeline peaks at
+              1.9x = 182px, which still fits inside the card at a 320px
+              viewport — a decoration that escaped its container cost this app
+              two sessions, so the number is checked in petMotion.test.ts.
+            */}
+            <span
+              ref={glow}
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full bg-avocado/45"
+              style={{ opacity: 0 }}
+            />
+            <span ref={shell} className="block">
+              <PetCat ref={cat} stage={stage} pose={pose} size={92} />
+            </span>
+          </button>
+
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-secondary font-bold">
+              {data.pet.name}
+              <span className="ml-1.5 font-normal text-faint">{stage.name}</span>
+            </p>
+            <p className="text-tertiary text-muted">
+              <span ref={count} className="inline-block font-bold tabular-nums text-primary-ink">
+                {run.current}
+              </span>
+              <span className="ml-1">{run.current === 1 ? 'day' : 'days'}</span>
+              <span className="mx-1.5 text-faint">·</span>
+              {statusLine(pose, run.current)}
+            </p>
+            {upcoming && (
+              <p className="mt-0.5 text-caption text-faint">
+                {upcoming.daysAway} more {upcoming.daysAway === 1 ? 'day' : 'days'} to{' '}
+                {upcoming.stage.name}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={goHome}
+            aria-label={`Send ${data.pet.name} home`}
+            className="tap shrink-0 self-start rounded-pill p-1.5 text-faint"
+          >
+            <Icon name="house" size={17} strokeWidth={1.9} />
+          </button>
+        </div>
+      </Card>
+
+      {heldOpen && (
+        <PetSheet
+          date={date}
+          leaving={openLeaving}
+          onClose={() => setOpen(false)}
+          onSendHome={() => {
+            setOpen(false)
+            goHome()
+          }}
+        />
+      )}
+    </>
+  )
+}

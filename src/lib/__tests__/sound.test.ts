@@ -17,6 +17,7 @@ class FakeGain {
 
 let built = 0
 let oscillators: FakeOscillator[] = []
+let gains: FakeGain[] = []
 
 class FakeAudioContext {
   state = 'running'
@@ -24,7 +25,7 @@ class FakeAudioContext {
   destination = {}
   constructor() { built += 1 }
   createOscillator() { const o = new FakeOscillator(); oscillators.push(o); return o }
-  createGain() { return new FakeGain() }
+  createGain() { const g = new FakeGain(); gains.push(g); return g }
   resume() {}
 }
 
@@ -44,6 +45,7 @@ const fakeStorage = {
 beforeEach(() => {
   built = 0
   oscillators = []
+  gains = []
   store.clear()
   win.AudioContext = FakeAudioContext
   win.localStorage = fakeStorage
@@ -82,6 +84,30 @@ describe('sound', () => {
     expect(oscillators).toHaveLength(2)
     sound('goal')
     expect(oscillators).toHaveLength(5)
+  })
+
+  it('gives the cat a rising cue of its own, quieter than logging', () => {
+    // The envelope starts at a 0.0001 floor and *ramps* to the note's gain, so
+    // the peak is the first ramp target rather than the first set value.
+    const peak = () =>
+      Math.max(
+        ...gains.map((g) =>
+          Number(g.gain.exponentialRampToValueAtTime.mock.calls[0]?.[0] ?? 0)
+        )
+      )
+
+    sound('log')
+    const logPeak = peak()
+    oscillators = []
+    gains = []
+
+    sound('pet')
+    const notes = oscillators.map((o) => o.frequency.value)
+    expect(notes).toHaveLength(2)
+    // Rising, so it reads as arrival rather than as departure.
+    expect(notes[1]).toBeGreaterThan(notes[0])
+    // And never loud enough to compete with the sound of logging food.
+    expect(peak()).toBeLessThan(logPeak)
   })
 
   it('makes undo the reverse of log, so the pair is learnable', () => {

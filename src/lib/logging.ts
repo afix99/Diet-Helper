@@ -103,6 +103,17 @@ export function useLogging() {
     [update]
   )
 
+  const renamePet = useCallback(
+    (name: string) => update((d) => edits.renamePet(d, name)),
+    [update]
+  )
+  const sendPetHome = useCallback(() => update((d) => edits.sendPetHome(d)), [update])
+  const callPetOut = useCallback(() => update((d) => edits.callPetOut(d)), [update])
+  const markPetStageSeen = useCallback(
+    (stageIndex: number) => update((d) => edits.markPetStageSeen(d, stageIndex)),
+    [update]
+  )
+
   const resolveFood = useCallback((id: string) => findFood(data, id), [data])
 
   return {
@@ -117,6 +128,10 @@ export function useLogging() {
     logActivity,
     removeActivity,
     setActivityMinutes,
+    renamePet,
+    sendPetHome,
+    callPetOut,
+    markPetStageSeen,
     resolveFood,
   }
 }

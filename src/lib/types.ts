@@ -115,6 +115,23 @@ export interface ActivityLog {
   kcal: number
 }
 
+/**
+ * The streak cat's own state. Everything else about it — which stage it is at,
+ * what pose it holds — is derived from the diary, so this is only the part the
+ * diary cannot know.
+ */
+export interface PetState {
+  name: string
+  /** False while the cat is in its house and off the Today screen. */
+  out: boolean
+  /**
+   * The highest stage already celebrated. Starts at -1 so an existing diary
+   * gets one welcome at whatever stage it has already earned, rather than six
+   * celebrations in a row.
+   */
+  seenStage: number
+}
+
 export interface Targets extends Macros {
   waterMl: number
 }

@@ -39,6 +39,8 @@ export type IconName =
   | 'teacup'
   | 'glass'
   | 'star'
+  | 'cat'
+  | 'house'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   // A bowl with steam — the app's own mark, matching the launcher icon.
@@ -179,6 +181,25 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
   /* A drinking glass, used at small sizes to show one glass of water. */
   glass: <path d="M6.75 4.25h10.5l-1.2 15.5H7.95z" />,
+  /*
+   * A curled sleeping cat, for the streak pill when the cat is in its house.
+   * Drawn as one closed body with two ears and a wrapped tail rather than a
+   * head-and-body pair, because at 14px two ellipses merge into a blob.
+   */
+  cat: (
+    <>
+      <path d="M4.6 16.4c0-3.1 2.8-5.5 6.2-5.5s6.2 2.4 6.2 5.5v2.1H4.6z" />
+      <path d="M6.2 11.6 5.4 7.8l3 2.1M15.6 11.6l.8-3.8-3 2.1" />
+      <path d="M17 18.5c1.8 0 2.9-1.1 2.9-2.6" />
+    </>
+  ),
+  /* Its house. Paired with the cat glyph wherever the two states are shown. */
+  house: (
+    <>
+      <path d="M3.75 10.6 12 4.25l8.25 6.35V19.5a1 1 0 0 1-1 1H4.75a1 1 0 0 1-1-1z" />
+      <path d="M9.4 20.5v-4.7a2.6 2.6 0 0 1 5.2 0v4.7" />
+    </>
+  ),
   /* Late evening: past the moon, when the lights are off. */
   star: (
     <path d="m12 4 2.35 4.76 5.25.76-3.8 3.7.9 5.23L12 15.98l-4.7 2.47.9-5.23-3.8-3.7 5.25-.76z" />

@@ -75,6 +75,20 @@ export const EXERCISE_STYLES: Record<string, BurstStyle> = {
   'MIND & DESK': { colours: ['#b0a8d0', '#ded8ee', '#8f86b8'], shape: 'dot', weight: 0.45 },
 }
 
+/**
+ * The streak cat reaching a new stage.
+ *
+ * Its own style rather than the fallback, which is a pale pink dot: at the size
+ * a celebration wants, those read as a smudge sitting over the cat's face
+ * rather than as confetti coming off it. Small bright sparks in the app's own
+ * accent colours, and light enough to hang in the air for a moment.
+ */
+export const PET_STYLE: BurstStyle = {
+  colours: ['#f2c94c', '#7ed957', '#ff6fa5'],
+  shape: 'spark',
+  weight: 0.6,
+}
+
 export function exerciseStyleFor(category: string | null | undefined): BurstStyle {
   return (category && EXERCISE_STYLES[category]) || FALLBACK
 }

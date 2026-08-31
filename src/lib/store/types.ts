@@ -1,5 +1,13 @@
 import type { PresetId } from '../targets'
-import type { ActivityLog, Food, LogEntry, Profile, Targets, WeightLog } from '../types'
+import type {
+  ActivityLog,
+  Food,
+  LogEntry,
+  PetState,
+  Profile,
+  Targets,
+  WeightLog,
+} from '../types'
 
 export interface ShoppingItem {
   id: string
@@ -35,6 +43,8 @@ export interface AppData {
   targetLocks: Partial<Record<keyof Targets, boolean>>
   /** Which distribution shape drives the unlocked targets. */
   targetPreset: PresetId
+  /** The streak cat. A new top-level key, so old diaries backfill the default. */
+  pet: PetState
 }
 
 /**
