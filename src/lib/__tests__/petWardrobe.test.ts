@@ -36,6 +36,7 @@ const allBadges = badges({
     fat: 50,
     fibre: 999,
     salmonMeals: 3,
+    burned: 0,
   })),
   targets: { kcal: 1500, protein: 100, carbs: 150, fat: 50, fibre: 25, waterMl: 2000 },
   startWeightKg: 62,
@@ -122,7 +123,12 @@ describe('the catalogue holds together', () => {
   it('keeps every stage index in range', () => {
     const max = PET_STAGES.length - 1
     for (const from of sources) {
-      const index = from.kind === 'stage' ? from.index : from.stageIndex
+      const index =
+        from.kind === 'stage'
+          ? from.index
+          : from.kind === 'badges'
+            ? from.stageIndex
+            : undefined
       if (index === undefined) continue
       expect(index).toBeGreaterThanOrEqual(0)
       expect(index).toBeLessThanOrEqual(max)
