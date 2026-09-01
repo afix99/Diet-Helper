@@ -41,6 +41,7 @@ export function defaultPet(): PetState {
     worn: {},
     costume: null,
     seenUnlocks: [],
+    greeted: false,
   }
 }
 

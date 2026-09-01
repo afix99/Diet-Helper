@@ -293,6 +293,18 @@ export function markUnlocksSeen(d: AppData, ids: readonly string[]): AppData {
   return { ...d, pet: { ...d.pet, seenUnlocks: [...seen] } }
 }
 
+/**
+ * Record that the cat has said its hello.
+ *
+ * Idempotent, and written the moment the bubble appears rather than when it
+ * closes — otherwise reloading mid-greeting would earn a second one, which is
+ * exactly the "once only" this exists to guarantee.
+ */
+export function markGreeted(d: AppData): AppData {
+  if (d.pet.greeted) return d
+  return { ...d, pet: { ...d.pet, greeted: true } }
+}
+
 // --- warnings the user has closed --------------------------------------------
 
 /**

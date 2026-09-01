@@ -166,7 +166,7 @@ export function PetWardrobe({ date }: { date: string }) {
 /** A costume's own pieces, for its preview swatch. */
 function costumeLook(id: string, unlocked: ReadonlySet<string>) {
   return wornPieces(
-    { name: '', out: true, seenStage: 0, worn: {}, costume: id, seenUnlocks: [] },
+    { name: '', out: true, seenStage: 0, worn: {}, costume: id, seenUnlocks: [], greeted: true },
     new Set([...unlocked, id])
   )
 }

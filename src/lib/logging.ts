@@ -139,6 +139,8 @@ export function useLogging() {
     [update]
   )
 
+  const markGreeted = useCallback(() => update((d) => edits.markGreeted(d)), [update])
+
   const dismissUnderEating = useCallback(
     (dismissal: UnderEatingDismissalRecord) =>
       update((d) => edits.dismissUnderEating(d, dismissal)),
@@ -172,6 +174,7 @@ export function useLogging() {
     wearCostume,
     takeOffCostume,
     markUnlocksSeen,
+    markGreeted,
     dismissUnderEating,
     restoreUnderEating,
     resolveFood,

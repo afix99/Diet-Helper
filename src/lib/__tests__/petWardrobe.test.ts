@@ -17,13 +17,14 @@ import { DRAWN_PIECES } from '@/components/PetAccessory'
 import { PET_STAGES } from '../pet'
 import { badges } from '../nutrition'
 import {
+  markGreeted,
   markUnlocksSeen,
   removeItem,
   takeOffCostume,
   wearCostume,
   wearItem,
 } from '../logEdits'
-import { defaultData, defaultPet } from '../store/defaults'
+import { defaultData, defaultPet, hydrate } from '../store/defaults'
 import type { PetState } from '../types'
 
 /** Every badge, all unlocked, so the catalogue can be exercised against real ids. */
@@ -358,5 +359,39 @@ describe('the copy stays kind', () => {
       ...COSTUMES.map((c) => requirementFor(c.id, allBadges)),
     ]
     for (const line of copy) expect(line).not.toMatch(banned)
+  })
+})
+
+
+describe('the cat says hello exactly once', () => {
+  it('starts a new diary ungreeted', () => {
+    expect(defaultPet().greeted).toBe(false)
+  })
+
+  it('flips the flag, and only the first time', () => {
+    const base = defaultData()
+    const once = markGreeted(base)
+    expect(once.pet.greeted).toBe(true)
+    // Same object back on a second call: nothing re-renders, nothing re-saves,
+    // and no second greeting can be earned.
+    expect(markGreeted(once)).toBe(once)
+  })
+
+  it('backfills onto a diary saved before the greeting existed', () => {
+    /*
+     * Existing diaries have a `pet` object with no `greeted` key at all. The
+     * store merges one level deep, so without hydrate() the field would arrive
+     * undefined — falsy, which happens to work, but only by luck. This pins it.
+     */
+    const old = {
+      ...defaultData(),
+      pet: { name: 'Comel', out: true, seenStage: 3 },
+    } as unknown as ReturnType<typeof defaultData>
+    expect(hydrate(old).pet.greeted).toBe(false)
+  })
+
+  it('leaves an already-greeted diary alone when it reloads', () => {
+    const greeted = markGreeted(defaultData())
+    expect(hydrate(greeted).pet.greeted).toBe(true)
   })
 })

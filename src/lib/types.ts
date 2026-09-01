@@ -147,6 +147,13 @@ export interface PetState {
   costume: string | null
   /** Unlock ids already looked at, so a new item is marked once, not forever. */
   seenUnlocks: string[]
+  /**
+   * False until the cat has said its one hello.
+   *
+   * Same shape as `seenStage`: a greeting that replayed on every launch would
+   * be a notification, and the whole point of this one is that it happens once.
+   */
+  greeted: boolean
 }
 
 /**

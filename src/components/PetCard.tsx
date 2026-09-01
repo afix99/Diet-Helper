@@ -5,6 +5,7 @@ import { Card } from './ui'
 import { Icon } from './icons'
 import { PetCat, type PetCatHandle } from './PetCat'
 import { PetSheet } from './PetSheet'
+import { PetBubble } from './PetBubble'
 import { burstAt } from './BurstLayer'
 import { usePresence } from '@/hooks/usePresence'
 import { flourishesOn } from '@/lib/motion'
@@ -54,9 +55,18 @@ import { useData } from '@/lib/store/provider'
  * streak beside it do that instead. A tap that both played an animation and
  * covered it with a sheet would have shown you neither.
  */
+/**
+ * The cat's one hello, in the user's own words.
+ *
+ * Kept verbatim — lowercase and all. It is their phrase for themselves, and
+ * tidying someone's endearment into title case is not a copy edit, it is
+ * changing what they said.
+ */
+const GREETING = 'Welcome home memey cantik'
+
 export function PetCard({ date }: { date: string }) {
   const { data } = useData()
-  const { markPetStageSeen, sendPetHome } = useLogging()
+  const { markPetStageSeen, sendPetHome, markGreeted } = useLogging()
   const cat = useRef<PetCatHandle>(null)
   const glow = useRef<HTMLSpanElement>(null)
   const count = useRef<HTMLSpanElement>(null)
@@ -199,6 +209,36 @@ export function PetCard({ date }: { date: string }) {
     []
   )
 
+  /*
+   * The one hello.
+   *
+   * `greeted` is written the instant the bubble goes up, not when it comes
+   * down: a reload halfway through would otherwise earn a second greeting, and
+   * "once only" was the whole request. `shown` is separate local state so the
+   * bubble survives that write — flipping the stored flag immediately would
+   * otherwise unmount the thing that just appeared.
+   */
+  const [greeting, setGreeting] = useState(false)
+  const greetedOnce = useRef(false)
+  useEffect(() => {
+    if (greetedOnce.current || data.pet.greeted) return
+    greetedOnce.current = true
+    // A beat, so it does not collide with the page's own entrance.
+    const up = window.setTimeout(() => {
+      setGreeting(true)
+      markGreeted()
+      if (flourishesOn()) play(rigOf(), 'greet')
+    }, 600)
+    return () => window.clearTimeout(up)
+  }, [data.pet.greeted, markGreeted])
+
+  /* Long enough to read twice, short enough not to become furniture. */
+  useEffect(() => {
+    if (!greeting) return
+    const down = window.setTimeout(() => setGreeting(false), 6000)
+    return () => window.clearTimeout(down)
+  }, [greeting])
+
   /* Greet: arriving from the house. `out` flipping true is the trigger. */
   const wasOut = useRef(data.pet.out)
   useEffect(() => {
@@ -218,6 +258,9 @@ export function PetCard({ date }: { date: string }) {
   return (
     <>
       <Card className="mb-4">
+        {greeting && (
+          <PetBubble text={GREETING} onDismiss={() => setGreeting(false)} />
+        )}
         <div className="flex items-center gap-3">
           {/* The cat is the toy: tapping it plays, it does not navigate. */}
           <button
