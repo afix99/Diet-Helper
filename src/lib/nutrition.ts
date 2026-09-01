@@ -153,6 +153,9 @@ export interface DayRecord {
   date: string
   kcal: number
   protein: number
+  /** Carried so the macro chart can plot a week of them, not just today. */
+  carbs: number
+  fat: number
   fibre: number
   /**
    * Calories burned above rest by logged activity. Zero when nothing was

@@ -1,11 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { MIN_LOW_DAYS, underEating } from '../underEating'
+import {
+  MIN_LOW_DAYS,
+  RESURFACE_GAP_DAYS,
+  dismissalFor,
+  targetWarningVisible,
+  underEating,
+  underEatingVisible,
+  type UnderEatingDismissal,
+} from '../underEating'
 import type { DayRecord } from '../nutrition'
 
 const day = (date: string, kcal: number, burned = 0): DayRecord => ({
   date,
   kcal,
   protein: 0,
+  carbs: 0,
+  fat: 0,
   fibre: 0,
   burned,
   salmonMeals: 0,
@@ -105,5 +115,139 @@ describe('exercise counts against the floor', () => {
     // A blank day with a workout on it is not evidence of not eating.
     const days = [day('2026-08-27', 0, 700), day('2026-08-28', 0, 700)]
     expect(underEating(days, profile, '2026-08-29').triggered).toBe(false)
+  })
+})
+
+
+/* --- closing it ----------------------------------------------------------- */
+
+/** A fortnight ending the day before TODAY, with the named dates run low. */
+const fortnight = (lowDates: string[], normalKcal = 1800): DayRecord[] =>
+  Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(Date.UTC(2026, 7, 15 + i)).toISOString().slice(0, 10)
+    return day(d, lowDates.includes(d) ? 500 : normalKcal)
+  })
+
+const check = (days: DayRecord[], today = TODAY) =>
+  underEating(days, profile, today, 62)
+
+describe('the warning can be closed, and stays closed', () => {
+  const days = fortnight(['2026-08-26', '2026-08-27'])
+  const live = check(days)
+
+  it('is on screen before anything is dismissed', () => {
+    expect(live.triggered).toBe(true)
+    expect(underEatingVisible(live, null, 800, days)).toBe(true)
+  })
+
+  it('goes quiet once closed', () => {
+    /*
+     * The whole point of the change. A warning you cannot dismiss stops being
+     * information and becomes furniture.
+     */
+    const d = dismissalFor(live, 800, TODAY)
+    expect(underEatingVisible(live, d, 800, days)).toBe(false)
+  })
+
+  it('records the situation rather than a bare flag', () => {
+    const d = dismissalFor(live, 800, TODAY)
+    expect(d.targetKcal).toBe(800)
+    expect(d.throughDate).toBe('2026-08-27')
+    expect(d.at).toBe(TODAY)
+  })
+
+  it('stays quiet while the same stretch simply continues', () => {
+    // One more low day, no normal days in between: same situation, not news.
+    const more = fortnight(['2026-08-26', '2026-08-27', '2026-08-28'])
+    const d: UnderEatingDismissal = {
+      at: TODAY,
+      targetKcal: 800,
+      throughDate: '2026-08-27',
+    }
+    expect(underEatingVisible(check(more), d, 800, more)).toBe(false)
+  })
+
+  it('stays quiet when the target goes up', () => {
+    const d = dismissalFor(live, 800, TODAY)
+    expect(underEatingVisible(live, d, 1400, days)).toBe(false)
+  })
+})
+
+describe('what counts as the situation changing', () => {
+  it('speaks again when the target is lowered further', () => {
+    // Dropping the target after reading the warning is a new decision about
+    // the very number the warning is about.
+    const days = fortnight(['2026-08-26', '2026-08-27'])
+    const d = dismissalFor(check(days), 800, TODAY)
+    expect(underEatingVisible(check(days), d, 700, days)).toBe(true)
+  })
+
+  it('speaks again when low days restart after a normal stretch', () => {
+    /*
+     * A dip, then a clear run of normal days, then another dip is a different
+     * pattern from one long stretch — and only the second one is news.
+     */
+    const days = fortnight(['2026-08-20', '2026-08-21', '2026-08-27', '2026-08-28'])
+    const d: UnderEatingDismissal = {
+      at: '2026-08-22',
+      targetKcal: 800,
+      throughDate: '2026-08-21',
+    }
+    expect(underEatingVisible(check(days), d, 800, days)).toBe(true)
+  })
+
+  it('needs a real break, not one quiet day', () => {
+    // 2026-08-22 normal, then low again: only one normal day, so it is the
+    // same stretch wobbling rather than a new one starting.
+    const days = fortnight(['2026-08-20', '2026-08-21', '2026-08-23'])
+    const d: UnderEatingDismissal = {
+      at: '2026-08-22',
+      targetKcal: 800,
+      throughDate: '2026-08-21',
+    }
+    expect(RESURFACE_GAP_DAYS).toBeGreaterThan(1)
+    expect(underEatingVisible(check(days), d, 800, days)).toBe(false)
+  })
+
+  it('cannot be tricked into a break by simply not logging', () => {
+    /*
+     * Unlogged days are not evidence of eating. If they counted as the normal
+     * stretch, stopping logging for a few days would resurface the warning —
+     * rewarding the one behaviour the app least wants to encourage.
+     */
+    const days = fortnight(['2026-08-20', '2026-08-21', '2026-08-27']).map((d) =>
+      d.date > '2026-08-21' && d.date < '2026-08-27' ? { ...d, kcal: 0 } : d
+    )
+    const dis: UnderEatingDismissal = {
+      at: '2026-08-22',
+      targetKcal: 800,
+      throughDate: '2026-08-21',
+    }
+    expect(underEatingVisible(check(days), dis, 800, days)).toBe(false)
+  })
+
+  it('never shows when there is nothing to warn about', () => {
+    const fine = fortnight([])
+    expect(check(fine).triggered).toBe(false)
+    expect(underEatingVisible(check(fine), null, 1800, fine)).toBe(false)
+  })
+})
+
+describe('the small reminder shares the dismissal', () => {
+  it('hides once the big one is closed', () => {
+    // Two lines about one subject, one of them un-silenceable, reads as the
+    // app ignoring you.
+    const d: UnderEatingDismissal = { at: TODAY, targetKcal: 800, throughDate: TODAY }
+    expect(targetWarningVisible(true, null, 800)).toBe(true)
+    expect(targetWarningVisible(true, d, 800)).toBe(false)
+  })
+
+  it('comes back if the target is lowered again', () => {
+    const d: UnderEatingDismissal = { at: TODAY, targetKcal: 800, throughDate: TODAY }
+    expect(targetWarningVisible(true, d, 750)).toBe(true)
+  })
+
+  it('says nothing when the target is not below resting', () => {
+    expect(targetWarningVisible(false, null, 1800)).toBe(false)
   })
 })

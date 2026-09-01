@@ -24,20 +24,22 @@ import type { MacroKey } from '@/lib/macroFate'
 import {
   badgesFor,
   burnedOn,
+  dayRecords,
   dayTotals,
   entriesBySlot,
   latestWeight,
   streakFor,
 } from '@/lib/selectors'
-import { formatDay, slotForNow } from '@/lib/dates'
+import { addDays, formatDay, slotForNow } from '@/lib/dates'
 import { useLogging } from '@/lib/logging'
+import { dismissalFor, targetWarningVisible, underEating } from '@/lib/underEating'
 import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
 import { MEAL_SLOTS, SLOT_LABELS, type MealSlot } from '@/lib/types'
 
 export default function TodayPage() {
   const { data, ready } = useData()
-  const { callPetOut } = useLogging()
+  const { callPetOut, dismissUnderEating } = useLogging()
   const [picking, setPicking] = useState<MealSlot | null>(null)
   const [quickAdding, setQuickAdding] = useState<MealSlot | null>(null)
   const [explaining, setExplaining] = useState<MacroKey | null>(null)
@@ -64,6 +66,17 @@ export default function TodayPage() {
     () => targetRisk(data.profile, data.targets.kcal, latestWeight(data)),
     [data]
   )
+
+  /*
+   * The same check the card below runs, needed here only so that closing the
+   * small reminder records *what* was closed rather than a bare flag. Cheap:
+   * dayRecords buckets the log in one pass precisely because this reads a
+   * fortnight of it on every render.
+   */
+  const underEatingCheck = useMemo(() => {
+    const dates = Array.from({ length: 14 }, (_, i) => addDays(date, i - 13))
+    return underEating(dayRecords(data, dates), data.profile, date, latestWeight(data))
+  }, [data, date])
 
   /*
    * Exercise raises the allowance rather than subtracting from what you ate.
@@ -211,18 +224,35 @@ export default function TodayPage() {
             Edit target
           </Link>
         </div>
-        {risk.belowResting && risk.restingKcal !== null && (
-          <Link
-            href="/more/settings"
-            className="tap mt-3 flex items-center gap-2 rounded-inner bg-amber/10 px-3 py-2 text-left text-caption leading-snug text-amber"
-          >
-            <span className="flex-1">
-              A reminder, not a rule: {data.targets.kcal.toLocaleString('en-GB')} kcal is under
-              the {risk.restingKcal.toLocaleString('en-GB')} your body burns at rest.
-            </span>
-            <Icon name="chevron" size={13} strokeWidth={2.5} className="shrink-0" />
-          </Link>
-        )}
+        {/* Closeable, and it shares the big card's dismissal — see
+            targetWarningVisible. Two lines about the same subject, one of them
+            un-silenceable, is how a reminder turns into nagging. */}
+        {targetWarningVisible(
+          risk.belowResting,
+          data.dismissals.underEating,
+          data.targets.kcal
+        ) &&
+          risk.restingKcal !== null && (
+            <div className="mt-3 flex items-center gap-1 rounded-inner bg-amber/10 pr-1 text-caption leading-snug text-amber">
+              <Link href="/more/settings" className="tap flex flex-1 items-center gap-2 px-3 py-2 text-left">
+                <span className="flex-1">
+                  A reminder, not a rule: {data.targets.kcal.toLocaleString('en-GB')} kcal is
+                  under the {risk.restingKcal.toLocaleString('en-GB')} your body burns at rest.
+                </span>
+                <Icon name="chevron" size={13} strokeWidth={2.5} className="shrink-0" />
+              </Link>
+              <button
+                type="button"
+                onClick={() =>
+                  dismissUnderEating(dismissalFor(underEatingCheck, data.targets.kcal, date))
+                }
+                aria-label="Close this reminder"
+                className="tap shrink-0 rounded-pill p-1.5 text-amber/70"
+              >
+                <Icon name="close" size={14} strokeWidth={2.2} />
+              </button>
+            </div>
+          )}
 
         <button
           type="button"

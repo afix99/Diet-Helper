@@ -17,6 +17,8 @@ import {
 import { supabaseClient } from '@/lib/store'
 import { defaultData } from '@/lib/store/defaults'
 import { latestWeight } from '@/lib/selectors'
+import { formatDay } from '@/lib/dates'
+import { useLogging } from '@/lib/logging'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { SoundToggle } from '@/components/SoundToggle'
 import { MotionToggle } from '@/components/MotionToggle'
@@ -41,6 +43,7 @@ const TARGET_FIELDS: { key: keyof Targets; label: string; unit: string }[] = [
 
 export default function SettingsPage() {
   const { data, ready, update, storeKind } = useData()
+  const { restoreUnderEating } = useLogging()
   const [showDisclaimer, setShowDisclaimer] = useState(false)
   const [confirmingReset, setConfirmingReset] = useState(false)
 
@@ -228,6 +231,30 @@ export default function SettingsPage() {
           <Icon name="chevron" size={16} strokeWidth={2.25} className="shrink-0 text-faint" />
         </button>
       </ListGroup>
+
+      {/* Closing the reminder is remembered, so the way to un-close it has to
+          live somewhere findable. Only shown once there is something to
+          restore — an always-present row about a warning you never dismissed
+          would itself be a small nag. */}
+      {data.dismissals.underEating && (
+        <ListGroup header="Reminders" className="mb-5">
+          <button
+            type="button"
+            onClick={restoreUnderEating}
+            className="tap flex w-full items-center justify-between px-4 py-3 text-left"
+          >
+            <span>
+              <span className="block text-secondary font-semibold">
+                Show the low-intake reminder again
+              </span>
+              <span className="block text-tertiary text-muted">
+                Closed on {formatDay(data.dismissals.underEating.at, { day: 'numeric', month: 'long' })}
+              </span>
+            </span>
+            <Icon name="chevron" size={16} strokeWidth={2.25} className="shrink-0 text-faint" />
+          </button>
+        </ListGroup>
+      )}
 
       <ListGroup header="Profile">
         <div className="grid grid-cols-2 gap-3 p-4">

@@ -24,7 +24,7 @@ const day = (
   protein = 95,
   fibre = 30,
   salmonMeals = 0
-): DayRecord => ({ date, kcal, protein, fibre, burned: 0, salmonMeals })
+): DayRecord => ({ date, kcal, protein, carbs: 0, fat: 0, fibre, burned: 0, salmonMeals })
 
 const run = (over: Partial<InsightInput>) =>
   insights({

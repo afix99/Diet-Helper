@@ -4,7 +4,7 @@ import { DEFAULT_PRESET } from '../targets'
 import { DEFAULT_PET_NAME } from '../pet'
 
 export { todayIso }
-import type { PetState, Profile } from '../types'
+import type { Dismissals, PetState, Profile } from '../types'
 import type { AppData, ShoppingItem } from './types'
 
 
@@ -53,8 +53,16 @@ export function defaultPet(): PetState {
  * it is why the wardrobe needs no migration: it runs on every load, and is a
  * no-op once the fields are there.
  */
+export function defaultDismissals(): Dismissals {
+  return { underEating: null }
+}
+
 export function hydrate(data: AppData): AppData {
-  return { ...data, pet: { ...defaultPet(), ...data.pet } }
+  return {
+    ...data,
+    pet: { ...defaultPet(), ...data.pet },
+    dismissals: { ...defaultDismissals(), ...data.dismissals },
+  }
 }
 
 export function defaultShopping(): ShoppingItem[] {
@@ -87,5 +95,6 @@ export function defaultData(): AppData {
     targetLocks: {},
     targetPreset: DEFAULT_PRESET,
     pet: defaultPet(),
+    dismissals: defaultDismissals(),
   }
 }

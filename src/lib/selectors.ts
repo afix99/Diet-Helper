@@ -112,6 +112,8 @@ export function dayRecords(data: AppData, dates: readonly string[]): DayRecord[]
       date,
       kcal: totals.kcal,
       protein: totals.protein,
+      carbs: totals.carbs,
+      fat: totals.fat,
       fibre: totals.fibre,
       burned: burnByDate.get(date) ?? 0,
       salmonMeals: entries.filter((e) => isSalmon(entryName(e, data.customFoods))).length,

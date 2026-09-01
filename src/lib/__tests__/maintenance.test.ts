@@ -48,6 +48,8 @@ const days: DayRecord[] = Array.from({ length: 56 }, (_, i) => ({
   date: addDays(TODAY, -(56 - i)),
   kcal: 1700,
   protein: 90,
+  carbs: 0,
+  fat: 0,
   fibre: 20,
   burned: 0,
   salmonMeals: 0,

@@ -17,6 +17,7 @@ import { burnFor, clampMinutes } from './exercise'
 import { normalisePetName } from './pet'
 import type {
   AccessorySlot,
+  UnderEatingDismissalRecord,
   ActivityLog,
   Exercise,
   Food,
@@ -290,6 +291,27 @@ export function markUnlocksSeen(d: AppData, ids: readonly string[]): AppData {
   for (const id of ids) seen.add(id)
   if (seen.size === before) return d
   return { ...d, pet: { ...d.pet, seenUnlocks: [...seen] } }
+}
+
+// --- warnings the user has closed --------------------------------------------
+
+/**
+ * Close the under-eating warning.
+ *
+ * Records what was true at the moment it was closed rather than a flag, so
+ * `underEatingVisible` can tell "already read and decided on" apart from "this
+ * is a new situation". See the rule at the bottom of underEating.ts.
+ */
+export function dismissUnderEating(
+  d: AppData,
+  dismissal: UnderEatingDismissalRecord
+): AppData {
+  return { ...d, dismissals: { ...d.dismissals, underEating: dismissal } }
+}
+
+/** Undo it, from Settings. Nothing the app can do should be a one-way door. */
+export function restoreUnderEating(d: AppData): AppData {
+  return { ...d, dismissals: { ...d.dismissals, underEating: null } }
 }
 
 export type { ActivityLog, LogEntry }

@@ -149,6 +149,23 @@ export interface PetState {
   seenUnlocks: string[]
 }
 
+/**
+ * Warnings the user has closed.
+ *
+ * In the diary rather than in localStorage: closing a warning is a decision
+ * about your own body, and it should hold on every device you open the app on,
+ * not just the phone you happened to dismiss it from.
+ */
+export interface Dismissals {
+  underEating: UnderEatingDismissalRecord | null
+}
+
+export interface UnderEatingDismissalRecord {
+  at: string
+  targetKcal: number
+  throughDate: string
+}
+
 export interface Targets extends Macros {
   waterMl: number
 }

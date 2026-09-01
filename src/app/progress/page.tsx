@@ -2,12 +2,13 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Card, EmptyState, ListGroup, PageHeader, StatusPill } from '@/components/ui'
+import { Card, ListGroup, PageHeader, StatusPill } from '@/components/ui'
 import { insights } from '@/lib/insights'
 import { Icon } from '@/components/icons'
 import { TrendCard } from '@/components/TrendCard'
+import { ProgressCharts } from '@/components/ProgressCharts'
 import { PickRail } from '@/components/PickRail'
-import { rollingAverage, round1, statusBand } from '@/lib/nutrition'
+import { round1, statusBand } from '@/lib/nutrition'
 import { dayRecords, latestWeight, weekDates, weekOf } from '@/lib/selectors'
 import { formatDay } from '@/lib/dates'
 import { useData } from '@/lib/store/provider'
@@ -19,11 +20,6 @@ export default function ProgressPage() {
   const [input, setInput] = useState('')
   const today = todayIso()
 
-  const sorted = useMemo(
-    () => [...data.weights].sort((a, b) => a.date.localeCompare(b.date)),
-    [data.weights]
-  )
-  const trend = useMemo(() => rollingAverage(sorted.map((w) => w.weightKg)), [sorted])
   const latest = latestWeight(data)
 
   // Observations run over the last four weeks of *logged* days, never planned
@@ -130,21 +126,7 @@ export default function ProgressPage() {
         </p>
       </Card>
 
-      <Card className="mb-4">
-        <h2 className="mb-1 text-secondary font-bold">Weight trend</h2>
-        {sorted.length < 2 ? (
-          <EmptyState art="scales" title="Need at least 2 readings" hint="Log twice to see a trend" />
-        ) : (
-          <WeightChart
-            points={sorted.map((w, i) => ({
-              date: w.date,
-              weight: w.weightKg,
-              avg: trend[i],
-            }))}
-            goal={data.profile.goalWeightKg}
-          />
-        )}
-      </Card>
+      <ProgressCharts today={today} />
 
       <TrendCard today={today} />
 
@@ -245,83 +227,6 @@ function Stat({
         <span className="ml-0.5 text-tertiary font-semibold text-faint">{unit}</span>
       </p>
       <p className="text-tertiary font-semibold">{label}</p>
-    </div>
-  )
-}
-
-/**
- * Inline SVG rather than a charting library: two series over at most a few
- * dozen points does not justify 50 kB on a phone.
- */
-function WeightChart({
-  points,
-  goal,
-}: {
-  points: { date: string; weight: number; avg: number | null }[]
-  goal: number
-}) {
-  const w = 320
-  const h = 150
-  const pad = { top: 10, right: 8, bottom: 20, left: 30 }
-  const values = [...points.map((p) => p.weight), goal]
-  const min = Math.min(...values) - 0.5
-  const max = Math.max(...values) + 0.5
-  const span = max - min || 1
-
-  const x = (i: number) =>
-    pad.left + (i / Math.max(1, points.length - 1)) * (w - pad.left - pad.right)
-  const y = (v: number) => pad.top + (1 - (v - min) / span) * (h - pad.top - pad.bottom)
-
-  const line = (get: (p: (typeof points)[number]) => number | null) =>
-    points
-      .map((p, i) => {
-        const v = get(p)
-        return v === null ? null : `${i === 0 ? 'M' : 'L'}${x(i)},${y(v)}`
-      })
-      .filter(Boolean)
-      .join(' ')
-
-  return (
-    <div className="overflow-x-auto">
-      <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img" aria-label="Weekly weight chart">
-        <line
-          x1={pad.left}
-          x2={w - pad.right}
-          y1={y(goal)}
-          y2={y(goal)}
-          stroke="rgb(var(--avocado))"
-          strokeWidth="1.5"
-          strokeDasharray="4 4"
-        />
-        <text x={pad.left} y={y(goal) - 4} fontSize="8" fill="rgb(var(--avocado))">
-          goal {goal}kg
-        </text>
-        <path d={line((p) => p.weight)} fill="none" stroke="rgb(var(--line))" strokeWidth="1.5" />
-        <path
-          d={line((p) => p.avg)}
-          fill="none"
-          stroke="rgb(var(--primary))"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {points.map((p, i) => (
-          <circle key={p.date} cx={x(i)} cy={y(p.weight)} r="2.5" fill="rgb(var(--primary))" />
-        ))}
-        <text x={2} y={y(max - 0.5)} fontSize="8" fill="rgb(var(--faint))">
-          {round1(max)}
-        </text>
-        <text x={2} y={y(min + 0.5)} fontSize="8" fill="rgb(var(--faint))">
-          {round1(min)}
-        </text>
-      </svg>
-      <p className="mt-1 text-caption text-faint">
-        <span className="mr-1 inline-block h-[3px] w-3.5 rounded-pill bg-primary align-middle" />
-        7-day average
-        <span className="mx-1">·</span>
-        <span className="mr-1 inline-block h-[3px] w-3.5 rounded-pill bg-line align-middle" />
-        daily reading
-      </p>
     </div>
   )
 }

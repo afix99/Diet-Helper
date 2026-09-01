@@ -6,7 +6,14 @@ import { RECIPES } from './catalogue'
 import { findFood, latestWeight } from './selectors'
 import { bodyWeightFor } from './exercise'
 import * as edits from './logEdits'
-import type { AccessorySlot, Exercise, Food, LogEntry, MealSlot } from './types'
+import type {
+  AccessorySlot,
+  Exercise,
+  Food,
+  LogEntry,
+  MealSlot,
+  UnderEatingDismissalRecord,
+} from './types'
 
 /**
  * Mutations for the food log, shared by Today, Week and Recipes.
@@ -132,6 +139,16 @@ export function useLogging() {
     [update]
   )
 
+  const dismissUnderEating = useCallback(
+    (dismissal: UnderEatingDismissalRecord) =>
+      update((d) => edits.dismissUnderEating(d, dismissal)),
+    [update]
+  )
+  const restoreUnderEating = useCallback(
+    () => update((d) => edits.restoreUnderEating(d)),
+    [update]
+  )
+
   const resolveFood = useCallback((id: string) => findFood(data, id), [data])
 
   return {
@@ -155,6 +172,8 @@ export function useLogging() {
     wearCostume,
     takeOffCostume,
     markUnlocksSeen,
+    dismissUnderEating,
+    restoreUnderEating,
     resolveFood,
   }
 }

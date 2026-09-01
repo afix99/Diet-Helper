@@ -46,6 +46,8 @@ const daysOf = (n: number, kcal: number, burned = 0): DayRecord[] =>
     date: addDays(TODAY, -(n - i)),
     kcal,
     protein: 100,
+    carbs: 0,
+    fat: 0,
     fibre: 25,
     burned,
     salmonMeals: 0,

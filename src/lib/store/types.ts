@@ -1,6 +1,7 @@
 import type { PresetId } from '../targets'
 import type {
   ActivityLog,
+  Dismissals,
   Food,
   LogEntry,
   PetState,
@@ -45,6 +46,8 @@ export interface AppData {
   targetPreset: PresetId
   /** The streak cat. A new top-level key, so old diaries backfill the default. */
   pet: PetState
+  /** Warnings the user has closed. Backfilled like `pet`. */
+  dismissals: Dismissals
 }
 
 /**
