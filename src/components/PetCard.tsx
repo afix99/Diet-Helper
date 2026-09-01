@@ -8,11 +8,11 @@ import { PetSheet } from './PetSheet'
 import { burstAt } from './BurstLayer'
 import { usePresence } from '@/hooks/usePresence'
 import { flourishesOn } from '@/lib/motion'
-import { sound } from '@/lib/sound'
+import { hush, sound } from '@/lib/sound'
 import { nextStage, poseFor, stageFor, statusLine } from '@/lib/pet'
 import { freshUnlocks, unlockedIds, wornPieces } from '@/lib/petWardrobe'
 import {
-  LOUD_REACTIONS,
+  VOICE_FOR,
   nextAmbientDelay,
   pickAmbient,
   pickReaction,
@@ -176,17 +176,28 @@ export function PetCard({ date }: { date: string }) {
    */
   const lastReaction = useRef<ReactionId | null>(null)
   const reaction = useRef<Animation[]>([])
+  const voice = useRef<OscillatorNode[]>([])
   const poke = () => {
     if (!flourishesOn()) return
     stop(reaction.current)
+    // The sound is cut for the same reason the animation is: ten purrs stacked
+    // on top of each other stop being a purr and become a drone.
+    hush(voice.current)
     const next = pickReaction(lastReaction.current)
     lastReaction.current = next
     reaction.current = play(rigOf(), next)
+    const [cue, steps] = VOICE_FOR[next]
+    voice.current = sound(cue, steps)
     // Long enough that an ambient cannot interrupt the reaction it overlaps.
     reactingUntil.current = Date.now() + 1300
-    if (LOUD_REACTIONS.includes(next)) sound('pet')
   }
-  useEffect(() => () => stop(reaction.current), [])
+  useEffect(
+    () => () => {
+      stop(reaction.current)
+      hush(voice.current)
+    },
+    []
+  )
 
   /* Greet: arriving from the house. `out` flipping true is the trigger. */
   const wasOut = useRef(data.pet.out)

@@ -27,6 +27,7 @@
  * allowlist so that it reads as a decision rather than an oversight.
  */
 import { prefersReducedMotion } from './motion'
+import type { CatVoice } from './sound'
 
 export type RigPart =
   | 'root'
@@ -1553,12 +1554,43 @@ export const REACTION_IDS = [
 ] as const
 
 /**
- * The four that get a sound.
+ * What each reaction sounds like: a voice, and how far up the scale.
  *
- * Reactions fire on every tap, and a cue on every one of them turns a toy into
- * a noise machine the tenth time you poke it. Only the showy ones speak.
+ * Every one of the fifteen speaks. They come from five timbres rather than
+ * fifteen unrelated noises, and the second number moves the voice by whole
+ * degrees of the pentatonic table in sound.ts — so all fifteen are
+ * distinguishable while remaining, unmistakably, one cat. Nothing can land
+ * off-scale, because transposing walks the table rather than multiplying.
+ *
+ * The mapping is by temperament, not by mechanics: affectionate reactions purr,
+ * playful ones chirp, showy ones trill, startled ones mew.
  */
-export const LOUD_REACTIONS: readonly ReactionId[] = ['pounce', 'spin', 'backflip', 'zoom']
+export const VOICE_FOR: Record<ReactionId, readonly [CatVoice, number]> = {
+  // Affection — low and rough.
+  squish: ['purr', 0],
+  purr: ['purr', 0],
+  nod: ['purr', 1],
+  wave: ['purr', 2],
+  headbutt: ['purr', -1],
+
+  // Play — short and rising.
+  pounce: ['chirp', 0],
+  bounce: ['chirp', 1],
+  wiggle: ['chirp', -1],
+  zoom: ['chirp', 2],
+
+  // Showing off — rolled and climbing.
+  spin: ['trill', 0],
+  backflip: ['trill', 1],
+  roll: ['trill', -1],
+
+  // Startled, and the small collapse after it.
+  surprise: ['mew', 1],
+  flop: ['mew', -1],
+
+  // The one that is neither: shaking itself off.
+  shake: ['brrp', 0],
+}
 
 export const TIMELINES: Record<TimelineId, Timeline> = {
   idle,

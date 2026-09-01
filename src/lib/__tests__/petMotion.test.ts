@@ -4,7 +4,7 @@ import {
   AMBIENT_MAX_GAP,
   AMBIENT_MIN_GAP,
   EXITS,
-  LOUD_REACTIONS,
+  VOICE_FOR,
   REACTION_IDS,
   RIG_PARTS,
   TIMELINES,
@@ -445,10 +445,37 @@ describe('the reaction pool', () => {
     }
   })
 
-  it('sounds only on the rare showy ones', () => {
-    // A cue on all fifteen turns a toy into a noise machine by the tenth poke.
-    expect(LOUD_REACTIONS.length).toBeLessThanOrEqual(4)
-    for (const id of LOUD_REACTIONS) expect(REACTION_IDS).toContain(id)
+  it('gives every single reaction a voice', () => {
+    // A reaction added without a voice would be the one silent tap in fifteen,
+    // which reads as the app having missed the tap rather than as a choice.
+    for (const id of REACTION_IDS) expect(VOICE_FOR[id]).toBeDefined()
+    expect(Object.keys(VOICE_FOR).sort()).toEqual([...REACTION_IDS].sort())
+  })
+
+  it('draws them from a handful of timbres, not fifteen noises', () => {
+    const voices = new Set(Object.values(VOICE_FOR).map(([cue]) => cue))
+    expect(voices.size).toBeLessThanOrEqual(5)
+    expect(voices.size).toBeGreaterThanOrEqual(3)
+  })
+
+  it('keeps every transposition small enough to stay one animal', () => {
+    // Two degrees either way. Further and the same voice starts reading as a
+    // different creature at the top of its range.
+    for (const [, steps] of Object.values(VOICE_FOR)) {
+      expect(Math.abs(steps)).toBeLessThanOrEqual(2)
+    }
+  })
+
+  it('varies the pitch within a voice, so the fifteen are told apart', () => {
+    const byVoice = new Map<string, number[]>()
+    for (const [cue, steps] of Object.values(VOICE_FOR)) {
+      byVoice.set(cue, [...(byVoice.get(cue) ?? []), steps])
+    }
+    for (const [cue, steps] of byVoice) {
+      if (steps.length < 3) continue
+      // A voice used three or more times must not play the same note every time.
+      expect(`${cue}:${new Set(steps).size}`).not.toBe(`${cue}:1`)
+    }
   })
 
   it('moves more than an ambient does — that is the difference', () => {
