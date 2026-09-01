@@ -322,7 +322,9 @@ export default function TodayPage() {
                 <BadgeArt key={b.id} id={b.id} unlocked size={30} />
               ))}
             </div>
-            <p className="flex-1 text-secondary font-semibold">
+            {/* min-w-0: without it the paragraph refuses to wrap below its
+                longest word-pair and the chevron absorbs the whole squeeze. */}
+            <p className="min-w-0 flex-1 text-secondary font-semibold">
               {unlocked.length} {unlocked.length === 1 ? 'badge' : 'badges'}
               <span className="ml-1 font-normal text-faint">unlocked</span>
             </p>

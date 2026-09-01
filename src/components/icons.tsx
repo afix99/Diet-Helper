@@ -238,7 +238,21 @@ export function Icon({
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
+      /*
+       * `shrink-0` here rather than at each call site, because `width` on a
+       * flex item is a starting size and not a floor: `flex-shrink` defaults
+       * to 1, so a row short of space takes it out of the icon first — down
+       * to nothing. That failure is invisible to every overflow check we run,
+       * since a squeezed icon does not stick out of anything; it just quietly
+       * stops being there. It cost the badges card on Today its chevron at
+       * 320px, and two week rows a status glyph, before anyone noticed.
+       *
+       * An icon is a fixed-size glyph in every use in this app, and half a
+       * chevron is worse than no chevron, so the floor belongs in the
+       * component. `pnpm check:crushed` walks every screen at every phone
+       * width and fails if any icon is ever squeezed again.
+       */
+      className={`shrink-0 ${className}`}
     >
       {PATHS[name]}
     </svg>

@@ -14,7 +14,8 @@
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:emoji": "node scripts/check-no-emoji.mjs",
     "prebuild": "node scripts/check-contrast.mjs && node scripts/check-no-emoji.mjs && node scripts/check-badges.mjs && node scripts/stamp-sw.mjs",
-    "check:badges": "node scripts/check-badges.mjs"
+    "check:badges": "node scripts/check-badges.mjs",
+    "check:crushed": "node scripts/check-crushed-icons.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
