@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react'
 import { useData } from './store/provider'
-import { RECIPES } from './catalogue'
+import { RECIPES } from './recipes'
 import { findFood, latestWeight } from './selectors'
 import { bodyWeightFor } from './exercise'
 import * as edits from './logEdits'

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Card, ListGroup, PageHeader } from '@/components/ui'
-import { RECIPES } from '@/lib/catalogue'
+import { RECIPES } from '@/lib/recipes'
 import { useLogging } from '@/lib/logging'
 import { todayIso } from '@/lib/store/defaults'
 import { MEAL_SLOTS, SLOT_LABELS, type MealSlot } from '@/lib/types'

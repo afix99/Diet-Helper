@@ -1,5 +1,6 @@
 /** Derived reads shared across screens. Keeps components free of arithmetic. */
-import { FOODS, RECIPES } from './catalogue'
+import { FOODS } from './catalogue'
+import { RECIPES } from './recipes'
 import {
   EMPTY_MACROS,
   badges,

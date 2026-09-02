@@ -24,7 +24,8 @@ import {
   wearCostume,
   wearItem,
 } from '../logEdits'
-import { defaultData, defaultPet, hydrate } from '../store/defaults'
+import { defaultData, defaultPet } from '../store/defaults'
+import { repair } from '../store/schema'
 import type { PetState } from '../types'
 
 /** Every badge, all unlocked, so the catalogue can be exercised against real ids. */
@@ -415,18 +416,18 @@ describe('the cat says hello exactly once', () => {
   it('backfills onto a diary saved before the greeting existed', () => {
     /*
      * Existing diaries have a `pet` object with no `greeted` key at all. The
-     * store merges one level deep, so without hydrate() the field would arrive
+     * store merges one level deep, so without repair() the field would arrive
      * undefined — falsy, which happens to work, but only by luck. This pins it.
      */
     const old = {
       ...defaultData(),
       pet: { name: 'Comel', out: true, seenStage: 3 },
     } as unknown as ReturnType<typeof defaultData>
-    expect(hydrate(old).pet.greeted).toBe(false)
+    expect(repair(old).data.pet.greeted).toBe(false)
   })
 
   it('leaves an already-greeted diary alone when it reloads', () => {
     const greeted = markGreeted(defaultData())
-    expect(hydrate(greeted).pet.greeted).toBe(true)
+    expect(repair(greeted).data.pet.greeted).toBe(true)
   })
 })

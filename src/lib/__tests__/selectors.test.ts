@@ -1,8 +1,9 @@
 import { existsSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { badgesFor, dayRecords, entryName, streakFor } from '../selectors'
+import { streak } from '../nutrition'
 import { FOODS, RECIPES } from '../catalogue'
-import { addDays, todayIso, weekOf } from '../dates'
+import { addDays, daysBetween, todayIso, weekDates, weekOf } from '../dates'
 import { defaultData } from '../store/defaults'
 import type { AppData } from '../store/types'
 import type { LogEntry } from '../types'
@@ -36,6 +37,65 @@ describe('streaks count today', () => {
       entry(today, 1400),
     ])
     expect(streakFor(data, today).current).toBe(3)
+  })
+})
+
+/*
+ * Qwen's audit flagged this as a live bug; it is not, but only because
+ * `streakFor` is the single caller and it happens to feed `streak()` a gapless
+ * span. That is an invariant nothing was enforcing, so these two tests make it
+ * load-bearing: the first proves the invariant actually matters, the second
+ * proves `streakFor` still honours it.
+ */
+describe('the grace day needs the whole span, not a window off the end', () => {
+  const today = todayIso()
+
+  /**
+   * Three weeks of logging with two misses: one at day -7, one at day -1.
+   *
+   * The gap between them is six days, so on the whole diary the second miss
+   * falls inside the first one's seven-day window and is *not* forgiven — the
+   * run breaks. A seven-day window ending today cannot see the miss at -7 at
+   * all, so it forgives the one at -1 and reports a run six times too long.
+   * That difference is the entire reason the invariant exists.
+   */
+  const hiatusDiary = () => {
+    const entries: LogEntry[] = []
+    for (let d = 20; d >= 0; d -= 1) {
+      if (d === 7 || d === 1) continue
+      entries.push(entry(addDays(today, -d), 1400))
+    }
+    return withEntries(entries)
+  }
+
+  it('reads the streak differently when it can only see the last seven days', () => {
+    const data = hiatusDiary()
+    const full = streakFor(data, today)
+
+    // The same diary, but sliced the way Qwen worried a caller might: only the
+    // current week, with no sight of the grace already spent before it.
+    const bare = streak(dayRecords(data, weekDates(today, 7)))
+
+    expect(bare.current).not.toBe(full.current)
+    // And specifically too high: the window cannot see the earlier forgiveness,
+    // so it hands out a second one inside the same seven days.
+    expect(bare.current).toBeGreaterThan(full.current)
+  })
+
+  it('streakFor hands streak() every day in the span, in order', () => {
+    const data = hiatusDiary()
+    // Recompute the span the way streakFor must: first entry to today, no holes.
+    const first = data.entries.map((e) => e.date).sort()[0]
+    const span = weekDates(today, daysBetween(first, today) + 1)
+
+    const dates = span
+    for (let i = 1; i < dates.length; i += 1) {
+      expect(daysBetween(dates[i - 1], dates[i])).toBe(1)
+    }
+    expect(dates[dates.length - 1]).toBe(today)
+
+    // The contract in streak()'s doc comment, asserted rather than trusted.
+    expect(streakFor(data, today)).toEqual(streak(dayRecords(data, dates)))
   })
 })
 

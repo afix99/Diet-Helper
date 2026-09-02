@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Emoji } from '@/components/Emoji'
 import { Card, ListGroup, PageHeader, SegmentedControl } from '@/components/ui'
 import { Icon } from '@/components/icons'
-import { SUPPLEMENTS } from '@/lib/catalogue'
+import { SUPPLEMENTS } from '@/lib/seedDefaults'
 import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
 

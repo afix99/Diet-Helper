@@ -3,7 +3,8 @@
 import { useId, useState } from 'react'
 import { Card, ListGroup, PageHeader, SegmentedControl } from '@/components/ui'
 import { Icon } from '@/components/icons'
-import { METHODOLOGY, TARGET_NOTES } from '@/lib/catalogue'
+import { BackupCard } from '@/components/BackupCard'
+import { METHODOLOGY, TARGET_NOTES } from '@/lib/seedDefaults'
 import { bmr, leanBodyMass, maintenanceFor } from '@/lib/nutrition'
 import {
   PRESETS,
@@ -424,6 +425,8 @@ export default function SettingsPage() {
           </button>
         )}
       </Card>
+
+      <BackupCard />
 
       <Card className="mb-5 border-clay/40">
         <h2 className="text-title text-clay">Reset</h2>

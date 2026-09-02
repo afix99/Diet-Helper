@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { defaultData, hydrate } from './defaults'
+import { defaultData } from './defaults'
+import { repair } from './schema'
 import { hasRealContent, readLocalData } from './local'
 import type { AppData, DataStore } from './types'
 
@@ -66,14 +67,17 @@ export class SupabaseStore implements DataStore {
        * halfway, the only surviving record should not be the one we deleted.
        */
       const local = readLocalData()
-      const base = hydrate(
-        hasRealContent(local) ? ({ ...defaultData(), ...local } as AppData) : defaultData()
-      )
+      const base = hasRealContent(local) ? repair(local).data : defaultData()
       const fresh = { ...base, profile: { ...base.profile, id: user.id } } as AppData
       await this.save(fresh)
       return fresh
     }
-    return hydrate({ ...defaultData(), ...(data.data as Partial<AppData>) } as AppData)
+    /*
+     * Same treatment as the local store. RLS guarantees this row belongs to
+     * this user; it says nothing at all about the shape of the JSON inside it,
+     * and the browser is what wrote it.
+     */
+    return repair(data.data).data
   }
 
   async save(data: AppData): Promise<void> {

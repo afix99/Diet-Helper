@@ -28,6 +28,8 @@ export type IconName =
   | 'lock'
   | 'arrowUp'
   | 'arrowDown'
+  | 'download'
+  | 'upload'
   | 'tilde'
   | 'dash'
   | 'activity'
@@ -131,6 +133,20 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
   arrowUp: <path d="M12 19V5.5M6 11.5 12 5.5l6 6" />,
   arrowDown: <path d="M12 5v13.5M6 12.5l6 6 6-6" />,
+  /* Download and upload: the same tray, with the arrow reversed. Drawn as a
+     tray rather than a folder because at 15px a folder's tab is one pixel. */
+  download: (
+    <>
+      <path d="M12 3.5v10.5M7.5 9.5l4.5 4.5 4.5-4.5" />
+      <path d="M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3" />
+    </>
+  ),
+  upload: (
+    <>
+      <path d="M12 14V3.5M7.5 8l4.5-4.5L16.5 8" />
+      <path d="M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3" />
+    </>
+  ),
   /* A shirt, for the wardrobe. Collar notch, two shoulders and a body, on the
      same 24 grid and cap radius as the rest of the set. Chosen over a coat
      hanger because a hanger at 15px is two thin diagonals and a hook, and

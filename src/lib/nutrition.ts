@@ -183,6 +183,18 @@ export interface StreakResult {
  * hard-reset streaks burn out and drive abandonment, and evidence for streaks
  * improving *dietary* adherence specifically is weak. One forgiven day per
  * rolling seven keeps the run alive without making the number meaningless.
+ *
+ * **`days` must be every calendar day in the span, in order, with no holes.**
+ * The grace allowance is windowed by array *index* — `forgiven.filter((j) => j
+ * > i - 7)` reads "the last seven days" only because seven entries back really
+ * is seven days back. Hand it a filtered list of logged days, or a bare week
+ * off the end of a longer diary, and the window silently means something else:
+ * grace already spent before the window opens is invisible, so a run can be
+ * forgiven twice in one week and the streak reads too high.
+ *
+ * `selectors.ts` has exactly one caller, `streakFor`, and it satisfies this by
+ * construction — it builds the span from the first entry to today with
+ * `weekDates`. A second caller must do the same. `nutrition.test.ts` pins it.
  */
 export function streak(days: readonly DayRecord[], gracesPerWeek = 1): StreakResult {
   let current = 0

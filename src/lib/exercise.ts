@@ -22,7 +22,7 @@
  * 20-30% either side of them. Every screen that shows one of these numbers says
  * so.
  */
-import { EXERCISES } from './catalogue'
+import { EXERCISES } from './exerciseCatalogue'
 import type { ActivityLog, Exercise } from './types'
 
 /** One MET: what the body spends doing nothing, already inside the target. */

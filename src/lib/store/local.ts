@@ -1,4 +1,5 @@
-import { defaultData, hydrate } from './defaults'
+import { defaultData } from './defaults'
+import { repair } from './schema'
 import type { AppData, DataStore } from './types'
 
 export const LOCAL_KEY = 'memey-diet-planner:v1'
@@ -49,9 +50,16 @@ export class LocalStore implements DataStore {
     try {
       const raw = window.localStorage.getItem(KEY)
       if (!raw) return defaultData()
-      // Merge over defaults so data saved by an older build still loads.
-      return hydrate({ ...defaultData(), ...(JSON.parse(raw) as Partial<AppData>) } as AppData)
+      /*
+       * `repair` rather than a spread over the defaults. The save below
+       * swallows a quota failure, so a half-written document is a thing this
+       * browser can genuinely hold, and JSON.parse is perfectly happy to
+       * return one. See the note at the top of schema.ts.
+       */
+      return repair(JSON.parse(raw)).data
     } catch {
+      // Not even valid JSON. Nothing to salvage, so start clean rather than
+      // throwing on the first render.
       return defaultData()
     }
   }

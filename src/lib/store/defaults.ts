@@ -1,4 +1,4 @@
-import { DEFAULT_TARGETS, DEFAULTS, SHOPPING_SEED } from '../catalogue'
+import { DEFAULT_TARGETS, DEFAULTS, SHOPPING_SEED } from '../seedDefaults'
 import { todayIso } from '../dates'
 import { DEFAULT_PRESET } from '../targets'
 import { DEFAULT_PET_NAME } from '../pet'
@@ -45,25 +45,8 @@ export function defaultPet(): PetState {
   }
 }
 
-/**
- * Fill in pet fields an older save predates.
- *
- * The stored data is merged over the defaults one level deep, so a `pet`
- * object written before the wardrobe existed replaces `defaultPet()` whole and
- * arrives with no `worn`, `costume` or `seenUnlocks`. This is the backfill, and
- * it is why the wardrobe needs no migration: it runs on every load, and is a
- * no-op once the fields are there.
- */
 export function defaultDismissals(): Dismissals {
   return { underEating: null }
-}
-
-export function hydrate(data: AppData): AppData {
-  return {
-    ...data,
-    pet: { ...defaultPet(), ...data.pet },
-    dismissals: { ...defaultDismissals(), ...data.dismissals },
-  }
 }
 
 export function defaultShopping(): ShoppingItem[] {

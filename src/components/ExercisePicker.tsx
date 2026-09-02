@@ -5,7 +5,7 @@ import { Sheet } from './ui'
 import { PressButton } from './PressButton'
 import { burstFrom } from './BurstLayer'
 import { useCountUp } from '@/hooks/useCountUp'
-import { EXERCISES, EXERCISE_CATEGORIES } from '@/lib/catalogue'
+import { EXERCISES, EXERCISE_CATEGORIES } from '@/lib/exerciseCatalogue'
 import {
   DEFAULT_MINUTES,
   MAX_MINUTES,
