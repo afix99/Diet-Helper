@@ -72,6 +72,19 @@ export function PetSheet({
           </p>
         </div>
 
+        {/*
+          The wardrobe leads, because it is the only thing in this sheet you
+          come here to *do*. It used to sit below the name field and all seven
+          rows of the stage ladder, roughly 600px down, which made the one
+          interactive part of the pet the hardest thing in it to reach.
+
+          The preview above it stays first on purpose: it is the cat wearing
+          what you just picked, which is the feedback you want while dressing.
+          Everything below is reference — a name set once, a ladder read
+          occasionally, and a promise that has not changed.
+        */}
+        <PetWardrobe date={date} />
+
         <label className="mb-4 block">
           <span className="text-tertiary font-semibold text-muted">Name</span>
           <input
@@ -122,7 +135,6 @@ export function PetSheet({
           })}
         </ul>
 
-        <PetWardrobe date={date} />
 
         {/*
           Said plainly, because the whole design rests on it and a user who

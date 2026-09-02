@@ -286,14 +286,6 @@ export function PetCard({ date }: { date: string }) {
             <span ref={shell} className="block">
               <PetCat ref={cat} stage={stage} pose={pose} size={92} worn={worn} />
             </span>
-            {/* One dot for "there is something new in the wardrobe". A count
-                would turn a wardrobe into an inbox. */}
-            {fresh > 0 && (
-              <span
-                aria-hidden
-                className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-surface"
-              />
-            )}
           </button>
 
           {/* ...and the name beside it is the way in. */}
@@ -301,11 +293,7 @@ export function PetCard({ date }: { date: string }) {
             type="button"
             onClick={() => setOpen(true)}
             data-pet-open
-            aria-label={
-              fresh > 0
-                ? `${data.pet.name}, ${stage.name}. Open details — new in the wardrobe`
-                : `${data.pet.name}, ${stage.name}. Open details`
-            }
+            aria-label={`${data.pet.name}, ${stage.name}. Open details`}
             className="tap min-w-0 flex-1 text-left"
           >
             <p className="truncate text-secondary font-bold">
@@ -337,6 +325,38 @@ export function PetCard({ date }: { date: string }) {
             <Icon name="house" size={17} strokeWidth={1.9} />
           </button>
         </div>
+
+        {/*
+          The wardrobe's front door, and until this existed there wasn't one.
+          You reached it by tapping the pet's *name* — not the cat, which
+          plays — and then scrolling past the whole stage ladder inside the
+          sheet. The word "wardrobe" appeared nowhere you could press, so you
+          had to already know.
+
+          On its own line rather than a third control in the row above: that
+          row already wraps badly at 320px, and a fourth thing in it would make
+          that worse. And it carries the new-item dot, which used to sit on the
+          cat — an affordance pointing at the wardrobe, mounted on the one
+          button that never opens it.
+        */}
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          data-pet-wardrobe
+          aria-label={
+            fresh > 0
+              ? `Open ${data.pet.name}'s wardrobe — something new is unlocked`
+              : `Open ${data.pet.name}'s wardrobe`
+          }
+          className="tap mt-3 flex w-full items-center justify-center gap-1.5 rounded-pill bg-raised py-2 text-tertiary font-semibold text-primary-ink"
+        >
+          <Icon name="shirt" size={15} strokeWidth={2} />
+          Wardrobe
+          {/* A dot, not a count. A count would turn a wardrobe into an inbox. */}
+          {fresh > 0 && (
+            <span aria-hidden className="h-2 w-2 rounded-full bg-primary" />
+          )}
+        </button>
       </Card>
 
       {heldOpen && (

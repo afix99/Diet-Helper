@@ -42,6 +42,7 @@ export type IconName =
   | 'cat'
   | 'house'
   | 'repeat'
+  | 'shirt'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   // A bowl with steam — the app's own mark, matching the launcher icon.
@@ -130,6 +131,16 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
   arrowUp: <path d="M12 19V5.5M6 11.5 12 5.5l6 6" />,
   arrowDown: <path d="M12 5v13.5M6 12.5l6 6 6-6" />,
+  /* A shirt, for the wardrobe. Collar notch, two shoulders and a body, on the
+     same 24 grid and cap radius as the rest of the set. Chosen over a coat
+     hanger because a hanger at 15px is two thin diagonals and a hook, and
+     collapses into a smudge; a shirt keeps a silhouette. */
+  shirt: (
+    <>
+      <path d="M8.5 3.5 12 6l3.5-2.5 4 2.2a1.5 1.5 0 0 1 .7 1.7l-.9 3.1-2.8-.8V20a1 1 0 0 1-1 1H8.5a1 1 0 0 1-1-1V9.7l-2.8.8-.9-3.1a1.5 1.5 0 0 1 .7-1.7Z" />
+      <path d="M8.5 3.5 12 6l3.5-2.5" />
+    </>
+  ),
   /* Two arrows chasing each other round a rounded rectangle: the standard
      repeat mark, drawn on the same 24 grid and with the same cap radius as
      the rest of the set rather than lifted from another family. */
