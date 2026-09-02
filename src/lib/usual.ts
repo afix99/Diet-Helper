@@ -79,3 +79,34 @@ export function usualFor(
   }
   return ranked
 }
+
+/**
+ * What she eats most, across the whole day rather than one slot.
+ *
+ * `usualFor` above answers "what goes in *this* meal", and carries two rules
+ * that belong to the Today screen and nowhere else: it is scoped to a slot, and
+ * it hides anything already on today's plate. Both are wrong for a browsable
+ * list — you should be able to find your usual breakfast at nine at night, and
+ * logging something should not make it vanish from the catalogue.
+ *
+ * So this shares the scoring and none of the Today-specific rules: the same
+ * `weightFor` half-life, the same ninety-day window, summed across every slot.
+ */
+export function oftenLogged(
+  data: AppData,
+  { limit = 8, today = todayIso() }: UsualOptions = {}
+): Food[] {
+  const score = new Map<string, number>()
+  for (const e of data.entries) {
+    if (!e.foodId || e.date > today) continue
+    const w = weightFor(e.date, today)
+    if (w === 0) continue
+    score.set(e.foodId, (score.get(e.foodId) ?? 0) + w)
+  }
+
+  return [...score.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([id]) => findFood(data, id))
+    .filter((f): f is Food => Boolean(f))
+    .slice(0, limit)
+}

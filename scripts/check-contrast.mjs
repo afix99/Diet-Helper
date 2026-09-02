@@ -79,6 +79,12 @@ const PAIRS_LIGHT = [
   ['primary-ink', 'bg', 4.5, 9],
   ['primary-ink', 'surface', 4.5, 9],
   ['on-primary', 'primary', 4.5, 9],
+  // The macro values on the Foods list: these tones as *text* on a card, which
+  // is a different question from white text on a fill of the same tone, and was
+  // the pairing this file did not check when that screen started using them.
+  ['amber', 'surface', 4.5, 9],
+  ['ocean', 'surface', 4.5, 9],
+  ['avocado', 'surface', 4.5, 9],
   ['on-primary', 'avocado', 4.5, 9],
   ['on-primary', 'amber', 4.5, 9],
   ['on-primary', 'clay', 4.5, 9],
@@ -97,6 +103,9 @@ const PAIRS_DARK = [
   ['primary-ink', 'bg', 6, 11],
   ['primary-ink', 'surface', 4.5, 11],
   ['on-primary', 'primary', 4.5, 14],
+  ['amber', 'surface', 4.5, 14],
+  ['ocean', 'surface', 4.5, 14],
+  ['avocado', 'surface', 4.5, 14],
   ['on-primary', 'avocado', 4.5, 14],
   ['on-primary', 'amber', 4.5, 14],
   ['on-primary', 'clay', 4.5, 14],

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { HALF_LIFE_DAYS, usualFor, weightFor } from '../usual'
+import { HALF_LIFE_DAYS, oftenLogged, usualFor, weightFor } from '../usual'
 import { FOODS } from '../catalogue'
 import { addDays } from '../dates'
 import { defaultData } from '../store/defaults'
@@ -137,5 +137,51 @@ describe('usualFor', () => {
       macros: { kcal: 300, protein: 10, carbs: 40, fat: 8, fibre: 2 },
     }
     expect(usualFor(store([freeText]), 'breakfast', { today: TODAY })).toEqual([])
+  })
+})
+
+describe('oftenLogged', () => {
+  /*
+   * The Foods list needs a different question from the one `usualFor` answers.
+   * That one is scoped to a meal slot and hides whatever is already on today's
+   * plate — both correct for Today, both wrong for a browsable catalogue.
+   */
+  it('counts every slot, not just one', () => {
+    const d = store([
+      log(TODAY, at(0).id, 'breakfast'),
+      log(TODAY, at(1).id, 'dinner'),
+      log(addDays(TODAY, -1), at(1).id, 'lunch'),
+    ])
+    const ids = oftenLogged(d, { today: TODAY }).map((f) => f.id)
+    // The one eaten twice across two different slots ranks first.
+    expect(ids[0]).toBe(at(1).id)
+    expect(ids).toContain(at(0).id)
+  })
+
+  it('still lists something eaten today', () => {
+    // usualFor deliberately hides these; a catalogue that made a food vanish
+    // the moment you logged it would be broken.
+    const d = store([log(TODAY, at(0).id)])
+    expect(oftenLogged(d, { today: TODAY }).map((f) => f.id)).toEqual([at(0).id])
+  })
+
+  it('prefers what you eat now over what you ate months ago', () => {
+    const d = store([
+      log(addDays(TODAY, -1), at(0).id),
+      log(addDays(TODAY, -60), at(1).id),
+      log(addDays(TODAY, -61), at(1).id),
+      log(addDays(TODAY, -62), at(1).id),
+    ])
+    expect(oftenLogged(d, { today: TODAY })[0].id).toBe(at(0).id)
+  })
+
+  it('ignores the future and returns nothing for an empty diary', () => {
+    expect(oftenLogged(store([log(addDays(TODAY, 1), at(0).id)]), { today: TODAY })).toEqual([])
+    expect(oftenLogged(store(), { today: TODAY })).toEqual([])
+  })
+
+  it('honours the limit', () => {
+    const d = store([0, 1, 2, 3, 4].map((i) => log(addDays(TODAY, -i), at(i).id)))
+    expect(oftenLogged(d, { today: TODAY, limit: 3 })).toHaveLength(3)
   })
 })

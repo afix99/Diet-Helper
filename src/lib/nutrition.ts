@@ -480,3 +480,34 @@ export function round1(n: number): number {
 export function isSalmon(name: string): boolean {
   return /salmon/i.test(name)
 }
+
+/**
+ * How a food's calories are divided between protein, carbohydrate and fat.
+ *
+ * For the composition bar on the Foods list. Two decisions make it honest
+ * rather than decorative:
+ *
+ * - **Energy share, not gram share.** A gram of fat carries nine calories
+ *   against four for the other two, so a bar drawn on grams would show a
+ *   spoonful of oil as a sliver and make every fatty food look lean. The whole
+ *   point of the bar is "where did these calories come from".
+ * - **Fibre is not a fourth slice.** It is already inside the carbohydrate
+ *   figure, so giving it its own segment would count it twice and shrink
+ *   everything else to make room. It keeps its number on the row; it does not
+ *   get a share of the bar.
+ *
+ * Returns fractions summing to 1, or all zeroes for a food with no macros at
+ * all — the caller draws nothing rather than dividing by zero.
+ */
+export function macroSplit(food: {
+  protein: number
+  carbs: number
+  fat: number
+}): { protein: number; carbs: number; fat: number } {
+  const p = Math.max(0, food.protein) * 4
+  const c = Math.max(0, food.carbs) * 4
+  const f = Math.max(0, food.fat) * 9
+  const total = p + c + f
+  if (total <= 0) return { protein: 0, carbs: 0, fat: 0 }
+  return { protein: p / total, carbs: c / total, fat: f / total }
+}
