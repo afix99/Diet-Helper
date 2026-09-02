@@ -118,6 +118,36 @@ export const ACCESSORIES: readonly Accessory[] = [
   { id: 'sunglasses', name: 'Sunglasses', slot: 'face', from: stage(4) },
   { id: 'star_clip', name: 'Star clip', slot: 'head', from: stage(5) },
   { id: 'angel_wings', name: 'Angel wings', slot: 'back', from: stage(6) },
+
+  /*
+   * --- from pairs of badges ---
+   *
+   * The Body slot had nothing wearable in it: all twenty items above are head,
+   * face, neck or back, and the only two body pieces are locked inside
+   * costumes. Every one of the fourteen everyday badges was already spoken for
+   * by a single item, so there was no unused source left — these hang off
+   * *pairs* instead, using the same `badges` source the costumes use. No new
+   * badge, no new stage, and a pair is a slightly longer road than a single
+   * one, which suits a whole garment.
+   */
+  {
+    id: 'knitted_vest',
+    name: 'Knitted vest',
+    slot: 'body',
+    from: { kind: 'badges', badgeIds: ['comeback', 'two_weeks'] },
+  },
+  {
+    id: 'stripy_jumper',
+    name: 'Stripy jumper',
+    slot: 'body',
+    from: { kind: 'badges', badgeIds: ['full_week', 'protein_power'] },
+  },
+  {
+    id: 'dungarees',
+    name: 'Dungarees',
+    slot: 'body',
+    from: { kind: 'badges', badgeIds: ['home_cook', 'fibre_friend'] },
+  },
 ]
 
 /*
@@ -241,13 +271,23 @@ export function requirementFor(id: string, badges: readonly Badge[]): string {
   }
 
   const names = from.badgeIds.map(nameOf)
-  // Royal wants all fourteen; listing them would be a paragraph, not a hint.
+  /*
+   * "all N everyday badges" is only true when the list *is* every everyday
+   * badge — which is Royal, and Royal alone. Astronaut wants five specific
+   * streak badges, and read "Earn all 5 everyday badges", which is wrong twice
+   * over: there are fourteen, and these five are not an arbitrary subset. A
+   * locked item's one job is telling you what to go and do, so it has to name
+   * them.
+   */
+  const everyday = badges.filter((b) => !NEVER_UNLOCKS.includes(b.id)).length
   const list =
-    names.length > 3
+    names.length >= everyday && everyday > 0
       ? `all ${names.length} everyday badges`
-      : names.length === 2
-        ? `${names[0]} and ${names[1]}`
-        : names.join(', ')
+      : names.length > 3
+        ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
+        : names.length === 2
+          ? `${names[0]} and ${names[1]}`
+          : names.join(', ')
   return from.stageIndex
     ? `Earn ${list}, and reach ${stageName(from.stageIndex)}`
     : `Earn ${list}`

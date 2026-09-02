@@ -4,7 +4,7 @@ import { forwardRef, useId, useImperativeHandle, useRef } from 'react'
 import type { PetPart, PetPose, PetStage } from '@/lib/pet'
 import type { Rig } from '@/lib/petMotion'
 import type { AccessorySlot } from '@/lib/types'
-import { AccessoryDefs, PetAccessory } from './PetAccessory'
+import { AccessoryDefs, PetAccessory, crowdsFlame } from './PetAccessory'
 
 /**
  * The cat, as a rig rather than a picture.
@@ -519,7 +519,33 @@ export const PetCat = forwardRef<
                 than triumphant. `animate-breathe` is the app's existing 2.6s
                 pulse, reused rather than a seventh keyframe nobody remembers.
               */}
+              {/*
+                When a hat is in the way the flame steps aside rather than
+                being hidden — losing the last stage's reward the moment you
+                dress the cat would be a poor trade. It moves *beside* the head
+                rather than above it: stacking it on top of a party hat would
+                put its tip around y -33, a third of the drawing's height clear
+                of the box, which pokes out of the card it lives in. Up and to
+                the left it stays in frame at any hat height, and reads as a
+                wisp keeping the cat company.
+              */}
               {has('flame') && !curled && (
+                <g
+                  /*
+                   * The displacement has to be its own node. `animate-breathe`
+                   * animates `transform`, and a running animation beats an
+                   * inline style outright — put both on one element and the
+                   * flame simply never moves.
+                   */
+                  style={
+                    crowdsFlame(worn.head)
+                      ? {
+                          transform: 'translate(-42px, -6px) scale(0.62)',
+                          transformOrigin: '60px 4px',
+                        }
+                      : undefined
+                  }
+                >
                 <g className="animate-breathe" style={{ transformOrigin: '60px 16px' }}>
                   <path
                     d="M61 -12 C 63 -4, 69 0, 71 6 C 74 13, 70 20, 60 20
@@ -534,6 +560,7 @@ export const PetCat = forwardRef<
                     fill="#fff"
                     opacity={0.6}
                   />
+                </g>
                 </g>
               )}
 

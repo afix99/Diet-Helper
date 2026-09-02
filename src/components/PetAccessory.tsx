@@ -69,6 +69,47 @@ const rim = (d: string, w = 1.4, o = 0.55) => (
 
 type PieceProps = { g: (name: string) => string }
 
+/**
+ * The highest point each head piece reaches, in the cat's own coordinates.
+ *
+ * The streak flame at Old Friend stands at x 60, y -12 to 20 — dead centre
+ * above the skull, which is exactly where a hat goes. Head pieces are painted
+ * after it, so the crown had a flame coming up through the middle of it and the
+ * sweatband wore one like a candle.
+ *
+ * Two of the ten do not actually collide: the star clip sits off to the right
+ * at x 70+, and the sweatband is a low band at y 22. Hard-coding "a hat is
+ * worn, so move the flame" would have shoved it aside for those two as well, so
+ * what is recorded here is where each piece actually reaches, and the flame
+ * moves only for the ones that occupy the same space.
+ *
+ * Read off the paths below rather than estimated — change a hat's geometry and
+ * its number here changes with it.
+ */
+export const HEAD_TOP_Y: Record<string, number> = {
+  party_hat: -12.6, // the pom-pom, cy -9 less r 3.6
+  beanie: -9.5, // pom cy -4 less r 5.5
+  crown: 0, // the centre spike
+  golden_crown: -6,
+  sweatband: 22, // a low band; nowhere near the flame
+  sprout: -11, // the taller leaf
+  explorer_cap: -8, // the dome
+  flower_crown: -1, // the tallest blossom, petals included
+  chef_hat: -10.5, // the middle puff, cy 1 less r 11.5
+  star_clip: 16, // off to the right at x 70+, so it never collides
+}
+
+/**
+ * Whether a worn head piece stands where the streak flame does.
+ *
+ * The threshold sits between the star clip at 16 and the flower crown at -1:
+ * anything reaching into the top of the head displaces the flame, anything
+ * sitting low or off to one side leaves it alone.
+ */
+export function crowdsFlame(id: string | null | undefined): boolean {
+  return id ? (HEAD_TOP_Y[id] ?? 99) < 12 : false
+}
+
 /* --- head ---------------------------------------------------------------- */
 
 const PartyHat = ({ g }: PieceProps) => (
@@ -450,6 +491,101 @@ const Satchel = ({ g }: PieceProps) => (
   </g>
 )
 
+/*
+ * Three garments that can be worn on their own, added because the Body tab
+ * offered a choice between nothing and nothing: every one of the twenty
+ * freely-unlockable pieces was a head, face, neck or back item, and the only
+ * two body pieces belonged to costumes and could not be taken out of them.
+ *
+ * They sit on the belly, which is cream — the apron above learned the hard way
+ * that a pale garment there is invisible — so each of these carries either a
+ * saturated ground or a dark outline, and the three silhouettes are made
+ * deliberately unalike: sleeveless with a V, full torso with stripes, and a
+ * bib with straps.
+ */
+
+const KnittedVest = ({ g }: PieceProps) => (
+  <g>
+    {/* Sleeveless, so the body's own colour shows at the shoulders. */}
+    <path
+      d="M46 74 q 14 -5 28 0 l 5 30 q -19 7 -38 0 Z"
+      fill={`url(#${g('a-plum')})`}
+      stroke="#4a2a86"
+      strokeWidth={1.2}
+    />
+    {/* The V, cut deep enough to read at 44px. */}
+    <path d="M53 75 L 60 88 L 67 75" fill="none" stroke="#4a2a86" strokeWidth={2.2} />
+    {/* Ribbed hem — two lines, because a knit without texture is just a shape. */}
+    <path
+      d="M43 99 q 17 6 34 0 M43 103 q 17 6 34 0"
+      fill="none"
+      stroke="#4a2a86"
+      strokeWidth={1.1}
+      opacity={0.55}
+    />
+    {rim('M49 78 q 5 -2 10 -2', 1.4, 0.5)}
+  </g>
+)
+
+const StripyJumper = ({ g }: PieceProps) => (
+  <g>
+    <path
+      d="M45 72 q 15 -6 30 0 l 5 33 q -20 7 -40 0 Z"
+      fill={`url(#${g('a-blue')})`}
+      stroke="#1f4a86"
+      strokeWidth={1.2}
+    />
+    {/* Stripes follow the barrel of the body rather than running flat, or the
+        jumper reads as a painted rectangle stuck to the front of the cat. */}
+    <path
+      d="M45 80 q 15 5 30 0 M44 88 q 16 5 32 0 M43 96 q 17 5 34 0"
+      fill="none"
+      stroke={`url(#${g('a-cream')})`}
+      strokeWidth={3.4}
+      strokeLinecap="round"
+    />
+    {/* A rolled collar, which is what tells you it is a jumper and not a vest. */}
+    <path
+      d="M52 73 q 8 -4 16 0 q -8 5 -16 0 Z"
+      fill="#1f4a86"
+      opacity={0.55}
+    />
+    {rim('M48 77 q 6 -3 12 -3', 1.4, 0.45)}
+  </g>
+)
+
+const Dungarees = ({ g }: PieceProps) => (
+  <g>
+    {/* Straps first, so the bib overlaps them where they meet it. */}
+    <path
+      d="M50 68 L 52 82 M70 68 L 68 82"
+      fill="none"
+      stroke="#3f6ea8"
+      strokeWidth={4}
+      strokeLinecap="round"
+    />
+    <path
+      d="M49 80 h 22 l 4 26 q -15 6 -30 0 Z"
+      fill={`url(#${g('a-blue')})`}
+      stroke="#1f4a86"
+      strokeWidth={1.3}
+    />
+    {/* The pocket, stitched — a plain denim shape reads as a bib and no more. */}
+    <rect x={54} y={86} width={13} height={10} rx={1.5} fill="#2f5c92" />
+    <path
+      d="M54 89 h 13"
+      stroke={GOLD.mid}
+      strokeWidth={0.9}
+      strokeDasharray="2 1.6"
+      opacity={0.8}
+    />
+    {/* Brass buttons where the straps meet the bib. */}
+    <circle cx={52} cy={82} r={2} fill={GOLD.mid} />
+    <circle cx={68} cy={82} r={2} fill={GOLD.mid} />
+    {rim('M51 83 h 18', 1.2, 0.4)}
+  </g>
+)
+
 /* --- back ---------------------------------------------------------------- */
 
 /*
@@ -609,6 +745,9 @@ const PIECES: Record<string, (p: PieceProps) => React.ReactElement> = {
   scarf: Scarf,
   apron: Apron,
   satchel: Satchel,
+  knitted_vest: KnittedVest,
+  stripy_jumper: StripyJumper,
+  dungarees: Dungarees,
   cape: Cape,
   royal_cape: RoyalCape,
   wings: Wings,

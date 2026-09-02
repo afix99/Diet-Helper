@@ -150,6 +150,18 @@ describe('the catalogue holds together', () => {
     expect(looseAccessories('neck').length).toBeGreaterThanOrEqual(3)
     expect(looseAccessories('back').length).toBeGreaterThanOrEqual(3)
   })
+
+  /*
+   * Every slot needs something you can actually choose. The Body tab used to
+   * hold only the apron and the satchel, both of them costume-only, so it
+   * offered a choice between "None" and nothing at all — a tab that looked
+   * broken rather than empty.
+   */
+  it('gives every slot at least one item wearable on its own', () => {
+    for (const slot of SLOTS) {
+      expect(looseAccessories(slot).length, `${slot} has nothing loose`).toBeGreaterThan(0)
+    }
+  })
 })
 
 describe('a costume is a look, not a preset', () => {
@@ -202,6 +214,29 @@ describe('the locked hint comes from the badge, so the two cannot drift', () => 
     const royal = requirementFor('royal', allBadges)
     expect(royal.length).toBeLessThan(60)
     expect(royal).toContain('14')
+  })
+
+  /*
+   * ...but only when the list really is all of them. Astronaut wants five
+   * specific streak badges and used to read "Earn all 5 everyday badges",
+   * which is wrong twice: there are fourteen everyday badges, and these five
+   * are not an arbitrary subset. A locked item's one job is saying what to go
+   * and do.
+   */
+  it('names the badges when a costume wants some of them rather than all', () => {
+    const astronaut = requirementFor('astronaut', allBadges)
+    expect(astronaut).not.toMatch(/all \d+ everyday badges/)
+    for (const name of ['First Step', 'Three in a Row', 'Full Week', 'Two Weeks', 'Thirty Days']) {
+      expect(astronaut).toContain(name)
+    }
+  })
+
+  it('carries the same corrected line onto the costume-only pieces', () => {
+    // The helmet and the jetpack quote their costume's source, so a wrong
+    // summary there would have been three wrong lines, not one.
+    for (const id of ['space_helmet', 'jetpack']) {
+      expect(requirementFor(id, allBadges)).not.toMatch(/all \d+ everyday badges/)
+    }
   })
 })
 
