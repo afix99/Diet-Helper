@@ -4,11 +4,12 @@ import { parseQuickAdd } from '../quickAdd'
 import viral from '../../../seed/viral-foods.json'
 import fruits from '../../../seed/fruits.json'
 import pantry from '../../../seed/pantry.json'
+import sushi from '../../../seed/sushi-delivery.json'
 
 const names = (s: string) => parseQuickAdd(s, FOODS).matches.map((m) => m.food.name)
 
 describe('the food pack', () => {
-  const ADDED = [viral, fruits, pantry]
+  const ADDED = [viral, fruits, pantry, sushi]
 
   it('adds every pack on top of the workbook, losing nothing', () => {
     expect(viral.length).toBeGreaterThanOrEqual(70)
@@ -55,9 +56,69 @@ describe('the food pack', () => {
   })
 
   it('exposes the new categories for browsing', () => {
-    for (const c of ['ZUS COFFEE', 'VIRAL & STREET FOOD', 'CHAIN DRINKS', 'KOREAN & FAST FOOD']) {
+    for (const c of [
+      'ZUS COFFEE',
+      'VIRAL & STREET FOOD',
+      'CHAIN DRINKS',
+      'KOREAN & FAST FOOD',
+      'SUSHI DELIVERY DON',
+      'SUSHI DELIVERY BOWLS',
+      'SUSHI DELIVERY BENTO',
+      'SUSHI DELIVERY SUSHI',
+      'SUSHI DELIVERY SIDES',
+    ]) {
       expect(FOOD_CATEGORIES).toContain(c)
     }
+  })
+})
+
+describe('the Sushi Delivery menu', () => {
+  const find = (slug: string) => FOODS.find((f) => f.id === slug)!
+
+  it('carries the whole menu that was sent', () => {
+    expect(sushi).toHaveLength(26)
+  })
+
+  /*
+   * The menu is full of promo furniture — "TOP 1 |", "Chef 👍 |",
+   * "Best Seller |", "20% OFF Sides". That is marketing, it changes weekly,
+   * and nobody types it into a search box. The dish is what gets stored.
+   */
+  it('stores dish names, not the promo wrapping around them', () => {
+    for (const f of sushi) {
+      expect(f.name).not.toMatch(/TOP 1|Best Seller|Chef|20% OFF|\|/)
+    }
+    expect(find('sd-yakiniku-beef-don').name).toBe('Yakiniku Beef Don')
+  })
+
+  it('says on every row that the numbers are an estimate', () => {
+    // Restaurants publish no nutrition. Presenting a built-up figure with the
+    // same confidence as the workbook's would be the dishonest part.
+    for (const f of sushi) expect(f.notes).toMatch(/^Estimate\./)
+  })
+
+  it('keeps the sides as their own rows rather than baking them in', () => {
+    // A bento eaten without the gyoza should be loggable as that. One
+    // inseparable number would make the diary less true, not more convenient.
+    for (const slug of ['sd-miso-soup', 'sd-onsen-egg', 'sd-fried-gyoza', 'sd-edamame']) {
+      expect(find(slug)).toBeTruthy()
+    }
+  })
+
+  it('ranks the obvious dishes the way the plate actually does', () => {
+    // Sanity on the arithmetic rather than on the exact values: a salad bowl
+    // must not carry a don's carbs, and the fatty cut must not read leaner
+    // than the fillet.
+    expect(find('sd-salmon-teriyaki-salad-bowl').carbs).toBeLessThan(
+      find('sd-salmon-teriyaki-don').carbs
+    )
+    expect(find('sd-salmon-belly-don').fat).toBeGreaterThan(find('sd-salmon-teriyaki-don').fat)
+    expect(find('sd-salmon-shioyaki-don').kcal).toBeLessThan(
+      find('sd-salmon-teriyaki-don').kcal
+    )
+    // Sashimi and nigiri, no rice bowl: the best protein per calorie here.
+    const perKcal = (slug: string) => find(slug).protein / find(slug).kcal
+    expect(perKcal('sd-salmon-lover-platter-9')).toBeGreaterThan(perKcal('sd-chicken-katsu-curry-don'))
   })
 })
 
@@ -80,6 +141,13 @@ describe('quick add finds the new foods by the names people type', () => {
     expect(names('tteokbokki')[0]).toBe('Tteokbokki')
     expect(names('boba')[0]).toMatch(/Bubble Tea|Boba/)
     expect(names('nasi kandar')[0]).toMatch(/Nasi Kandar/)
+  })
+
+  it('matches the sushi shop by dish name', () => {
+    expect(names('salmon teriyaki don')).toContain('Salmon Teriyaki Don')
+    expect(names('yakiniku beef don and miso soup')).toEqual(
+      expect.arrayContaining(['Yakiniku Beef Don', 'Miso Soup'])
+    )
   })
 
   it('parses a realistic mixed order', () => {

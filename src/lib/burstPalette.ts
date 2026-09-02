@@ -52,6 +52,18 @@ export const BURST_STYLES: Record<string, BurstStyle> = {
   'MAMAK / STREET FOOD': { colours: ['#d9702f', '#f0b95e', '#8f4520'], shape: 'spark', weight: 1.05 },
   'VIRAL & STREET FOOD': { colours: ['#ff5c8a', '#ffc861', '#5ec8d9'], shape: 'ring', weight: 0.9 },
   'KOREAN & FAST FOOD': { colours: ['#e8453f', '#ffb03b', '#f5e6d0'], shape: 'ring', weight: 1 },
+  /*
+   * The sushi shop. Salmon coral, nori green-black and rice cream run through
+   * all five, so the whole menu bursts as one restaurant rather than five
+   * unrelated things — but the shapes differ by what you actually ordered: a
+   * rice bowl lands heavier than a salad, and sashimi is the lightest thing
+   * on the menu in every sense.
+   */
+  'SUSHI DELIVERY DON': { colours: ['#ff8a5c', '#f7e3c8', '#3f5a4a'], shape: 'crumb', weight: 1.1 },
+  'SUSHI DELIVERY BOWLS': { colours: ['#ff8a5c', '#7ac74f', '#f7e3c8'], shape: 'leaf', weight: 0.8 },
+  'SUSHI DELIVERY BENTO': { colours: ['#ff8a5c', '#e8b04b', '#3f5a4a'], shape: 'crumb', weight: 1.2 },
+  'SUSHI DELIVERY SUSHI': { colours: ['#ff7a4f', '#fdf6ea', '#2f4a3d'], shape: 'spark', weight: 0.75 },
+  'SUSHI DELIVERY SIDES': { colours: ['#8fbf7a', '#f7e3c8', '#c9884a'], shape: 'dot', weight: 0.7 },
 }
 
 /**

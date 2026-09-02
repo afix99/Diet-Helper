@@ -7,6 +7,7 @@
  */
 import foodsJson from '../../seed/foods.json'
 import viralFoodsJson from '../../seed/viral-foods.json'
+import sushiJson from '../../seed/sushi-delivery.json'
 import fruitsJson from '../../seed/fruits.json'
 import pantryJson from '../../seed/pantry.json'
 import recipesJson from '../../seed/recipes.json'
@@ -60,6 +61,10 @@ export const FOODS: Food[] = [
   ...(fruitsJson as RawFood[]).map((f) => toFood(f, 'community')),
   ...(pantryJson as RawFood[]).map((f) => toFood(f, 'community')),
   ...(viralFoodsJson as RawFood[]).map((f) => toFood(f, 'community')),
+  // One local restaurant's menu, read off its GrabFood listing. Same
+  // `community` tier as the rest: nobody publishes nutrition for a don, so
+  // every row is built up from the components the menu itself describes.
+  ...(sushiJson as RawFood[]).map((f) => toFood(f, 'community')),
 ]
 
 /**
