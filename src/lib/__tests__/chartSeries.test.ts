@@ -7,7 +7,7 @@ import {
   thin,
   windowFor,
 } from '../chartSeries'
-import type { DayRecord } from '../nutrition'
+import { bmr, tdee, type DayRecord } from '../nutrition'
 import type { WeightLog } from '../types'
 
 const TODAY = '2026-09-01'
@@ -120,10 +120,48 @@ describe('the plotted series', () => {
     expect(s.points[0].fibre).toBe(25)
   })
 
-  it('adds logged exercise on top of resting burn', () => {
+  it('adds logged exercise on top of the day\u2019s spend', () => {
     const plain = s.points[0].burned as number
     const trained = s.points[2].burned as number
     expect(trained - plain).toBeGreaterThan(150)
+  })
+
+  /*
+   * This line was basal rate alone for a long time while the chart's caption
+   * called it "what your body used" and called the gap under it "what moves the
+   * scale". Nothing in this suite noticed, because nothing pinned the value —
+   * so the switch to real maintenance passed every test unchanged. It is
+   * pinned now, in the direction that matters: too low is the dangerous way for
+   * a burn line to be wrong, because it makes every deficit look smaller than
+   * it is.
+   */
+  it('plots maintenance, not basal rate', () => {
+    const weight = 62
+    const basal = bmr(weight, profile.heightCm!, profile.age!, profile.sex)
+    expect(s.points[0].burned).toBe(tdee(basal, profile.activityLevel))
+    expect(s.points[0].burned as number).toBeGreaterThan(basal)
+  })
+
+  it('follows the activity level rather than ignoring it', () => {
+    const still = buildSeries(days, weights, { ...profile, activityLevel: 'sedentary' })
+    const busy = buildSeries(days, weights, { ...profile, activityLevel: 'active' })
+    expect(busy.points[0].burned as number).toBeGreaterThan(still.points[0].burned as number)
+  })
+
+  it('takes a measured burn over the formula when one is available', () => {
+    // What burnRate produces wins outright: it came from her own body.
+    const measured = buildSeries(days, weights, profile, 2100)
+    expect(measured.points[0].burned).toBe(2100)
+    // Exercise still lands on top of it.
+    expect(measured.points[2].burned).toBe(2100 + 200)
+  })
+
+  it('does not redraw the measured burn as the weight moves', () => {
+    // The formula varies with body mass; a measured figure is one number over a
+    // window, and pretending otherwise would be inventing precision.
+    const measured = buildSeries(days, [weigh('2026-08-28', 80)], profile, 2100)
+    expect(measured.points[0].burned).toBe(2100)
+    expect(measured.points[3].burned).toBe(2100)
   })
 
   it('uses the weight you were at the time, not the weight you are now', () => {

@@ -16,7 +16,7 @@
  */
 
 import { addDays, todayIso } from './dates'
-import { bmr, rollingAverage, type DayRecord } from './nutrition'
+import { bmr, rollingAverage, tdee, type DayRecord } from './nutrition'
 import type { ActivityLevel, Sex, WeightLog } from './types'
 
 /** How far back the charts look. */
@@ -47,7 +47,7 @@ export interface DayPoint {
   carbs: number | null
   fat: number | null
   fibre: number | null
-  /** Resting burn plus whatever exercise was logged. Null without a full profile. */
+  /** What the body spent: maintenance plus logged exercise. Null without a full profile. */
   burned: number | null
   /** A weigh-in on this exact day, if there was one. */
   weightKg: number | null
@@ -106,14 +106,31 @@ export function earliestDate(
 /**
  * Build the plotted series.
  *
- * `burned` is resting burn for the body you had *at the time* — the weigh-in
- * carried forward — plus logged activity. Using today's weight for a month of
- * history would quietly redraw the past every time you step on the scale.
+ * `burned` is what the body actually spent that day: maintenance for the body
+ * you had *at the time* — the weigh-in carried forward — plus logged activity.
+ * Using today's weight for a month of history would quietly redraw the past
+ * every time you step on the scale.
+ *
+ * It was basal rate alone until this was written, which was wrong in a way that
+ * mattered. The chart's own caption calls this line "what your body used" and
+ * calls the gap below it "what moves the scale", and basal rate is neither: it
+ * leaves out everything between lying still and going to the gym, which for a
+ * sedentary day is a fifth of the total and for an active one is most of the
+ * difference. The line sat several hundred calories low, which made every
+ * deficit look smaller than it was — the one direction an app like this must
+ * never be wrong in.
+ *
+ * `observedKcal` replaces the formula outright when `burnRate` has managed to
+ * measure one. It does not vary with weight the way the formula does, because
+ * it is a single figure measured across a window rather than a curve; that is a
+ * fair trade for a number derived from her body instead of a regression on
+ * strangers.
  */
 export function buildSeries(
   days: readonly DayRecord[],
   weights: readonly WeightLog[],
-  profile: SeriesProfile
+  profile: SeriesProfile,
+  observedKcal: number | null = null
 ): Series {
   const byWeight = new Map(weights.map((w) => [w.date, w.weightKg]))
 
@@ -128,10 +145,11 @@ export function buildSeries(
       cursor += 1
     }
     const weightForDay = carried ?? profile.startWeightKg
-    const resting =
-      profile.heightCm && profile.age
-        ? bmr(weightForDay, profile.heightCm, profile.age, profile.sex)
-        : null
+    const spent =
+      observedKcal ??
+      (profile.heightCm && profile.age
+        ? tdee(bmr(weightForDay, profile.heightCm, profile.age, profile.sex), profile.activityLevel)
+        : null)
     const logged = d.kcal > 0
     return {
       date: d.date,
@@ -140,7 +158,7 @@ export function buildSeries(
       carbs: logged ? d.carbs : null,
       fat: logged ? d.fat : null,
       fibre: logged ? d.fibre : null,
-      burned: resting === null ? null : Math.round(resting + d.burned),
+      burned: spent === null ? null : Math.round(spent + d.burned),
       weightKg: byWeight.get(d.date) ?? null,
     }
   })

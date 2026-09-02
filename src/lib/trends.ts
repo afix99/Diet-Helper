@@ -96,6 +96,21 @@ export interface Trend {
   reading: TrendReading | null
   etaWeeks: number | null
   etaDate: string | null
+  /** Days from the first weigh-in to the last — the window the slope is measured over. */
+  spanDays: number
+  /**
+   * Logged days *inside* that window, which is a different question from
+   * `loggedDays`: a diary can be complete for a fortnight and empty for the two
+   * months of weigh-ins around it. Anything reasoning about how much of the
+   * eating the app actually saw has to use this one.
+   */
+  loggedDaysInSpan: number
+  /**
+   * Standard error of the weight slope, in kg/week. Null below three readings.
+   * This is how an estimate built on the slope can widen its own error bars
+   * when the scale is noisy and narrow them when it is not.
+   */
+  rateStdErrPerWeekKg: number | null
 }
 
 const mean = (ns: readonly number[]) =>
@@ -132,6 +147,46 @@ export function ratePerWeek(weights: readonly WeightLog[]): number | null {
   return round1(-(sxy / sxx) * 7 * 100) / 100
 }
 
+/**
+ * How much the slope could be wrong, in kg/week.
+ *
+ * The rate is a regression, so it comes with an honest uncertainty, and any
+ * calorie figure derived from it inherits that uncertainty. Quoting a single
+ * number from four noisy weigh-ins and the same number from forty would be
+ * claiming a precision the data does not have; this is what lets the estimate
+ * built on top say "about 2,000" when the readings are sparse and "2,010 to
+ * 2,060" when they are not.
+ *
+ * Residual standard error of the slope: sqrt(SSE / (n-2) / Sxx). Null below
+ * three readings, because two points fit a line exactly and leave no residual
+ * to measure.
+ */
+export function rateStdErrPerWeek(weights: readonly WeightLog[]): number | null {
+  const sorted = [...weights].sort((a, b) => a.date.localeCompare(b.date))
+  if (sorted.length < 3) return null
+
+  const origin = sorted[0].date
+  const xs = sorted.map((w) => daysBetween(origin, w.date))
+  const ys = sorted.map((w) => w.weightKg)
+  const mx = mean(xs)
+  const my = mean(ys)
+
+  let sxy = 0
+  let sxx = 0
+  for (let i = 0; i < xs.length; i += 1) {
+    sxy += (xs[i] - mx) * (ys[i] - my)
+    sxx += (xs[i] - mx) ** 2
+  }
+  if (sxx === 0) return null
+
+  const slope = sxy / sxx
+  const intercept = my - slope * mx
+  let sse = 0
+  for (let i = 0; i < xs.length; i += 1) sse += (ys[i] - (intercept + slope * xs[i])) ** 2
+
+  return Math.sqrt(sse / (xs.length - 2) / sxx) * 7
+}
+
 /** Seven-day blocks ending on `today`, oldest first. */
 function bucketWeeks(input: TrendInput): TrendWeek[] {
   const { days, weights, today } = input
@@ -156,7 +211,10 @@ function bucketWeeks(input: TrendInput): TrendWeek[] {
   })
 }
 
-const EMPTY: Omit<Trend, 'ready' | 'needs' | 'weeks' | 'loggedDays'> = {
+const EMPTY: Omit<
+  Trend,
+  'ready' | 'needs' | 'weeks' | 'loggedDays' | 'spanDays' | 'loggedDaysInSpan' | 'rateStdErrPerWeekKg'
+> = {
   ratePerWeekKg: null,
   avgIntakeKcal: null,
   avgBurnedKcal: 0,
@@ -175,6 +233,11 @@ export function trends(input: TrendInput): Trend {
   const logged = days.filter((d) => d.kcal > 0)
   const sorted = [...weights].sort((a, b) => a.date.localeCompare(b.date))
   const span = sorted.length >= 2 ? daysBetween(sorted[0].date, sorted[sorted.length - 1].date) : 0
+  const from = sorted.length >= 2 ? sorted[0].date : null
+  const to = sorted.length >= 2 ? sorted[sorted.length - 1].date : null
+  const loggedDaysInSpan =
+    from && to ? logged.filter((d) => d.date >= from && d.date <= to).length : 0
+  const rateStdErrPerWeekKg = rateStdErrPerWeek(sorted)
 
   // Gates, checked in the order that makes the advice most useful: tell someone
   // the one thing that would unlock this, not the whole list of what is missing.
@@ -183,6 +246,9 @@ export function trends(input: TrendInput): Trend {
     needs,
     weeks,
     loggedDays: logged.length,
+    spanDays: span,
+    loggedDaysInSpan,
+    rateStdErrPerWeekKg,
     ...EMPTY,
   })
   if (sorted.length < MIN_WEIGH_INS) {
@@ -252,5 +318,8 @@ export function trends(input: TrendInput): Trend {
     reading,
     etaWeeks,
     etaDate: etaWeeks === null ? null : addDays(today, etaWeeks * 7),
+    spanDays: span,
+    loggedDaysInSpan,
+    rateStdErrPerWeekKg,
   }
 }

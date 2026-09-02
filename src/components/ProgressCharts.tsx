@@ -12,7 +12,9 @@ import {
   windowFor,
   type Range,
 } from '@/lib/chartSeries'
-import { dayRecords } from '@/lib/selectors'
+import { burnRate } from '@/lib/burnRate'
+import { dayRecords, weekDates } from '@/lib/selectors'
+import { trends } from '@/lib/trends'
 import { useData } from '@/lib/store/provider'
 
 /**
@@ -31,6 +33,25 @@ export function ProgressCharts({ today }: { today: string }) {
   const { data } = useData()
   const [range, setRange] = useState<Range>('month')
 
+  /*
+   * The measured burn, when there is one, so this chart and the card above it
+   * cannot quote different numbers for the same body. Same twelve-week window
+   * and same exclusion of today as `BurnRateCard`.
+   */
+  const measured = useMemo(() => {
+    const r = burnRate(
+      trends({
+        days: dayRecords(data, weekDates(today, 84).filter((d) => d < today)),
+        weights: data.weights,
+        targets: data.targets,
+        profile: data.profile,
+        goalWeightKg: data.profile.goalWeightKg,
+        today,
+      })
+    )
+    return r.ready ? r.observedKcal : null
+  }, [data, today])
+
   const { dates, s } = useMemo(() => {
     const spanAll = datesBetween(
       windowFor('all', null, today).from,
@@ -44,9 +65,9 @@ export function ProgressCharts({ today }: { today: string }) {
     const shown = thin(all, 60)
     return {
       dates: shown,
-      s: buildSeries(dayRecords(data, shown), data.weights, data.profile),
+      s: buildSeries(dayRecords(data, shown), data.weights, data.profile, measured),
     }
-  }, [data, range, today])
+  }, [data, range, today, measured])
 
   const has = (pick: (p: (typeof s.points)[number]) => number | null) =>
     s.points.some((p) => pick(p) !== null)
@@ -114,9 +135,11 @@ export function ProgressCharts({ today }: { today: string }) {
       <Card className="mb-4">
         <h2 className="mb-1 text-secondary font-bold">Eaten against burned</h2>
         <p className="mb-2 text-caption leading-relaxed text-faint">
-          Bars are what you logged. The line is what your body used — resting burn for the
-          weight you were at the time, plus any exercise you logged. The gap between them is
-          what moves the scale.
+          Bars are what you logged. The line is what your body used &mdash;{' '}
+          {measured === null
+            ? 'estimated for the weight you were at the time'
+            : 'measured from your own weight and diary'}
+          , plus any exercise you logged. The gap between them is what moves the scale.
         </p>
         {!has((p) => p.kcal) ? (
           <EmptyState art="scales" title="Nothing logged in this range" hint="Log a day and it appears here" />

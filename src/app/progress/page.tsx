@@ -6,6 +6,7 @@ import { Card, ListGroup, PageHeader, StatusPill } from '@/components/ui'
 import { insights } from '@/lib/insights'
 import { Icon } from '@/components/icons'
 import { TrendCard } from '@/components/TrendCard'
+import { BurnRateCard } from '@/components/BurnRateCard'
 import { ProgressCharts } from '@/components/ProgressCharts'
 import { PickRail } from '@/components/PickRail'
 import { round1, statusBand } from '@/lib/nutrition'
@@ -129,6 +130,8 @@ export default function ProgressPage() {
       <ProgressCharts today={today} />
 
       <TrendCard today={today} />
+
+      <BurnRateCard today={today} />
 
       {/* Silently rendering nothing left people assuming the feature was
           missing. Show the locked state and what opens it. */}
