@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePresence } from '@/hooks/usePresence'
 import { CustomFoodDialog } from '@/components/CustomFoodDialog'
 import { FoodRow } from '@/components/FoodRow'
+import { Icon } from '@/components/icons'
 import { EmptyState, PageHeader } from '@/components/ui'
 import { FOOD_CATEGORIES } from '@/lib/catalogue'
 import { chipLabels, sectionFoods } from '@/lib/foodList'
@@ -42,6 +43,7 @@ export default function FoodsPage() {
   const PAGE = 60
   const [limit, setLimit] = useState(PAGE)
   const sentinel = useRef<HTMLDivElement>(null)
+  const chipRow = useRef<HTMLDivElement>(null)
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -81,6 +83,14 @@ export default function FoodsPage() {
   useEffect(() => {
     setLimit(PAGE)
   }, [query, category])
+
+  // Pick a category from the far end of the row and it would otherwise stay
+  // off-screen, leaving nothing on screen to say which filter is on.
+  useEffect(() => {
+    chipRow.current
+      ?.querySelector('[aria-pressed="true"]')
+      ?.scrollIntoView({ block: 'nearest', inline: 'center' })
+  }, [category])
 
   /*
    * `ready` is in the deps for a load-bearing reason: hooks run before the
@@ -145,16 +155,55 @@ export default function FoodsPage() {
         }
       />
 
-      <input
-        type="search"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search foods, categories, notes…"
-        aria-label="Search foods"
-        className="mb-3 w-full rounded-pill border border-line bg-surface px-4 py-3 text-body outline-none placeholder:text-faint focus:border-primary"
-      />
+      {/*
+        Search is the primary tool on a list this long, and the field was a
+        bare pill: nothing marking it as search, and no way to empty it but
+        selecting the text and deleting. The icon sits inside the rounded
+        field rather than beside it so the whole pill still reads as one
+        control, and the clear button only exists when there is something to
+        clear.
+      */}
+      <div className="relative mb-3">
+        <Icon
+          name="search"
+          size={17}
+          strokeWidth={2}
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint"
+        />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search foods, categories, notes…"
+          aria-label="Search foods"
+          className="w-full rounded-pill border border-line bg-surface py-3 pl-11 pr-11 text-body outline-none placeholder:text-faint focus:border-primary [&::-webkit-search-cancel-button]:hidden"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery('')}
+            aria-label="Clear search"
+            className="tap absolute right-1 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center text-faint"
+          >
+            <Icon name="close" size={16} strokeWidth={2.25} />
+          </button>
+        )}
+      </div>
 
-      <div className="-mx-4 mb-4 flex gap-1.5 overflow-x-auto px-4 pb-1">
+      {/*
+        Thirty chips in a scroller with nothing to say so — the last one sat
+        half-cut at the right edge, which reads as a layout fault rather than
+        as "there is more this way". The mask is alpha, not colour, so one
+        declaration serves both themes.
+      */}
+      <div
+        ref={chipRow}
+        className="-mx-4 mb-4 flex gap-1.5 overflow-x-auto px-4 pb-1"
+        style={{
+          maskImage: 'linear-gradient(to right, #000 calc(100% - 28px), transparent)',
+          WebkitMaskImage: 'linear-gradient(to right, #000 calc(100% - 28px), transparent)',
+        }}
+      >
         <Chip active={category === null} onClick={() => setCategory(null)}>
           All
         </Chip>
