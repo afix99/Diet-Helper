@@ -5,6 +5,7 @@ import {
   addFood,
   addRecipe,
   copyDay,
+  copySlot,
   deleteCustomFood,
   newId,
   removeEntry,
@@ -111,6 +112,46 @@ describe('setServings', () => {
     d = addFood(d, DAY, 'dinner', second, 2, () => 'b')
     const after = setServings(d, 'a', 3)
     expect(after.entries[1].servings).toBe(2)
+  })
+})
+
+describe('copySlot', () => {
+  /*
+   * The opposite of `copyDay` where it counts, and deliberately so. Repeating
+   * one meal means "and this as well"; deleting what was already logged in
+   * order to honour a repeat button would be the worse of the two surprises.
+   */
+  it('appends rather than replacing, unlike copyDay', () => {
+    let d = addFood(base(), DAY, 'lunch', food, 1, () => 'src')
+    d = addFood(d, OTHER, 'lunch', second, 1, () => 'kept')
+    const after = copySlot(d, DAY, OTHER, 'lunch', ids())
+    const dest = after.entries.filter((e) => e.date === OTHER)
+    expect(dest).toHaveLength(2)
+    expect(dest.some((e) => e.id === 'kept')).toBe(true)
+  })
+
+  it('takes only the slot asked for', () => {
+    let d = addFood(base(), DAY, 'lunch', food, 1, () => 'l')
+    d = addFood(d, DAY, 'dinner', second, 1, () => 'din')
+    const after = copySlot(d, DAY, OTHER, 'lunch', ids())
+    const dest = after.entries.filter((e) => e.date === OTHER)
+    expect(dest).toHaveLength(1)
+    expect(dest[0].slot).toBe('lunch')
+  })
+
+  it('mints fresh ids so the copy can be removed on its own', () => {
+    const d = addFood(base(), DAY, 'lunch', food, 2, () => 'src')
+    const after = copySlot(d, DAY, OTHER, 'lunch', ids())
+    const copied = after.entries.find((e) => e.date === OTHER)!
+    expect(copied.id).not.toBe('src')
+    // Everything else about the entry survives, servings included.
+    expect(copied.servings).toBe(2)
+    expect(copied.foodId).toBe(food.id)
+  })
+
+  it('is a no-op when the source slot is empty', () => {
+    const d = addFood(base(), DAY, 'lunch', food, 1, () => 'src')
+    expect(copySlot(d, OTHER, DAY, 'dinner', ids())).toBe(d)
   })
 })
 

@@ -143,6 +143,29 @@ export function copyDay(
   return { ...d, entries: [...kept, ...source.map((e) => ({ ...e, id: mintId(), date: to }))] }
 }
 
+/**
+ * Copy one meal slot from one day onto another.
+ *
+ * The sibling of `copyDay`, and deliberately the opposite where it counts:
+ * this **appends**. Copying yesterday's breakfast onto a day that already has
+ * a breakfast means "and this as well", where the whole-day version means
+ * "make today look like that day". Silently deleting what someone already
+ * logged in order to honour a repeat button would be the worse surprise of the
+ * two, so the caller decides whether the slot is empty first and this never
+ * destroys anything on its own.
+ */
+export function copySlot(
+  d: AppData,
+  from: string,
+  to: string,
+  slot: MealSlot,
+  mintId: () => string = newId
+): AppData {
+  const source = d.entries.filter((e) => e.date === from && e.slot === slot)
+  if (source.length === 0) return d
+  return { ...d, entries: [...d.entries, ...source.map((e) => ({ ...e, id: mintId(), date: to }))] }
+}
+
 export function addCustomFood(
   d: AppData,
   food: Omit<Food, 'id' | 'slug' | 'ownerId'>,

@@ -39,7 +39,7 @@ import { MEAL_SLOTS, SLOT_LABELS, type MealSlot } from '@/lib/types'
 
 export default function TodayPage() {
   const { data, ready } = useData()
-  const { callPetOut, dismissUnderEating } = useLogging()
+  const { callPetOut, copyDay, dismissUnderEating } = useLogging()
   const [picking, setPicking] = useState<MealSlot | null>(null)
   const [quickAdding, setQuickAdding] = useState<MealSlot | null>(null)
   const [explaining, setExplaining] = useState<MacroKey | null>(null)
@@ -55,6 +55,29 @@ export default function TodayPage() {
   const totals = useMemo(() => dayTotals(data, date), [data, date])
   // One pass over the diary for all six cards, rather than one pass each.
   const bySlot = useMemo(() => entriesBySlot(data, date), [data, date])
+
+  /*
+   * The moment people quit tracking is the evening they cannot face logging,
+   * and the research is blunt about it: logging burden is the main reason
+   * diaries get abandoned, and most abandonment happens inside a month. The
+   * machinery to fill a day in one tap has existed since the Week screen was
+   * built — it was just nowhere near the screen you are actually looking at
+   * when you decide not to bother.
+   *
+   * Offered only on an empty day, and that is a safety rule rather than a
+   * tidiness one: `copyDay` *replaces* its destination, so putting this in
+   * front of a half-logged day would quietly delete breakfast. An empty day is
+   * also exactly the moment worth catching.
+   */
+  const yesterday = addDays(date, -1)
+  const emptyToday = useMemo(
+    () => data.entries.every((e) => e.date !== date),
+    [data.entries, date]
+  )
+  const yesterdayCount = useMemo(
+    () => data.entries.filter((e) => e.date === yesterday).length,
+    [data.entries, yesterday]
+  )
 
   /*
    * The ring measures against the target you set, whatever it is. An earlier
@@ -338,6 +361,21 @@ export default function TodayPage() {
       <WaterCard date={date} />
 
       <ExerciseCard date={date} />
+
+      {emptyToday && yesterdayCount > 0 && (
+        <PressButton
+          full
+          hapticWeight="medium"
+          onClick={() => {
+            copyDay(yesterday, date)
+            sound('log')
+          }}
+          className="mb-3 !rounded-card"
+        >
+          <Icon name="repeat" size={18} strokeWidth={2} />
+          Same as yesterday
+        </PressButton>
+      )}
 
       {/* Buried inside the picker, nobody found this. It is the fastest way to
           log, so it belongs on the front screen. */}

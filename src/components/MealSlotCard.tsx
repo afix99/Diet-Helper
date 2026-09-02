@@ -9,6 +9,7 @@ import { sound } from '@/lib/sound'
 import { burstFrom } from './BurstLayer'
 import { haptic } from '@/lib/haptics'
 import { usualFor } from '@/lib/usual'
+import { addDays } from '@/lib/dates'
 import { useData } from '@/lib/store/provider'
 import { SLOT_LABELS, type LogEntry, type MealSlot } from '@/lib/types'
 
@@ -41,10 +42,26 @@ export function MealSlotCard({
   onOpenPicker: () => void
 }) {
   const { data } = useData()
-  const { logFood, removeEntry, setServings } = useLogging()
+  const { copySlot, logFood, removeEntry, setServings } = useLogging()
 
   const label = SLOT_LABELS[slot]
   const slotKcal = entries.reduce((sum, e) => sum + entryMacros(e).kcal, 0)
+
+  /*
+   * Yesterday's version of this same meal, offered only when today's is empty.
+   * Breakfast is the same three things most mornings, and the usual-foods rail
+   * above already knows that — but it needs a tap per item, and this is the
+   * whole slot at once. Unlike `copyDay` this appends, so the empty check is a
+   * matter of not cluttering a slot that is already done rather than of safety.
+   */
+  const yesterday = addDays(date, -1)
+  const repeatable = useMemo(
+    () =>
+      entries.length === 0
+        ? data.entries.filter((e) => e.date === yesterday && e.slot === slot).length
+        : 0,
+    [data.entries, entries.length, slot, yesterday]
+  )
 
   /*
    * logFood mints the entry id internally, so the row that just arrived is
@@ -235,6 +252,24 @@ export function MealSlotCard({
             </li>
           ))}
         </ul>
+      )}
+
+      {repeatable > 0 && (
+        <button
+          type="button"
+          onClick={() => {
+            haptic('medium')
+            sound('log')
+            copySlot(yesterday, date, slot)
+          }}
+          className="tap mb-2 flex w-full items-center justify-center gap-1.5 rounded-pill bg-raised py-2.5 text-secondary font-semibold text-primary-ink"
+        >
+          <Icon name="repeat" size={15} strokeWidth={2.25} />
+          Same as yesterday
+          <span className="font-normal tabular-nums text-faint">
+            {repeatable} {repeatable === 1 ? 'item' : 'items'}
+          </span>
+        </button>
       )}
 
       <button

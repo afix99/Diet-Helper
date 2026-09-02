@@ -61,6 +61,12 @@ export function useLogging() {
     [update]
   )
 
+  const copySlot = useCallback(
+    (from: string, to: string, slot: MealSlot) =>
+      update((d) => edits.copySlot(d, from, to, slot)),
+    [update]
+  )
+
   const addCustomFood = useCallback(
     (food: Omit<Food, 'id' | 'slug' | 'ownerId'>) => {
       // The id is minted here so the caller can select the new food immediately,
@@ -160,6 +166,7 @@ export function useLogging() {
     setServings,
     toggleFavourite,
     copyDay,
+    copySlot,
     addCustomFood,
     deleteCustomFood,
     logActivity,
