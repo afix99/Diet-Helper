@@ -47,6 +47,7 @@ export default function TodayPage() {
      thing anyone opens this screen to do. */
   const [openSlot, setOpenSlot] = useState<MealSlot>(() => slotForNow())
   const [showMacros, setShowMacros] = useState(false)
+  const [showExtras, setShowExtras] = useState(false)
   const [heldPicking, pickingLeaving] = usePresence(picking)
   const [heldQuickAdding, quickAddLeaving] = usePresence(quickAdding)
   const [heldExplaining, explainLeaving] = usePresence(explaining)
@@ -335,6 +336,124 @@ export default function TodayPage() {
         )}
       </Card>
 
+      <UnderEatingCard date={date} />
+
+      <section className="mb-5" aria-labelledby="log-meal-title">
+        <div className="mb-2 px-1">
+          <div>
+            <h2 id="log-meal-title" className="text-title">
+              Log a meal
+            </h2>
+            <p className="text-tertiary text-faint">Adding to {SLOT_LABELS[openSlot].label}</p>
+          </div>
+        </div>
+
+        <PressButton
+          full
+          hapticWeight="medium"
+          onClick={() => setPicking(openSlot)}
+          className="!rounded-card"
+        >
+          <Icon name="plus" size={18} strokeWidth={2.25} />
+          Add food to {SLOT_LABELS[openSlot].label}
+        </PressButton>
+
+        <div
+          className={`mt-2 grid gap-2 ${emptyToday && yesterdayCount > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}
+        >
+          <PressButton
+            full
+            variant="quiet"
+            hapticWeight="medium"
+            onClick={() => setQuickAdding(openSlot)}
+            className="!rounded-card !px-3 !py-2.5"
+          >
+            <Icon name="pencil" size={17} strokeWidth={2} />
+            Describe meal
+          </PressButton>
+          {emptyToday && yesterdayCount > 0 && (
+            <PressButton
+              full
+              variant="quiet"
+              hapticWeight="medium"
+              onClick={() => {
+                copyDay(yesterday, date)
+                sound('log')
+              }}
+              className="!rounded-card !px-3 !py-2.5"
+            >
+              <Icon name="repeat" size={17} strokeWidth={2} />
+              Repeat yesterday
+            </PressButton>
+          )}
+        </div>
+      </section>
+
+      <section className="mb-5" aria-labelledby="today-meals-title">
+        <h2
+          id="today-meals-title"
+          className="mb-1.5 px-1 text-caption font-bold uppercase tracking-wide text-faint"
+        >
+          Today&rsquo;s meals
+        </h2>
+        <div className="stack gap-3">
+          {MEAL_SLOTS.map((slot) => (
+            <MealSlotCard
+              key={slot}
+              date={date}
+              slot={slot}
+              entries={bySlot[slot]}
+              open={openSlot === slot}
+              onToggle={() => setOpenSlot(slot)}
+              onOpenPicker={() => setPicking(slot)}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-4" aria-labelledby="daily-extras-title">
+        <button
+          type="button"
+          onClick={() => setShowExtras((value) => !value)}
+          aria-expanded={showExtras}
+          aria-controls="daily-extras-content"
+          className="card tap-row flex w-full items-center gap-3 px-4 py-3 text-left"
+        >
+          <span className="flex shrink-0 -space-x-1.5" aria-hidden>
+            <span className="grid h-9 w-9 place-items-center rounded-pill bg-ocean/15 text-ocean">
+              <Icon name="droplet" size={18} strokeWidth={2} />
+            </span>
+            <span className="grid h-9 w-9 place-items-center rounded-pill border-2 border-surface bg-primary/15 text-primary-ink">
+              <Icon name="activity" size={18} strokeWidth={2} />
+            </span>
+          </span>
+          <span className="min-w-0 flex-1">
+            <span id="daily-extras-title" className="block text-secondary font-bold">
+              Water &amp; exercise
+            </span>
+            <span className="block truncate text-tertiary tabular-nums text-faint">
+              {(data.water[date] ?? 0).toLocaleString('en-GB')} /{' '}
+              {data.targets.waterMl.toLocaleString('en-GB')} ml
+              <span className="mx-1.5">·</span>
+              {burned > 0 ? `${burned.toLocaleString('en-GB')} kcal earned` : 'No exercise'}
+            </span>
+          </span>
+          <Icon
+            name="chevron"
+            size={15}
+            strokeWidth={2.5}
+            className={`text-faint transition-transform ${showExtras ? '-rotate-90' : 'rotate-90'}`}
+          />
+        </button>
+
+        {showExtras && (
+          <div id="daily-extras-content" className="mt-3">
+            <WaterCard date={date} />
+            <ExerciseCard date={date} />
+          </div>
+        )}
+      </section>
+
       {PET_ENABLED && data.pet.out && <PetCard date={date} />}
 
       {unlocked.length > 0 && (
@@ -355,53 +474,6 @@ export default function TodayPage() {
           </Card>
         </Link>
       )}
-
-      <UnderEatingCard date={date} />
-
-      <WaterCard date={date} />
-
-      <ExerciseCard date={date} />
-
-      {emptyToday && yesterdayCount > 0 && (
-        <PressButton
-          full
-          hapticWeight="medium"
-          onClick={() => {
-            copyDay(yesterday, date)
-            sound('log')
-          }}
-          className="mb-3 !rounded-card"
-        >
-          <Icon name="repeat" size={18} strokeWidth={2} />
-          Same as yesterday
-        </PressButton>
-      )}
-
-      {/* Buried inside the picker, nobody found this. It is the fastest way to
-          log, so it belongs on the front screen. */}
-      <PressButton
-        full
-        hapticWeight="medium"
-        onClick={() => setQuickAdding(openSlot)}
-        className="mb-3 !rounded-card"
-      >
-        <Icon name="pencil" size={18} strokeWidth={2} />
-        Describe a whole meal
-      </PressButton>
-
-      <div className="stack gap-3">
-        {MEAL_SLOTS.map((slot) => (
-          <MealSlotCard
-            key={slot}
-            date={date}
-            slot={slot}
-            entries={bySlot[slot]}
-            open={openSlot === slot}
-            onToggle={() => setOpenSlot(slot)}
-            onOpenPicker={() => setPicking(slot)}
-          />
-        ))}
-      </div>
 
       {heldPicking && (
         <FoodPicker

@@ -287,7 +287,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
             <p className="text-secondary text-muted">There are two ways in, both on Today.</p>
             <ol className="mt-4 stack gap-3">
               <Way n="1" title="+ Add food">
-                Search all 147 foods. Your recents and favourites sit at the top, because
+                Search the full food catalogue. Your recents and favourites sit at the top, because
                 most logging is repeat logging.
               </Way>
               <Way n="2" title="Describe a whole meal">
@@ -310,7 +310,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               You&rsquo;re set up
             </h2>
             <p className="mx-auto mt-2 max-w-[30ch] text-secondary text-muted">
-              Nine badges are waiting. This is the first one, and it asks for the smallest
+              More badges are waiting. This is the first one, and it asks for the smallest
               possible thing.
             </p>
             <div className="mx-auto mt-5 max-w-xs rounded-card border border-primary/30 bg-primary-container/60 p-4">

@@ -13,6 +13,7 @@ export type IconName =
   | 'today'
   | 'calendar'
   | 'search'
+  | 'filter'
   | 'chart'
   | 'ellipsis'
   | 'book'
@@ -65,6 +66,11 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <circle cx="11" cy="11" r="6.75" />
       <path d="m16 16 4.5 4.5" />
+    </>
+  ),
+  filter: (
+    <>
+      <path d="M4 6h16M7 12h10M10 18h4" />
     </>
   ),
   chart: (

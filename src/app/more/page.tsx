@@ -6,6 +6,7 @@ import { IconTile, ListGroup, ListRow, PageHeader, type TileTone } from '@/compo
 import { PetCat } from '@/components/PetCat'
 import { PET_ENABLED, poseFor, stageFor } from '@/lib/pet'
 import { useLogging } from '@/lib/logging'
+import { RECIPES } from '@/lib/recipes'
 import { badgesFor, entriesFor, streakFor } from '@/lib/selectors'
 import { useData } from '@/lib/store/provider'
 import { todayIso } from '@/lib/store/defaults'
@@ -22,7 +23,7 @@ const LINKS: {
     icon: 'book',
     tone: 'primary',
     label: 'Recipes',
-    hint: '7 salmon dishes',
+    hint: 'Practical everyday meals',
   },
   {
     href: '/more/shop',
@@ -43,7 +44,7 @@ const LINKS: {
     icon: 'medal',
     tone: 'amber',
     label: 'Badges',
-    hint: '18 to collect',
+    hint: 'Progress and rewards',
   },
   {
     href: '/more/settings',
@@ -58,7 +59,8 @@ export default function MorePage() {
   const { data } = useData()
   const { callPetOut, sendPetHome } = useLogging()
   const today = todayIso()
-  const unlocked = badgesFor(data, today).filter((b) => b.unlocked).length
+  const badges = badgesFor(data, today)
+  const unlocked = badges.filter((b) => b.unlocked).length
   const stage = stageFor(streakFor(data, today).best)
   const pose = poseFor(entriesFor(data, today).length > 0)
 
@@ -101,7 +103,13 @@ export default function MorePage() {
                 </IconTile>
               }
               label={l.label}
-              secondary={l.hint}
+              secondary={
+                l.href === '/more/recipes'
+                  ? `${RECIPES.length} practical meals`
+                  : l.href === '/more/badges'
+                    ? `${unlocked} of ${badges.length} unlocked`
+                    : l.hint
+              }
               value={l.href === '/more/badges' && unlocked > 0 ? unlocked : undefined}
               chevron
             />
