@@ -1,10 +1,10 @@
 # Memey Diet Planner
 
 A phone-first web app built from `Memey_Diet_Planner_v3.xlsx`. It keeps the
-spreadsheet's content — the 69-item Malaysian food database, seven salmon
-recipes, the Setiawangsa shopping system, the supplement and micronutrient
-protocol, the nine badges — and makes logging a meal take about five seconds
-instead of pinch-zooming a 12-column grid.
+spreadsheet's content and expands it into a 441-item food catalogue, 19
+practical recipes, the Setiawangsa shopping system, the supplement and
+micronutrient protocol, and the badge collection — while making a meal take
+about five seconds to log instead of pinch-zooming a 12-column grid.
 
 Bilingual throughout (Malay first, English alongside), installable on iOS and
 Android home screens, and works offline.
@@ -55,6 +55,7 @@ settings.
 
 ```
 seed/                  Generated from the workbook — do not hand-edit
+seed/menu-recipes.json Curated recipe expansion, kept separate from workbook output
 src/lib/dates.ts       ISO day-key arithmetic, all in UTC (see below)
 scripts/extract_xlsx.py  Regenerates seed/ from .source-workbook.xlsx
 src/lib/nutrition.ts   Every formula ported from the sheet, cell refs in comments
@@ -64,8 +65,7 @@ supabase/migrations/   Schema and RLS policies
 ```
 
 The food catalogue is bundled into the JS at build time rather than fetched:
-it is 69 rows that only change when the workbook does, so search is instant
-and works with no network.
+it is 441 rows, so search is instant and works with no network.
 
 User data goes through a `DataStore` interface with two implementations. The
 screens only ever see the interface, so moving between local storage and
@@ -114,12 +114,13 @@ alarm colours, no shaming copy.
 
 ## The food catalogue
 
-147 items in two sets, and the app keeps them visibly apart:
+441 items from the workbook and curated community packs, kept visibly apart:
 
 - **69 workbook foods**, validated against the Malaysian Food Composition
   Tables and USDA SR Legacy per the source spreadsheet.
-- **78 chain and street foods** — the full ZUS Coffee menu, ayam gepuk, kebab,
-  Ramly, nasi kandar, Tealive and boba, Korean fried chicken, KFC and the rest.
+- **372 community foods** — fruit, pantry staples, the full ZUS Coffee menu,
+  ayam gepuk, kebab, Ramly, nasi kandar, Tealive and boba, Korean fried chicken,
+  sushi delivery dishes, KFC and the rest.
   These are public estimates and are labelled **est.** in the list, because a
   street portion genuinely varies between outlets. Sources for the same dish
   disagreed by a factor of two while this was compiled, which is exactly why
@@ -130,7 +131,7 @@ entry wins a tie against an estimated one.
 
 ## Adding your own foods
 
-The 69-item catalogue won't have everything. Two ways in:
+The catalogue won't have everything. Two ways in:
 
 - **From a search that finds nothing.** Type a name in the meal picker, and
   where the "no matches" message used to dead-end there's now an
