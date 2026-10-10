@@ -5,7 +5,7 @@ import { usePresence } from '@/hooks/usePresence'
 import { CustomFoodDialog } from '@/components/CustomFoodDialog'
 import { FoodRow } from '@/components/FoodRow'
 import { Icon } from '@/components/icons'
-import { EmptyState, PageHeader } from '@/components/ui'
+import { EmptyState, PageHeader, Sheet } from '@/components/ui'
 import { FOOD_CATEGORIES } from '@/lib/catalogue'
 import { chipLabels, sectionFoods } from '@/lib/foodList'
 import { useLogging } from '@/lib/logging'
@@ -20,7 +20,9 @@ export default function FoodsPage() {
   const [category, setCategory] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
+  const [filtering, setFiltering] = useState(false)
   const [heldAdding, addingLeaving] = usePresence(adding || null)
+  const [heldFiltering, filteringLeaving] = usePresence(filtering || null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const foods = useMemo(() => allFoods(data), [data])
@@ -43,7 +45,6 @@ export default function FoodsPage() {
   const PAGE = 60
   const [limit, setLimit] = useState(PAGE)
   const sentinel = useRef<HTMLDivElement>(null)
-  const chipRow = useRef<HTMLDivElement>(null)
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -65,6 +66,11 @@ export default function FoodsPage() {
    * of them unreachable. See `chipLabels`.
    */
   const labels = useMemo(() => chipLabels(FOOD_CATEGORIES), [])
+  const categoryCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const food of foods) counts.set(food.category, (counts.get(food.category) ?? 0) + 1)
+    return counts
+  }, [foods])
 
   /*
    * Her foods first. Catalogue order buried the twenty things she actually
@@ -75,7 +81,7 @@ export default function FoodsPage() {
   const sections = useMemo(() => {
     const browsing = !query.trim() && !category
     if (!browsing) return [{ title: null, foods: shown }]
-    return sectionFoods(shown, favouriteFoods(data), oftenLogged(data))
+    return sectionFoods(shown, favouriteFoods(data), oftenLogged(data, { limit: 5 }))
   }, [shown, data, query, category])
 
   // A new search starts at the top of its own results, not wherever the last
@@ -83,14 +89,6 @@ export default function FoodsPage() {
   useEffect(() => {
     setLimit(PAGE)
   }, [query, category])
-
-  // Pick a category from the far end of the row and it would otherwise stay
-  // off-screen, leaving nothing on screen to say which filter is on.
-  useEffect(() => {
-    chipRow.current
-      ?.querySelector('[aria-pressed="true"]')
-      ?.scrollIntoView({ block: 'nearest', inline: 'center' })
-  }, [category])
 
   /*
    * `ready` is in the deps for a load-bearing reason: hooks run before the
@@ -155,64 +153,64 @@ export default function FoodsPage() {
         }
       />
 
-      {/*
-        Search is the primary tool on a list this long, and the field was a
-        bare pill: nothing marking it as search, and no way to empty it but
-        selecting the text and deleting. The icon sits inside the rounded
-        field rather than beside it so the whole pill still reads as one
-        control, and the clear button only exists when there is something to
-        clear.
-      */}
-      <div className="relative mb-3">
-        <Icon
-          name="search"
-          size={17}
-          strokeWidth={2}
-          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint"
-        />
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search foods, categories, notes…"
-          aria-label="Search foods"
-          className="w-full rounded-pill border border-line bg-surface py-3 pl-11 pr-11 text-body outline-none placeholder:text-faint focus:border-primary [&::-webkit-search-cancel-button]:hidden"
-        />
-        {query && (
-          <button
-            type="button"
-            onClick={() => setQuery('')}
-            aria-label="Clear search"
-            className="tap absolute right-1 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center text-faint"
-          >
-            <Icon name="close" size={16} strokeWidth={2.25} />
-          </button>
-        )}
+      {/* Search owns the width; the catalogue's thirty categories move into a
+          sheet rather than competing with it in a permanent chip rail. */}
+      <div className="mb-3 flex items-center gap-2">
+        <div className="relative min-w-0 flex-1">
+          <Icon
+            name="search"
+            size={17}
+            strokeWidth={2}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint"
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search foods…"
+            aria-label="Search foods"
+            className="w-full rounded-pill border border-line bg-surface py-3 pl-11 pr-11 text-body outline-none placeholder:text-faint focus:border-primary [&::-webkit-search-cancel-button]:hidden"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              aria-label="Clear search"
+              className="tap absolute right-1 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center text-faint"
+            >
+              <Icon name="close" size={16} strokeWidth={2.25} />
+            </button>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => setFiltering(true)}
+          aria-label="Filter foods by category"
+          aria-haspopup="dialog"
+          className={`tap relative grid h-12 w-12 shrink-0 place-items-center rounded-pill border bg-surface ${
+            category ? 'border-primary text-primary-ink' : 'border-line text-muted'
+          }`}
+        >
+          <Icon name="filter" size={19} strokeWidth={2} />
+          {category && (
+            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full border border-surface bg-primary" />
+          )}
+        </button>
       </div>
 
-      {/*
-        Thirty chips in a scroller with nothing to say so — the last one sat
-        half-cut at the right edge, which reads as a layout fault rather than
-        as "there is more this way". The mask is alpha, not colour, so one
-        declaration serves both themes.
-      */}
-      <div
-        ref={chipRow}
-        className="-mx-4 mb-4 flex gap-1.5 overflow-x-auto px-4 pb-1"
-        style={{
-          maskImage: 'linear-gradient(to right, #000 calc(100% - 28px), transparent)',
-          WebkitMaskImage: 'linear-gradient(to right, #000 calc(100% - 28px), transparent)',
-        }}
-      >
-        <Chip active={category === null} onClick={() => setCategory(null)}>
-          All
-        </Chip>
-        {FOOD_CATEGORIES.map((c, i) => (
-          <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
-            {labels[i]}
-          </Chip>
-        ))}
-      </div>
+      {category && (
+        <div className="mb-4 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setCategory(null)}
+            className="tap flex min-h-9 items-center gap-1.5 rounded-pill bg-primary/12 px-3 text-tertiary font-semibold text-primary-ink"
+          >
+            {labels[FOOD_CATEGORIES.indexOf(category)]}
+            <Icon name="close" size={13} strokeWidth={2.25} />
+          </button>
+          <span className="text-caption text-faint">{shown.length} foods</span>
+        </div>
+      )}
 
       {shown.length === 0 ? (
         <div>
@@ -278,29 +276,104 @@ export default function FoodsPage() {
           onClose={() => setAdding(false)}
         />
       )}
+      {heldFiltering && (
+        <CategoryFilterSheet
+          value={category}
+          labels={labels}
+          counts={categoryCounts}
+          total={foods.length}
+          leaving={filteringLeaving}
+          onChange={setCategory}
+          onClose={() => setFiltering(false)}
+        />
+      )}
     </>
   )
 }
 
-function Chip({
-  active,
-  onClick,
-  children,
+function CategoryFilterSheet({
+  value,
+  labels,
+  counts,
+  total,
+  leaving,
+  onChange,
+  onClose,
 }: {
-  active: boolean
-  onClick: () => void
-  children: React.ReactNode
+  value: string | null
+  labels: string[]
+  counts: ReadonlyMap<string, number>
+  total: number
+  leaving: boolean
+  onChange: (value: string | null) => void
+  onClose: () => void
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`tap shrink-0 rounded-pill px-3 py-1.5 text-tertiary font-semibold ${
-        active ? 'bg-primary text-on-primary' : 'bg-raised text-muted'
-      }`}
-    >
-      {children}
-    </button>
+    <Sheet onClose={onClose} leaving={leaving} labelledBy="food-category-title">
+      <div className="flex items-start justify-between px-4 pb-3 pt-2">
+        <div>
+          <h2 id="food-category-title" className="text-title">
+            Food categories
+          </h2>
+          <p className="text-tertiary text-faint">Choose one to narrow the catalogue</p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="tap px-2 py-1 text-secondary font-semibold text-primary-ink"
+        >
+          Done
+        </button>
+      </div>
+
+      <div className="overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <button
+          type="button"
+          onClick={() => {
+            onChange(null)
+            onClose()
+          }}
+          aria-pressed={value === null}
+          className={`tap mb-2 flex min-h-12 w-full items-center justify-between rounded-inner px-3 text-left ${
+            value === null ? 'bg-primary/12 text-primary-ink' : 'bg-surface text-ink'
+          }`}
+        >
+          <span className="font-semibold">All foods</span>
+          <span className="flex items-center gap-2 text-caption tabular-nums text-faint">
+            {total}
+            {value === null && <Icon name="check" size={15} strokeWidth={2.5} />}
+          </span>
+        </button>
+
+        <div className="grid grid-cols-2 gap-2">
+          {FOOD_CATEGORIES.map((category, i) => {
+            const active = value === category
+            return (
+              <button
+                key={category}
+                type="button"
+                onClick={() => {
+                  onChange(category)
+                  onClose()
+                }}
+                aria-pressed={active}
+                className={`tap flex min-h-12 min-w-0 items-center justify-between gap-2 rounded-inner px-3 text-left ${
+                  active ? 'bg-primary/12 text-primary-ink' : 'bg-surface text-ink'
+                }`}
+              >
+                <span className="min-w-0 truncate text-tertiary font-semibold">{labels[i]}</span>
+                <span className="shrink-0 text-caption tabular-nums text-faint">
+                  {active ? (
+                    <Icon name="check" size={15} strokeWidth={2.5} />
+                  ) : (
+                    counts.get(category) ?? 0
+                  )}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </Sheet>
   )
 }

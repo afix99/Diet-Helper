@@ -37,7 +37,15 @@ describe('Icon sizing', () => {
   })
 
   it('draws something for every name it advertises', () => {
-    const names: IconName[] = ['today', 'calendar', 'search', 'chart', 'chevron', 'close']
+    const names: IconName[] = [
+      'today',
+      'calendar',
+      'search',
+      'filter',
+      'chart',
+      'chevron',
+      'close',
+    ]
     for (const name of names) {
       const el = Icon({ name }) as ReactElement
       expect(props(el).children, name).toBeTruthy()

@@ -1,6 +1,7 @@
 'use client'
 
 import { Emoji } from './Emoji'
+import { Icon } from './icons'
 import { BURST_STYLES, FALLBACK } from '@/lib/burstPalette'
 import { macroSplit } from '@/lib/nutrition'
 import type { Food } from '@/lib/types'
@@ -53,7 +54,7 @@ function CategoryMark({ category }: { category: string }) {
       width="10"
       height="10"
       viewBox="0 0 10 10"
-      className="mt-1.5 shrink-0"
+      className="shrink-0"
       style={{ overflow: 'visible' }}
     >
       {style.shape === 'ring' ? (
@@ -105,35 +106,49 @@ export function FoodRow({
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="tap flex w-full items-start gap-2.5 px-3.5 py-3 text-left"
+        className={`tap flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left transition-colors ${
+          open ? 'bg-raised/45' : ''
+        }`}
       >
         <CategoryMark category={food.category} />
 
         <span className="min-w-0 flex-1">
-          <span className="flex items-baseline gap-2">
-            <span className="min-w-0 flex-1 text-secondary font-semibold">
-              {food.name}
-              {/* Saved state rides on the name rather than owning a 48px column
-                  of its own. The old list drew a greyed-out star on all 441
-                  rows for a state that is almost always off. */}
-              {favourite && (
-                <Emoji name="star" size={13} className="ml-1.5 inline-block align-[-1px]" />
-              )}
-            </span>
-            <span className="shrink-0 text-secondary font-bold tabular-nums text-primary-ink">
-              {food.kcal}
-              <span className="ml-0.5 text-caption font-semibold text-faint">kcal</span>
-            </span>
+          <span className="block truncate text-secondary font-semibold">
+            {food.name}
+            {/* Saved state rides on the name rather than owning a 48px column
+                of its own. The old list drew a greyed-out star on all 441
+                rows for a state that is almost always off. */}
+            {favourite && (
+              <Emoji name="star" size={13} className="ml-1.5 inline-block align-[-1px]" />
+            )}
           </span>
-
-          <span className="mt-0.5 block truncate text-caption text-faint">
+          <span className="block truncate text-caption text-faint">
             {food.servingSize}
             {food.source === 'community' && <span className="ml-1.5">&middot; estimate</span>}
           </span>
+        </span>
 
+        <span className="shrink-0 text-right">
+          <span className="block text-secondary font-bold tabular-nums text-primary-ink">
+            {food.kcal}
+            <span className="ml-0.5 text-caption font-semibold text-faint">kcal</span>
+          </span>
+          <span className="mt-0.5 flex justify-end">
+            <Icon
+              name="chevron"
+              size={12}
+              strokeWidth={2.5}
+              className={`text-faint transition-transform ${open ? '-rotate-90' : 'rotate-90'}`}
+            />
+          </span>
+        </span>
+      </button>
+
+      {open && (
+        <div className="border-t border-line px-3.5 py-2.5">
           {hasMacros && (
-            <>
-              <span className="mt-2 flex h-1.5 overflow-hidden rounded-pill bg-raised">
+            <div className="mb-3">
+              <span className="flex h-1.5 overflow-hidden rounded-pill bg-raised">
                 {SEGMENTS.map((s) => (
                   <span
                     key={s.key}
@@ -142,15 +157,6 @@ export function FoodRow({
                   />
                 ))}
               </span>
-              {/*
-                Values in the same order as the bar above them, each in its
-                own colour, so the number and the slice are obviously the same
-                thing. The raw tones are used, not ink variants: measured
-                against a card they clear 5:1 in light and 7:1 in dark, and
-                check-contrast.mjs now guards all three — it previously only
-                checked white text *on* these colours, never these colours as
-                text, which is why the pairing went unexamined for so long.
-              */}
               <span className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-caption tabular-nums">
                 <Macro value={food.protein} label="protein" className="text-primary-ink" />
                 <Macro value={food.carbs} label="carbs" className="text-amber" />
@@ -159,13 +165,8 @@ export function FoodRow({
                   <Macro value={food.fibre} label="fibre" className="text-avocado" />
                 )}
               </span>
-            </>
+            </div>
           )}
-        </span>
-      </button>
-
-      {open && (
-        <div className="border-t border-line px-3.5 py-2.5">
           {food.source === 'community' && (
             <p className="mb-1.5 text-tertiary leading-relaxed text-faint">
               Estimated from public figures. Chain and street portions vary a lot between
