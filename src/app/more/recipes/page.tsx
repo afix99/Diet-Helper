@@ -24,7 +24,7 @@ export default function RecipesPage() {
     <>
       <PageHeader
         title="Recipes"
-        subtitle="All under 20 min active time"
+        subtitle={`${RECIPES.length} practical meals`}
         back={{ href: '/more', label: 'More' }}
       />
 

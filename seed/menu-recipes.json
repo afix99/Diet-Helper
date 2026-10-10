@@ -1,0 +1,306 @@
+[
+  {
+    "slug": "overnight-oats-banana-chia",
+    "name": "OVERNIGHT OATS WITH BANANA AND CHIA",
+    "minutes": 5,
+    "kcal": 360,
+    "protein": 13,
+    "carbs": 62,
+    "fat": 9,
+    "fibre": 10,
+    "ingredients": [
+      "40g rolled oats",
+      "150ml low-fat milk",
+      "1 small banana, sliced",
+      "2 tsp chia seeds",
+      "Pinch of cinnamon"
+    ],
+    "steps": [
+      "Stir the oats, milk, chia seeds and cinnamon together in a jar.",
+      "Cover and refrigerate overnight, or for at least 4 hours.",
+      "Stir once more and top with the sliced banana before eating."
+    ],
+    "chefsNote": "Prepare two jars together for an easy second breakfast. The banana supplies enough sweetness without added sugar."
+  },
+  {
+    "slug": "greek-yogurt-fruit-bowl",
+    "name": "GREEK YOGURT FRUIT BOWL",
+    "minutes": 5,
+    "kcal": 320,
+    "protein": 25,
+    "carbs": 30,
+    "fat": 13,
+    "fibre": 6,
+    "ingredients": [
+      "200g plain low-fat Greek yogurt",
+      "150g papaya, cubed",
+      "15g almonds, roughly chopped",
+      "1 tsp chia seeds",
+      "Pinch of cinnamon"
+    ],
+    "steps": [
+      "Spoon the yogurt into a bowl.",
+      "Top with papaya, almonds, chia seeds and cinnamon.",
+      "Serve immediately, or keep chilled until breakfast."
+    ],
+    "chefsNote": "Swap papaya for guava, berries or mango while keeping the portion similar."
+  },
+  {
+    "slug": "tuna-egg-wholemeal-sandwich",
+    "name": "TUNA AND EGG WHOLEMEAL SANDWICH",
+    "minutes": 10,
+    "kcal": 405,
+    "protein": 40,
+    "carbs": 34,
+    "fat": 10,
+    "fibre": 5,
+    "ingredients": [
+      "2 slices wholemeal bread",
+      "100g tuna in water, drained",
+      "1 boiled egg, chopped",
+      "2 tsp light mayonnaise",
+      "Cucumber and tomato slices",
+      "Black pepper"
+    ],
+    "steps": [
+      "Mix the tuna, egg, mayonnaise and black pepper in a small bowl.",
+      "Layer cucumber and tomato over one slice of bread.",
+      "Add the tuna mixture, close the sandwich and cut in half."
+    ],
+    "chefsNote": "Boil several eggs at once and keep them chilled for breakfasts and snacks during the week."
+  },
+  {
+    "slug": "ayam-kunyit-vegetable-rice-bowl",
+    "name": "AYAM KUNYIT VEGETABLE RICE BOWL",
+    "minutes": 20,
+    "kcal": 520,
+    "protein": 45,
+    "carbs": 60,
+    "fat": 9,
+    "fibre": 6,
+    "ingredients": [
+      "120g chicken breast, thinly sliced",
+      "150g cooked white rice",
+      "2 cups mixed vegetables",
+      "1 tsp cooking oil",
+      "1 tsp turmeric powder",
+      "1 clove garlic, minced",
+      "1 tsp light soy sauce",
+      "Chilli and black pepper to taste"
+    ],
+    "steps": [
+      "Coat the chicken with turmeric and black pepper.",
+      "Heat the oil in a wok and cook the chicken for 5 to 6 minutes.",
+      "Add garlic, chilli and vegetables; stir-fry until just tender.",
+      "Season with soy sauce and serve over the rice."
+    ],
+    "chefsNote": "Use a large vegetable portion to keep the bowl generous without relying on extra oil."
+  },
+  {
+    "slug": "ayam-percik-brown-rice-bowl",
+    "name": "AYAM PERCIK BROWN RICE BOWL",
+    "minutes": 20,
+    "kcal": 525,
+    "protein": 48,
+    "carbs": 49,
+    "fat": 14,
+    "fibre": 5,
+    "ingredients": [
+      "150g skinless chicken breast",
+      "150g cooked brown rice",
+      "1 cup ulam or cucumber salad",
+      "1 tbsp light coconut milk",
+      "1 tbsp blended chilli and onion",
+      "1 tsp tamarind water",
+      "Turmeric and salt to taste"
+    ],
+    "steps": [
+      "Mix coconut milk, chilli-onion paste, tamarind, turmeric and salt.",
+      "Coat the chicken with half the sauce and grill or air-fry for 12 to 15 minutes.",
+      "Warm the remaining sauce in a small pan until bubbling.",
+      "Slice the chicken and serve with brown rice, ulam and the cooked sauce."
+    ],
+    "chefsNote": "A thin percik glaze gives the flavour of the original without turning the sauce into the largest calorie source."
+  },
+  {
+    "slug": "ikan-kembung-ulam-plate",
+    "name": "IKAN KEMBUNG WITH ULAM",
+    "minutes": 18,
+    "kcal": 450,
+    "protein": 29,
+    "carbs": 52,
+    "fat": 12,
+    "fibre": 5,
+    "ingredients": [
+      "1 ikan kembung, cleaned (about 150g edible portion)",
+      "150g cooked white rice",
+      "1 generous cup mixed ulam",
+      "1 tbsp sambal belacan",
+      "1 limau kasturi",
+      "Turmeric and salt to taste"
+    ],
+    "steps": [
+      "Rub the fish with turmeric and a small pinch of salt.",
+      "Grill or air-fry at 200°C for 12 to 15 minutes, turning once.",
+      "Serve with rice, ulam, sambal belacan and limau kasturi."
+    ],
+    "chefsNote": "Kembung is an affordable oily fish and a useful alternative when salmon is not practical."
+  },
+  {
+    "slug": "bihun-sup-ayam",
+    "name": "BIHUN SUP AYAM",
+    "minutes": 20,
+    "kcal": 415,
+    "protein": 35,
+    "carbs": 45,
+    "fat": 8,
+    "fibre": 4,
+    "ingredients": [
+      "150g cooked rice vermicelli",
+      "100g cooked shredded chicken breast",
+      "500ml low-sodium chicken stock",
+      "1 cup bok choy and bean sprouts",
+      "2cm ginger, sliced",
+      "1 clove garlic, crushed",
+      "Spring onion and white pepper"
+    ],
+    "steps": [
+      "Bring the stock, ginger and garlic to a simmer for 5 minutes.",
+      "Add chicken and vegetables; cook for another 3 to 4 minutes.",
+      "Place the cooked bihun in a bowl and ladle the hot soup over it.",
+      "Finish with spring onion and white pepper."
+    ],
+    "chefsNote": "Cooked chicken makes this a fast meal. Use homemade or reduced-sodium stock when possible."
+  },
+  {
+    "slug": "nasi-goreng-kampung-ringan",
+    "name": "NASI GORENG KAMPUNG RINGAN",
+    "minutes": 18,
+    "kcal": 555,
+    "protein": 42,
+    "carbs": 55,
+    "fat": 17,
+    "fibre": 5,
+    "ingredients": [
+      "150g cooked day-old rice",
+      "100g chicken breast, diced",
+      "1 egg",
+      "1 cup kangkung or mixed vegetables",
+      "1 tsp cooking oil",
+      "1 tsp ikan bilis, crushed",
+      "1 clove garlic and 1 red chilli, minced",
+      "1 tsp light soy sauce"
+    ],
+    "steps": [
+      "Heat the oil in a wok and cook garlic, chilli and ikan bilis for 30 seconds.",
+      "Add chicken and stir-fry until cooked through.",
+      "Push the chicken aside, scramble the egg, then add rice and vegetables.",
+      "Season with soy sauce and toss over high heat until hot."
+    ],
+    "chefsNote": "Keeping the oil measured and adding a full cup of vegetables makes this lighter without losing the wok-fried character."
+  },
+  {
+    "slug": "tempeh-sambal-bowl",
+    "name": "TEMPEH SAMBAL BOWL",
+    "minutes": 18,
+    "kcal": 550,
+    "protein": 34,
+    "carbs": 52,
+    "fat": 20,
+    "fibre": 10,
+    "ingredients": [
+      "150g tempeh, sliced",
+      "150g cooked brown rice",
+      "1 cup cucumber, tomato and salad greens",
+      "1 tbsp sambal tumis",
+      "1 tsp cooking oil",
+      "1 tsp light soy sauce",
+      "1 limau kasturi"
+    ],
+    "steps": [
+      "Brush the tempeh with oil and air-fry at 190°C for 10 to 12 minutes.",
+      "Warm the sambal with soy sauce and a splash of water.",
+      "Toss the crisp tempeh through the sambal.",
+      "Serve over brown rice with the fresh vegetables and limau kasturi."
+    ],
+    "chefsNote": "Air-frying keeps the tempeh crisp with much less oil than deep-frying."
+  },
+  {
+    "slug": "tofu-ginger-soy-bowl",
+    "name": "TOFU GINGER-SOY BOWL",
+    "minutes": 20,
+    "kcal": 440,
+    "protein": 25,
+    "carbs": 53,
+    "fat": 15,
+    "fibre": 7,
+    "ingredients": [
+      "200g firm tofu, cubed",
+      "150g cooked white rice",
+      "1 cup broccoli",
+      "1 cup mushrooms and capsicum",
+      "1 tsp sesame oil",
+      "1 tbsp light soy sauce",
+      "2cm ginger, grated",
+      "1 clove garlic, minced"
+    ],
+    "steps": [
+      "Pat the tofu dry and brown it in sesame oil for 5 to 6 minutes.",
+      "Add ginger, garlic, mushrooms, capsicum and broccoli.",
+      "Stir-fry until the vegetables are tender-crisp, then add soy sauce and a splash of water.",
+      "Serve the tofu and vegetables over rice."
+    ],
+    "chefsNote": "Pressing the tofu briefly under a plate helps it brown instead of steaming in the pan."
+  },
+  {
+    "slug": "chapati-with-dhal",
+    "name": "CHAPATI WITH DHAL",
+    "minutes": 15,
+    "kcal": 490,
+    "protein": 20,
+    "carbs": 75,
+    "fat": 12,
+    "fibre": 13,
+    "ingredients": [
+      "2 small chapati",
+      "1 cup cooked dhal",
+      "½ cup cucumber and tomato salad",
+      "1 tsp plain yogurt",
+      "Coriander and chilli to taste"
+    ],
+    "steps": [
+      "Warm the dhal in a saucepan, adding water if it is too thick.",
+      "Heat the chapati on a dry pan until soft and lightly browned.",
+      "Mix cucumber and tomato with yogurt, coriander and chilli.",
+      "Serve the chapati with dhal and the fresh salad."
+    ],
+    "chefsNote": "This uses ready-made chapati and cooked dhal for speed. Choose dhal that is not finished with a heavy ghee tempering."
+  },
+  {
+    "slug": "black-pepper-beef-vegetable-bowl",
+    "name": "BLACK-PEPPER BEEF VEGETABLE BOWL",
+    "minutes": 20,
+    "kcal": 555,
+    "protein": 36,
+    "carbs": 58,
+    "fat": 18,
+    "fibre": 5,
+    "ingredients": [
+      "120g lean beef, thinly sliced",
+      "150g cooked white rice",
+      "1½ cups capsicum, onion and broccoli",
+      "1 tsp cooking oil",
+      "1 tbsp light soy sauce",
+      "1 tsp oyster sauce",
+      "1 tsp coarsely ground black pepper",
+      "1 clove garlic, minced"
+    ],
+    "steps": [
+      "Mix the beef with soy sauce, oyster sauce and black pepper.",
+      "Heat the oil in a wok and sear the beef for 2 to 3 minutes; remove to a plate.",
+      "Stir-fry garlic and vegetables until tender-crisp.",
+      "Return the beef, toss briefly and serve over rice."
+    ],
+    "chefsNote": "Slice the beef across the grain so a lean cut stays tender during the fast stir-fry."
+  }
+]
